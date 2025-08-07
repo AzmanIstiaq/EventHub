@@ -3,10 +3,10 @@
 
 # Group Information
 
-## Group-PX-XX
+## Group-P04-09
 
 ## Members
-* Student Name 1 (sXXXXX)
+* Jannik Ernst (s4002696)
 * Student Name 2 (sXXXXX)
 * Student Name 3 (sXXXXX)
 * Student Name 4 (sXXXXX)
