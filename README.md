@@ -7,9 +7,11 @@
 
 ## Members
 * Jannik Ernst (s4002696)
-* Student Name 2 (sXXXXX)
-* Student Name 3 (sXXXXX)
-* Student Name 4 (sXXXXX)
+* Benjamin Hatfield (s3980868)
+* Okasha Varoos (s3990054)
+* Abdulahi abdulahi (s3948224)
+* Nghi Le Hoang Vinh (s3978216)
+* Azman Istiaq Asfi (s4076788)
 
 ## Records
 
