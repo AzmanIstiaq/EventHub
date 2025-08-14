@@ -1,0 +1,22 @@
+We need to add all our project docs into this folder.
+
+- SRS document that contains:
+    + Project Architecture
+       
+       1. Introduction: Provides an overview of the project, its purpose, and stakeholders.
+       
+       2. Functional Requirements: Describes the application's features and functionalities.
+       
+       3. Non-Functional Requirements: Covers aspects like performance, security, usability, and reliability. 
+       
+       4. System Architecture: Presents a high-level architectural diagram and explains the system components and their interactions. 
+       
+       5. User Interface Design: Outlines the application's visual and interactive elements. 
+       
+       6. Assumptions and Constraints: States any assumptions made during requirement gathering and any constraints that may affect the project.
+       
+       7. Dependencies: Identifies external systems, libraries, or APIs required for the application.
+       
+       8. Glossary: Provides a list of terms and definitions used in the document.
+    
+    + Architectural diagram
