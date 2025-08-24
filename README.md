@@ -16,6 +16,6 @@
 ## Records
 
 * Github repository: https://github.com/cosc2299-2025/team-project-group-p04-09
-* Github Project Board : https://github.com/orgs/cosc2299-2025/projects/40
+* Github Project Board : https://github.com/orgs/cosc2299-2025/projects/40 (Under Planning Sub-Heading)
 
 See [Instructions](INSTRUCTIONS.md)
