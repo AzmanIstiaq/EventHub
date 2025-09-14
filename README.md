@@ -50,7 +50,14 @@
    git clone <repository-url>
    cd team-project-group-p04-09
    ```
-2. Set the active Spring profile and run the application:
+2. Create properties files:
+
+- Find src/main/resources folder.
+- create new files from the three example property files located in the folder.
+- To do this copy the file and paste into the resources folder removing the .example from the filename.
+- You can edit the property values as needed but if done with all three files the application should run correctly.
+
+3. Set the active Spring profile and run the application:
    ### Linux / macOS:
    ```bash
    SPRING_PROFILES_ACTIVE=dev ./mvnw spring-boot:run
