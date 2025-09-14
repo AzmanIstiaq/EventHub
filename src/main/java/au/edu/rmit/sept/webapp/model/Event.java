@@ -1,6 +1,7 @@
 package au.edu.rmit.sept.webapp.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.Set;
@@ -22,6 +23,7 @@ public class Event {
     private String location;
 
     @OneToMany(mappedBy = "event")
+    @JsonManagedReference
     private Set<Registration> registrations;
 
     @ManyToOne

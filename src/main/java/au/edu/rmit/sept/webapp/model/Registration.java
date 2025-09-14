@@ -1,5 +1,6 @@
 package au.edu.rmit.sept.webapp.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
@@ -12,10 +13,12 @@ public class Registration {
     private Long id;
 
     @ManyToOne
+    @JsonBackReference
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
     @ManyToOne
+    @JsonBackReference
     @JoinColumn(name = "event_id", nullable = false)
     private Event event;
 

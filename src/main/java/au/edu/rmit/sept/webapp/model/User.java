@@ -22,6 +22,7 @@ public class User {
     private UserType type;
 
     @OneToMany(mappedBy = "user")
+    @JsonManagedReference
     private Set<Registration> registrations;
 
     @OneToMany(mappedBy = "organiser")
