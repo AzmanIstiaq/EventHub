@@ -1,15 +1,17 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head>
-    <title>Upcoming Events</title>
-</head>
+<head><title>Upcoming Events</title></head>
 <body>
-<h1>Upcoming Events</h1>
+<h1 th:text="'Events for ' + ${organiser.name}"></h1>
+
+<a th:href="@{'/organiser/' + ${organiser.id} + '/events/new'}">Create New Event</a>
 <ul>
     <li th:each="event : ${events}">
-        <strong th:text="${event.title}"></strong> -
-        <span th:text="${event.dateTime}"></span> @
-        <span th:text="${event.location}"></span>
+        <strong th:text="${event.title}"></strong>
+        (<span th:text="${event.dateTime}"></span> @
+        <span th:text="${event.location}"></span>)
+        <a th:href="@{'/organiser/' + ${organiser.id} + '/events/' + ${event.id} + '/edit'}">Edit</a>
+        <a th:href="@{'/organiser/' + ${organiser.id} + '/events/' + ${event.id} + '/delete'}">Delete</a>
     </li>
 </ul>
 </body>

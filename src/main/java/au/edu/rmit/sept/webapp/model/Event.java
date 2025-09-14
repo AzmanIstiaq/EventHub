@@ -11,7 +11,6 @@ public class Event {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
     private String title;
 
     @Column(length = 1000)
@@ -20,85 +19,51 @@ public class Event {
     @Column(nullable = false)
     private LocalDateTime dateTime;
 
-    @Column(nullable = false)
     private String location;
 
-    @Column(nullable = false)
-    private Long organiserId;  // For now we just use a simple ID, later you can replace with a proper Organiser entity
+    @ManyToOne
+    @JoinColumn(name = "organiser_id", nullable = false)
+    private User organiser;
 
-    // --- Constructors ---
-    public Event() {
-    }
+    public Event() {}
 
-    public Event(Long id, String title, String description,
-                 LocalDateTime dateTime, String location, Long organiserId) {
+    public Event(Long id, String title, String description, LocalDateTime dateTime,
+                 String location, User organiser) {
         this.id = id;
         this.title = title;
         this.description = description;
         this.dateTime = dateTime;
         this.location = location;
-        this.organiserId = organiserId;
+        this.organiser = organiser;
     }
 
-    // --- Getters & Setters ---
-    public Long getId() {
-        return id;
-    }
+    // getters and setters
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    public String getTitle() { return title; }
+    public void setTitle(String title) { this.title = title; }
 
-    public String getTitle() {
-        return title;
-    }
+    public String getDescription() { return description; }
+    public void setDescription(String description) { this.description = description; }
 
-    public void setTitle(String title) {
-        this.title = title;
-    }
+    public LocalDateTime getDateTime() { return dateTime; }
+    public void setDateTime(LocalDateTime dateTime) { this.dateTime = dateTime; }
 
-    public String getDescription() {
-        return description;
-    }
+    public String getLocation() { return location; }
+    public void setLocation(String location) { this.location = location; }
 
-    public void setDescription(String description) {
-        this.description = description;
-    }
+    public User getOrganiser() { return organiser; }
+    public void setOrganiser(User organiser) { this.organiser = organiser; }
 
-    public LocalDateTime getDateTime() {
-        return dateTime;
-    }
-
-    public void setDateTime(LocalDateTime dateTime) {
-        this.dateTime = dateTime;
-    }
-
-    public String getLocation() {
-        return location;
-    }
-
-    public void setLocation(String location) {
-        this.location = location;
-    }
-
-    public Long getOrganiserId() {
-        return organiserId;
-    }
-
-    public void setOrganiserId(Long organiserId) {
-        this.organiserId = organiserId;
-    }
-
-    // --- toString for debugging ---
     @Override
     public String toString() {
         return "Event{" +
                 "id=" + id +
                 ", title='" + title + '\'' +
-                ", description='" + description + '\'' +
                 ", dateTime=" + dateTime +
                 ", location='" + location + '\'' +
-                ", organiserId=" + organiserId +
+                ", organiser=" + (organiser != null ? organiser.getName() : "null") +
                 '}';
     }
 }

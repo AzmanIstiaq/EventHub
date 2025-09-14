@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>Event Form</title>
+</head>
+<body>
+<h1 th:text="${event.id == null ? 'Create Event' : 'Edit Event'}"></h1>
+
+<form th:action="@{${formAction}}" th:object="${event}" method="post">
+  <label>Title: <input type="text" th:field="*{title}" required/></label><br/>
+  <label>Description: <textarea th:field="*{description}" required></textarea></label><br/>
+  <label>Date/Time:
+    <input type="datetime-local"
+           th:field="*{dateTime}"
+           th:value="${dateTimeValue}" required/>
+  </label><br/>
+
+  <label>Location: <input type="text" th:field="*{location}" required/></label><br/>
+  <button type="submit">Save</button>
+</form>
+
+<a th:href="@{'/organiser/' + ${organiserId} + '/events'}">Back to list</a>
+</body>
+</html>
