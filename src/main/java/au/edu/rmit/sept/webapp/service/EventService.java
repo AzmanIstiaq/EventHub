@@ -11,29 +11,36 @@ import java.util.Optional;
 
 @Service
 public class EventService {
-    private final EventRepository repo;
 
-    public EventService(EventRepository repo) {
-        this.repo = repo;
+    private final EventRepository eventRepository;
+
+    public EventService(EventRepository eventRepository) {
+        this.eventRepository = eventRepository;
     }
 
-    public List<Event> getUpcomingEventsForOrganiser(User organiser) {
-        return repo.findByOrganiserAndDateTimeAfter(organiser, LocalDateTime.now());
-    }
-
-    public Event save(Event event) {
-        return repo.save(event);
-    }
-
+    // Find a single event
     public Optional<Event> findById(Long id) {
-        return repo.findById(id);
+        return eventRepository.findById(id);
     }
 
+    // Save or update an event
+    public Event save(Event event) {
+        return eventRepository.save(event);
+    }
+
+    // Delete an event
     public void delete(Long id) {
-        repo.deleteById(id);
+        eventRepository.deleteById(id);
     }
 
-    public List<Event> findAll() {
-        return repo.findAll();
+    // Events for a specific organiser
+    public List<Event> getUpcomingEventsForOrganiser(User organiser) {
+        return eventRepository.findByOrganiserAndDateTimeAfterOrderByDateTimeAsc(
+                organiser, LocalDateTime.now());
+    }
+
+    // All upcoming events for public view
+    public List<Event> getAllUpcomingEvents() {
+        return eventRepository.findByDateTimeAfterOrderByDateTimeAsc(LocalDateTime.now());
     }
 }

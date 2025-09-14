@@ -1,7 +1,7 @@
 package au.edu.rmit.sept.webapp.service;
 
 import au.edu.rmit.sept.webapp.model.User;
-import au.edu.rmit.sept.webapp.repository.OrganiserRepository;
+import au.edu.rmit.sept.webapp.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -9,9 +9,9 @@ import java.util.Optional;
 
 @Service
 public class OrganiserService {
-    private final OrganiserRepository repo;
+    private final UserRepository repo;
 
-    public OrganiserService(OrganiserRepository repo) {
+    public OrganiserService(UserRepository repo) {
         this.repo = repo;
     }
 

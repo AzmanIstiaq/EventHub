@@ -2,7 +2,7 @@ package au.edu.rmit.sept.webapp;
 
 import au.edu.rmit.sept.webapp.model.User;
 import au.edu.rmit.sept.webapp.model.UserType;
-import au.edu.rmit.sept.webapp.repository.OrganiserRepository;
+import au.edu.rmit.sept.webapp.repository.UserRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.boot.SpringApplication;
@@ -20,16 +20,16 @@ public class WebappApplication {
 	}
 
 	@Bean
-	CommandLineRunner init(OrganiserRepository organiserRepo, EventRepository eventRepo) {
+	CommandLineRunner init(UserRepository organiserRepo, EventRepository eventRepo) {
 		return args -> {
-			User alice = organiserRepo.save(new User("Alice Club", "alice@uni.edu", UserType.ORGANISER));
-			User bob = organiserRepo.save(new User("Bob Society", "bob@uni.edu", UserType.ORGANISER));
+			User alice = organiserRepo.save(new User("Alice Club", "alice@uni.edu", "password", UserType.ORGANISER));
+			User bob = organiserRepo.save(new User("Bob Society", "bob@uni.edu", "password", UserType.ORGANISER));
 
-			eventRepo.save(new Event(null, "Hackathon", "24hr coding challenge",
+			eventRepo.save(new Event( "Hackathon", "24hr coding challenge",
 					LocalDateTime.now().plusDays(2), "Library", alice));
-			eventRepo.save(new Event(null, "BBQ Night", "Free food!",
+			eventRepo.save(new Event( "BBQ Night", "Free food!",
 					LocalDateTime.now().plusDays(5), "Campus Park", alice));
-			eventRepo.save(new Event(null, "Music Jam", "Bring your instruments!",
+			eventRepo.save(new Event( "Music Jam", "Bring your instruments!",
 					LocalDateTime.now().plusDays(3), "Auditorium", bob));
 		};
 	}
