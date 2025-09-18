@@ -18,4 +18,22 @@ public interface EventRepository extends JpaRepository<Event, Long> {
 
     // All upcoming events (public view)
     List<Event> findByDateTimeAfterOrderByDateTimeAsc(LocalDateTime dateTime);
+
+    // All events ordered by date descending (most recent first)
+    List<Event> findAllByOrderByDateTimeDesc();
+
+    // All events for a given organiser ordered by date descending
+    List<Event> findByOrganiserOrderByDateTimeDesc(User organiser);
+
+    // All past events
+    List<Event> findByDateTimeBeforeOrderByDateTimeDesc(LocalDateTime dateTime);
+
+    // Search events by title (case-insensitive)
+    List<Event> findByTitleContainingIgnoreCase(String title);
+
+    // Find events by location
+    List<Event> findByLocationContainingIgnoreCase(String location);
+
+    // Find events between dates
+    List<Event> findByDateTimeBetweenOrderByDateTimeAsc(LocalDateTime startDate, LocalDateTime endDate);
 }

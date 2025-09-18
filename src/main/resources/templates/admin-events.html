@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <title>Admin - Manage All Events</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .admin-header { background-color: #dc3545; color: white; padding: 15px; margin-bottom: 20px; border-radius: 5px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+        th { background-color: #f8f9fa; font-weight: bold; }
+        tr:nth-child(even) { background-color: #f8f9fa; }
+        .btn { padding: 8px 16px; margin: 2px; border: none; border-radius: 4px; cursor: pointer; text-decoration: none; display: inline-block; }
+        .btn-danger { background-color: #dc3545; color: white; }
+        .btn-info { background-color: #17a2b8; color: white; }
+        .btn-primary { background-color: #007bff; color: white; }
+        .btn:hover { opacity: 0.8; }
+        .event-actions { white-space: nowrap; }
+        .status { padding: 4px 8px; border-radius: 12px; font-size: 0.8em; font-weight: bold; }
+        .status-upcoming { background-color: #d4edda; color: #155724; }
+        .status-past { background-color: #f8d7da; color: #721c24; }
+        .stats-section { background-color: #e9ecef; padding: 15px; border-radius: 5px; margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+<div th:replace="~{fragments/navbar}"></div>
+
+<div class="admin-header">
+    <h1>🛡️ Admin Panel - Event Management</h1>
+    <p>View and manage all events across the platform</p>
+</div>
+
+<!-- Navigation Links -->
+<div style="margin-bottom: 20px;">
+    <a href="/admin/dashboard" class="btn btn-primary">📊 Dashboard</a>
+    <a href="/admin/users" class="btn btn-info">👥 Manage Users</a>
+    <a href="/events" class="btn btn-info">🌍 Public Events View</a>
+</div>
+
+<!-- Events Statistics -->
+<div class="stats-section">
+    <h3>📈 Event Statistics</h3>
+    <p><strong>Total Events:</strong> <span th:text="${events != null ? #lists.size(events) : 0}">0</span></p>
+    <p><strong>Upcoming Events:</strong> <span th:text="${upcomingEventsCount}">0</span></p>
+    <p><strong>Past Events:</strong> <span th:text="${pastEventsCount}">0</span></p>
+</div>
+
+<!-- Events Table -->
+<h2>All Events</h2>
+
+<div th:if="${events == null || #lists.isEmpty(events)}" style="text-align: center; padding: 40px; color: #6c757d;">
+    <h3>📅 No Events Found</h3>
+    <p>There are currently no events in the system.</p>
+</div>
+
+<table th:unless="${events == null || #lists.isEmpty(events)}">
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>Title</th>
+        <th>Organizer</th>
+        <th>Date & Time</th>
+        <th>Location</th>
+        <th>Status</th>
+        <th>Registrations</th>
+        <th>Actions</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="event : ${events}">
+        <td th:text="${event.id}">1</td>
+        <td>
+            <strong th:text="${event.title}">Event Title</strong>
+            <br>
+            <small th:text="${event.description}" style="color: #6c757d;">Event Description</small>
+        </td>
+        <td>
+            <span th:text="${event.organiser != null ? event.organiser.name : 'Unknown'}">Organizer Name</span>
+            <br>
+            <small th:text="${event.organiser != null ? event.organiser.email : ''}" style="color: #6c757d;">organizer@email.com</small>
+        </td>
+        <td th:text="${#temporals.format(event.dateTime, 'yyyy-MM-dd HH:mm')}">2024-01-01 10:00</td>
+        <td th:text="${event.location}">Location</td>
+        <td>
+            <span th:if="${event.dateTime.isAfter(#temporals.createNow())}"
+                  class="status status-upcoming">Upcoming</span>
+            <span th:if="${event.dateTime.isBefore(#temporals.createNow())}"
+                  class="status status-past">Past</span>
+        </td>
+        <td>
+            <span th:text="${event.registrations != null ? #lists.size(event.registrations) : 0}">0</span>
+            <br>
+            <a th:href="@{'/registrations/event/' + ${event.id}}" style="font-size: 0.8em; color: #007bff;">View Details</a>
+        </td>
+        <td class="event-actions">
+            <!-- View Event Details -->
+            <a th:href="@{'/admin/events/' + ${event.id}}"
+               class="btn btn-info"
+               style="font-size: 0.8em;">👁️ View</a>
+
+            <!-- Edit Event (redirect to organizer edit) -->
+            <a th:href="@{'/organiser/' + ${event.organiser.id} + '/events/' + ${event.id} + '/edit'}"
+               class="btn btn-primary"
+               style="font-size: 0.8em;">✏️ Edit</a>
+
+            <!-- Delete Event -->
+            <form th:action="@{'/admin/events/' + ${event.id} + '/delete'}"
+                  method="post"
+                  style="display: inline;"
+                  onsubmit="return confirm('Are you sure you want to delete this event? This action cannot be undone.');">
+                <button type="submit" class="btn btn-danger" style="font-size: 0.8em;">🗑️ Delete</button>
+            </form>
+        </td>
+    </tr>
+    </tbody>
+</table>
+
+<!-- Footer -->
+<div style="margin-top: 40px; padding: 20px; background-color: #f8f9fa; border-radius: 5px; text-align: center; color: #6c757d;">
+    <p><strong>Admin Panel</strong> | EventHub Campus Event Management System</p>
+    <p>Use admin privileges responsibly. All actions are logged.</p>
+</div>
+</body>
+</html>

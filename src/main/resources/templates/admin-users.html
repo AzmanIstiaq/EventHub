@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <title>Admin - Manage Users</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .admin-header { background-color: #dc3545; color: white; padding: 15px; margin-bottom: 20px; border-radius: 5px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+        th { background-color: #f8f9fa; font-weight: bold; }
+        tr:nth-child(even) { background-color: #f8f9fa; }
+        .btn { padding: 8px 16px; margin: 2px; border: none; border-radius: 4px; cursor: pointer; text-decoration: none; display: inline-block; }
+        .btn-danger { background-color: #dc3545; color: white; }
+        .btn-info { background-color: #17a2b8; color: white; }
+        .btn-primary { background-color: #007bff; color: white; }
+        .btn-warning { background-color: #ffc107; color: #212529; }
+        .btn:hover { opacity: 0.8; }
+        .user-type { padding: 4px 8px; border-radius: 12px; font-size: 0.8em; font-weight: bold; }
+        .type-admin { background-color: #dc3545; color: white; }
+        .type-organiser { background-color: #28a745; color: white; }
+        .type-student { background-color: #007bff; color: white; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px; }
+        .stat-card { background-color: #e9ecef; padding: 15px; border-radius: 5px; text-align: center; }
+        .stat-number { font-size: 1.8em; font-weight: bold; margin-bottom: 5px; }
+    </style>
+</head>
+<body>
+<div th:replace="~{fragments/navbar}"></div>
+
+<div class="admin-header">
+    <h1>👥 Admin Panel - User Management</h1>
+    <p>View and manage all user accounts</p>
+</div>
+
+<!-- Navigation Links -->
+<div style="margin-bottom: 20px;">
+    <a href="/admin/dashboard" class="btn btn-primary">📊 Dashboard</a>
+    <a href="/admin/events" class="btn btn-info">📅 Manage Events</a>
+</div>
+
+<!-- User Statistics -->
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-number" style="color: #007bff;" th:text="${users != null ? #lists.size(users) : 0}">0</div>
+        <div>Total Users</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-number" style="color: #dc3545;" th:text="${adminCount ?: 0}">0</div>
+        <div>Admins</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-number" style="color: #28a745;" th:text="${organiserCount ?: 0}">0</div>
+        <div>Organizers</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-number" style="color: #007bff;" th:text="${studentCount ?: 0}">0</div>
+        <div>Students</div>
+    </div>
+</div>
+
+<!-- Users Table -->
+<h2>All Users</h2>
+
+<div th:if="${users == null || #lists.isEmpty(users)}" style="text-align: center; padding: 40px; color: #6c757d;">
+    <h3>👥 No Users Found</h3>
+    <p>There are currently no users in the system.</p>
+</div>
+
+<table th:unless="${users == null || #lists.isEmpty(users)}">
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>Name</th>
+        <th>Email</th>
+        <th>User Type</th>
+        <th>Events Created</th>
+        <th>Events Registered</th>
+        <th>Actions</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="user : ${users}">
+        <td th:text="${user.id}">1</td>
+        <td>
+            <strong th:text="${user.name}">User Name</strong>
+        </td>
+        <td th:text="${user.email}">user@example.com</td>
+        <td>
+            <span th:if="${user.type.name() == 'ADMIN'}" class="user-type type-admin">ADMIN</span>
+            <span th:if="${user.type.name() == 'ORGANISER'}" class="user-type type-organiser">ORGANIZER</span>
+            <span th:if="${user.type.name() == 'STUDENT'}" class="user-type type-student">STUDENT</span>
+        </td>
+        <td>
+            <span th:text="${user.organisedEvents != null ? #lists.size(user.organisedEvents) : 0}">0</span>
+            <br>
+            <a th:if="${user.organisedEvents != null and #lists.size(user.organisedEvents) > 0}"
+               th:href="@{'/users/' + ${user.id} + '/organizedEvents'}"
+               style="font-size: 0.8em; color: #007bff;">View Events</a>
+        </td>
+        <td>
+            <span th:text="${user.registrations != null ? #lists.size(user.registrations) : 0}">0</span>
+            <br>
+            <a th:if="${user.registrations != null and #lists.size(user.registrations) > 0}"
+               th:href="@{'/users/' + ${user.id} + '/attendingEvents'}"
+               style="font-size: 0.8em; color: #007bff;">View Registrations</a>
+        </td>
+        <td>
+            <!-- View User Details -->
+            <a th:href="@{'/users/' + ${user.id}}"
+               class="btn btn-info"
+               style="font-size: 0.8em;">👁️ View</a>
+
+            <!-- Edit User (if needed) -->
+            <a th:href="@{'/admin/users/' + ${user.id} + '/edit'}"
+               class="btn btn-warning"
+               style="font-size: 0.8em;">✏️ Edit</a>
+
+            <!-- Deactivate User -->
+            <form th:action="@{'/admin/users/' + ${user.id} + '/deactivate'}"
+                  method="post"
+                  style="display: inline;"
+                  onsubmit="return confirm('Are you sure you want to deactivate this user? This will prevent them from logging in.');">
+                <button type="submit"
+                        class="btn btn-danger"
+                        style="font-size: 0.8em;"
+                        th:disabled="${user.type.name() == 'ADMIN'}">
+                    🚫 Deactivate
+                </button>
+            </form>
+        </td>
+    </tr>
+    </tbody>
+</table>
+
+<!-- User Management Guidelines -->
+<div style="margin-top: 30px; padding: 20px; background-color: #fff3cd; border-left: 5px solid #ffc107; border-radius: 5px;">
+    <h3>⚠️ User Management Guidelines</h3>
+    <ul>
+        <li><strong>Admin accounts</strong> cannot be deactivated through this interface</li>
+        <li><strong>Organizer deactivation</strong> will also disable their events</li>
+        <li><strong>Student deactivation</strong> will cancel their event registrations</li>
+        <li>Always verify the reason before deactivating accounts</li>
+        <li>Consider contacting users before taking action when possible</li>
+    </ul>
+</div>
+
+<!-- Footer -->
+<div style="margin-top: 40px; padding: 20px; background-color: #f8f9fa; border-radius: 5px; text-align: center; color: #6c757d;">
+    <p><strong>User Management Panel</strong> | EventHub Campus Event Management System</p>
+    <p>Handle user accounts responsibly. All actions are logged for security.</p>
+</div>
+</body>
+</html>
