@@ -9,7 +9,8 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-
+/// This controller is used for modifying event details, to be performed by Admin and organiser
+/// type users.
 @Controller
 @RequestMapping("/organiser")
 public class EventController {
@@ -21,7 +22,7 @@ public class EventController {
         this.organiserService = organiserService;
     }
 
-    // 1. List upcoming events
+    // List upcoming events for given orgainser ID
     @GetMapping("/{organiserId}/events")
     public String listEvents(@PathVariable Long organiserId, Model model) {
         User organiser = organiserService.findById(organiserId)
@@ -33,7 +34,7 @@ public class EventController {
     }
 
 
-    // 3. Save new event
+    // Create new event for given organiser
     @PostMapping("/{organiserId}/events")
     public String createEvent(@PathVariable Long organiserId, @ModelAttribute Event event) {
         User organiser = organiserService.findById(organiserId)
@@ -43,6 +44,7 @@ public class EventController {
         return "redirect:/organiser/" + organiserId + "/events";
     }
 
+    /// Shows the event form template for creating a new event
     @GetMapping("/{organiserId}/events/new")
     public String showCreateForm(@PathVariable Long organiserId, Model model) {
         Event event = new Event();
@@ -60,6 +62,8 @@ public class EventController {
         return "event-form";
     }
 
+    /// Shows the event form template for editing an existing event
+    /// for given organiser and event ID
     @GetMapping("/{organiserId}/events/{eventId}/edit")
     public String showEditForm(@PathVariable Long organiserId,
                                @PathVariable Long eventId, Model model) {
@@ -80,7 +84,8 @@ public class EventController {
         return "event-form";
     }
 
-    // 5. Update event
+
+    /// Updates an event based on the form input received
     @PostMapping("/{organiserId}/events/{eventId}")
     public String updateEvent(@PathVariable Long organiserId,
                               @PathVariable Long eventId,
@@ -103,7 +108,7 @@ public class EventController {
         return "redirect:/organiser/" + organiserId + "/events";
     }
 
-    // 6. Delete event
+    /// Deletes an event for a given organiser ID and event ID
     @GetMapping("/{organiserId}/events/{eventId}/delete")
     public String deleteEvent(@PathVariable Long organiserId, @PathVariable Long eventId) {
         eventService.delete(eventId);

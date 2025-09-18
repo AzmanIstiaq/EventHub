@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
-
+///  Used to create registration entries for specific events by student users
 @RestController
 @RequestMapping("/registrations")
 public class RegistrationController {

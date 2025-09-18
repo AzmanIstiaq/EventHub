@@ -12,7 +12,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-
+/// Used to perform user based operations and analytics when needed.
+/// CRUD operations for users
 @RestController
 @RequestMapping("/users")
 public class UserController {

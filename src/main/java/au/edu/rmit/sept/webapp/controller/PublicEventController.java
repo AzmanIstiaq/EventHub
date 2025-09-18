@@ -10,7 +10,8 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-
+/// This controller is to be used for public facing event operations (performed by student users)
+/// such as listing all events and registering for events.
 @Controller
 @RequestMapping("/events")
 public class PublicEventController {
