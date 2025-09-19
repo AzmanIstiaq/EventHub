@@ -11,13 +11,4 @@ import java.util.Optional;
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
 
-    // Find users by type
-    List<User> findByType(UserType userType);
-
-    // Find user by email
-    Optional<User> findByEmail(String email);
-
-    // Search users by name (case-insensitive)
-    List<User> findByNameContainingIgnoreCase(String name);
-
 }
