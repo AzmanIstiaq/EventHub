@@ -122,6 +122,8 @@
             <p class="event-meta">
                 <span th:text="${event.dateTime}"></span> @
                 <span th:text="${event.location}"></span>
+                <br>
+                <span th:text="'Number of RSVP\'s: ' + ${event.registrations.size()}"></span>
             </p>
 
             <button class="toggle-btn">Show Registrations ▼</button>
@@ -151,6 +153,8 @@
             <p class="event-meta">
                 <span th:text="${event.dateTime}"></span> @
                 <span th:text="${event.location}"></span>
+                <br>
+                <span th:text="'Number of RSVP\'s: ' + ${event.registrations.size()}"></span>
             </p>
 
             <button class="toggle-btn">Show Registrations ▼</button>
