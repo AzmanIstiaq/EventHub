@@ -22,7 +22,7 @@ public class Event {
     private LocalDateTime dateTime;
     private String location;
 
-    @OneToMany(mappedBy = "event")
+    @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
     private Set<Registration> registrations;
 

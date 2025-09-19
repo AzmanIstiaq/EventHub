@@ -22,7 +22,7 @@ public class Registration {
     @JoinColumn(name = "event_id", nullable = false)
     private Event event;
 
-    private LocalDateTime registrationDate;
+    private LocalDateTime registrationDate = LocalDateTime.now();
     private String status; // e.g., CONFIRMED, CANCELLED, WAITLISTED
 
     // Getters and setters
