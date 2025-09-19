@@ -29,7 +29,8 @@ public class RegistrationController {
     // Create a new registration
     @PostMapping
     public ResponseEntity<Registration> createRegistration(@RequestParam Long userId,
-                                                           @RequestParam Long eventId) {
+                                                           @RequestParam Long eventId
+                                                           ) {
         User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
         Event event = eventRepository.findById(eventId).orElseThrow(() -> new RuntimeException("Event not found"));
 

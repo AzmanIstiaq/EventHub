@@ -1,28 +1,146 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head><title>Upcoming Events</title></head>
+<head>
+    <title>Organiser Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background: #f5f7fa;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 2rem auto;
+            padding: 1rem;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        h1 {
+            margin: 0;
+        }
+
+        .btn {
+            padding: 0.4rem 0.8rem;
+            border: none;
+            border-radius: 6px;
+            text-decoration: none;
+            color: white;
+            font-size: 0.9rem;
+            cursor: pointer;
+        }
+
+        .btn-primary { background: #007bff; }
+        .btn-edit { background: #28a745; }
+        .btn-delete { background: #dc3545; }
+
+        .events-grid {
+            display: grid;
+            gap: 1.5rem;
+        }
+
+        .event-card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+            padding: 1rem 1.5rem;
+        }
+
+        .event-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .event-meta {
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .toggle-btn {
+            margin-top: 1rem;
+            background: #e9ecef;
+            border: none;
+            padding: 0.4rem 0.8rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        .toggle-btn.active {
+            background: #ced4da;
+        }
+
+        .registrations {
+            margin-top: 0.8rem;
+            padding-left: 1.2rem;
+            list-style: disc;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
 <body>
-<div th:replace="fragments/navbar"></div>
+<div th:replace="~{fragments/navbar}"></div>
 
-<h1 th:text="'Events for ' + ${organiser.name}"></h1>
+<div class="container">
+    <header>
+        <h1 th:text="'Events for ' + ${organiser.name}"></h1>
+        <a class="btn btn-primary"
+           th:href="@{'/organiser/' + ${organiser.id} + '/events/new'}">+ Create New Event</a>
+    </header>
 
-<a th:href="@{'/organiser/' + ${organiser.id} + '/events/new'}">Create New Event</a>
-<ul>
-    <li th:each="event : ${events}">
-        <strong th:text="${event.title}"></strong>
-        (<span th:text="${event.dateTime}"></span> @
-        <span th:text="${event.location}"></span>)
-        <a th:href="@{'/organiser/' + ${organiser.id} + '/events/' + ${event.id} + '/edit'}">Edit</a>
-        <a th:href="@{'/organiser/' + ${organiser.id} + '/events/' + ${event.id} + '/delete'}">Delete</a>
-        <ul>
-            <li th:each="registration : ${event.registrations}">
-                <strong th:text="${registration.getUser().getName()}"></strong>
-                (<span th:text="${registration.getRegistrationDate()}"></span>)
-                <span th:text="${registration.getStatus()}"></span>
+    <div class="events-grid">
+        <div class="event-card" th:each="event : ${events}">
+            <div class="event-header">
+                <h2 th:text="${event.title}"></h2>
+                <div class="event-actions">
+                    <a class="btn btn-edit"
+                       th:href="@{'/organiser/' + ${organiser.id} + '/events/' + ${event.id} + '/edit'}">Edit</a>
+                    <a class="btn btn-delete"
+                       th:href="@{'/organiser/' + ${organiser.id} + '/events/' + ${event.id} + '/delete'}">Delete</a>
+                </div>
+            </div>
+            <p class="event-meta">
+                <span th:text="${event.dateTime}"></span> @
+                <span th:text="${event.location}"></span>
+            </p>
 
-            </li>
-        </ul>
-    </li>
-</ul>
+            <button class="toggle-btn">Show Registrations ▼</button>
+            <ul class="registrations hidden">
+                <li th:each="registration : ${event.registrations}">
+                    <strong th:text="${registration.getUser().getName()}"></strong>
+                    (<span th:text="${registration.getRegistrationDate()}"></span>)
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const toggleButtons = document.querySelectorAll(".toggle-btn");
+
+        toggleButtons.forEach(btn => {
+            btn.addEventListener("click", () => {
+                const registrations = btn.nextElementSibling;
+                const isHidden = registrations.classList.contains("hidden");
+
+                registrations.classList.toggle("hidden", !isHidden);
+                btn.classList.toggle("active", isHidden);
+                btn.textContent = isHidden ? "Hide Registrations ▲" : "Show Registrations ▼";
+            });
+        });
+    });
+</script>
 </body>
 </html>
