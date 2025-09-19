@@ -54,23 +54,4 @@ public class EventService {
         return eventRepository.findAll();
     }
 
-    // Get all events ordered by date (most recent first)
-    public List<Event> getAllEventsOrderByDateDesc() {
-        return eventRepository.findAllByOrderByDateTimeDesc();
-    }
-
-    // Get events by organizer (all events, not just upcoming)
-    public List<Event> getAllEventsForOrganiser(User organiser) {
-        return eventRepository.findByOrganiserOrderByDateTimeDesc(organiser);
-    }
-
-    // Get past events
-    public List<Event> getPastEvents() {
-        return eventRepository.findByDateTimeBeforeOrderByDateTimeDesc(LocalDateTime.now());
-    }
-
-    // Search events by title (for admin search functionality)
-    public List<Event> searchEventsByTitle(String title) {
-        return eventRepository.findByTitleContainingIgnoreCase(title);
-    }
 }
