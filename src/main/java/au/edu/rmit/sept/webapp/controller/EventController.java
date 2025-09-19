@@ -46,49 +46,8 @@ public class EventController {
         return "redirect:/organiser/" + organiserId + "/events";
     }
 
-    /// Shows the event form template for creating a new event
-    @GetMapping("/{organiserId}/events/new")
-    public String showCreateForm(@PathVariable Long organiserId, Model model) {
-        Event event = new Event();
-        model.addAttribute("event", event);
-        model.addAttribute("organiserId", organiserId);
-
-        String formAction = "/organiser/" + organiserId + "/events";
-        model.addAttribute("formAction", formAction);
-
-        // pre-format date for input
-        model.addAttribute("dateTimeValue", event.getDateTime() != null
-                ? event.getDateTime().format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm"))
-                : "");
-
-        return "event-form";
-    }
-
-    /// Shows the event form template for editing an existing event
-    /// for given organiser and event ID
-    @GetMapping("/{organiserId}/events/{eventId}/edit")
-    public String showEditForm(@PathVariable Long organiserId,
-                               @PathVariable Long eventId, Model model) {
-        Event event = eventService.findById(eventId)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid event ID"));
-
-        model.addAttribute("event", event);
-        model.addAttribute("organiserId", organiserId);
-
-        String formAction = "/organiser/" + organiserId + "/events/" + eventId;
-        model.addAttribute("formAction", formAction);
-
-        // pre-format date for input
-        model.addAttribute("dateTimeValue", event.getDateTime() != null
-                ? event.getDateTime().format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm"))
-                : "");
-
-        return "event-form";
-    }
-
-
     /// Updates an event based on the form input received
-    @PostMapping("/{organiserId}/events/{eventId}")
+    @PostMapping("/{organiserId}/events/{eventId}/edit")
     public String updateEvent(@PathVariable Long organiserId,
                               @PathVariable Long eventId,
                               @ModelAttribute Event updatedEvent) {
