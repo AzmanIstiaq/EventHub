@@ -200,7 +200,7 @@
                     <input type="text" name="keywordsText" th:value="${event.getKeywordsAsString()}" placeholder="e.g. Music, Workshop, Tech">
 
                     <button type="submit">Save</button>
-                    <button type="button" onclick="cancelEditForm(this)">Cancel</button>
+                    <button type="button" th:onclick="'cancelEditForm(' + ${event.id} + ')'">Cancel</button>
                 </form>
 
             </div>
