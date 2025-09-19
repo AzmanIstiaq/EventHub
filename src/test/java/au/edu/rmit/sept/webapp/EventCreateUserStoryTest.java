@@ -93,7 +93,7 @@ class EventCreateUserStoryTest {
         when(organiserService.findById(organiserId)).thenReturn(Optional.of(organiser));
         when(categoryService.findAll()).thenReturn(List.of(cat));
         Keyword kwWelcome = new Keyword();
-        kwWelcome.setName("welcome");   // ✅ adjust setter if your field isn’t "name"
+        kwWelcome.setName("welcome");   // adjust setter if your field isn’t "name"
         when(keywordService.findOrCreateByName("welcome")).thenReturn(kwWelcome);
 
         Keyword kwParty = new Keyword();
