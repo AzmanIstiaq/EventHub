@@ -14,6 +14,14 @@
         <span th:text="${event.location}"></span>)
         <a th:href="@{'/organiser/' + ${organiser.id} + '/events/' + ${event.id} + '/edit'}">Edit</a>
         <a th:href="@{'/organiser/' + ${organiser.id} + '/events/' + ${event.id} + '/delete'}">Delete</a>
+        <ul>
+            <li th:each="registration : ${event.registrations}">
+                <strong th:text="${registration.getUser().getName()}"></strong>
+                (<span th:text="${registration.getRegistrationDate()}"></span>)
+                <span th:text="${registration.getStatus()}"></span>
+
+            </li>
+        </ul>
     </li>
 </ul>
 </body>

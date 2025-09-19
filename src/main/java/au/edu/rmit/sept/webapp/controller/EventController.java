@@ -30,7 +30,7 @@ public class EventController {
         List<Event> events = eventService.getUpcomingEventsForOrganiser(organiser);
         model.addAttribute("events", events);
         model.addAttribute("organiser", organiser);
-        return "organiser-events";
+        return "organiser-dashboard";
     }
 
 
