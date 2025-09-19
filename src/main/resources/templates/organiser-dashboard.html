@@ -87,6 +87,12 @@
         .hidden {
             display: none;
         }
+
+        .empty-message {
+            font-style: italic;
+            color: #666;
+            margin: 1rem 0;
+        }
     </style>
 </head>
 <body>
@@ -99,8 +105,40 @@
            th:href="@{'/organiser/' + ${organiser.id} + '/events/new'}">+ Create New Event</a>
     </header>
 
-    <div class="events-grid">
-        <div class="event-card" th:each="event : ${events}">
+    <h2>Upcoming Events</h2>
+    <div th:if="${#lists.isEmpty(upcomingEvents)}" class="empty-message" th:text="'There are no upcoming events for ' + ${organiser.getName()} + '.'">
+    </div>
+    <div class="events-grid" th:unless="${#lists.isEmpty(upcomingEvents)}">
+        <div class="event-card" th:each="event : ${upcomingEvents}">
+            <div class="event-header">
+                <h2 th:text="${event.title}"></h2>
+                <div class="event-actions">
+                    <a class="btn btn-edit"
+                       th:href="@{'/organiser/' + ${organiser.id} + '/events/' + ${event.id} + '/edit'}">Edit</a>
+                    <a class="btn btn-delete"
+                       th:href="@{'/organiser/' + ${organiser.id} + '/events/' + ${event.id} + '/delete'}">Delete</a>
+                </div>
+            </div>
+            <p class="event-meta">
+                <span th:text="${event.dateTime}"></span> @
+                <span th:text="${event.location}"></span>
+            </p>
+
+            <button class="toggle-btn">Show Registrations ▼</button>
+            <ul class="registrations hidden">
+                <li th:each="registration : ${event.registrations}">
+                    <strong th:text="${registration.getUser().getName()}"></strong>
+                    (<span th:text="${registration.getRegistrationDate()}"></span>)
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <h2>Past Events</h2>
+    <div th:if="${#lists.isEmpty(pastEvents)}" class="empty-message" th:text="'There are no past events for ' + ${organiser.getName()} + '.'">
+    </div>
+    <div class="events-grid" th:unless="${#lists.isEmpty(pastEvents)}">
+        <div class="event-card" th:each="event : ${pastEvents}">
             <div class="event-header">
                 <h2 th:text="${event.title}"></h2>
                 <div class="event-actions">

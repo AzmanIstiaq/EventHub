@@ -39,6 +39,11 @@ public class EventService {
                 organiser, LocalDateTime.now());
     }
 
+    public List<Event> getPastEventsForOrganiser(User organiser) {
+        return eventRepository.findByOrganiserAndDateTimeBeforeOrderByDateTimeAsc(
+                organiser, LocalDateTime.now());
+    }
+
     // All upcoming events for public view
     public List<Event> getAllUpcomingEvents() {
         return eventRepository.findByDateTimeAfterOrderByDateTimeAsc(LocalDateTime.now());

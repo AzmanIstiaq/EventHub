@@ -22,13 +22,15 @@ public class EventController {
         this.organiserService = organiserService;
     }
 
-    // List upcoming events for given orgainser ID
+    // List events for given organiser ID
     @GetMapping("/{organiserId}/events")
-    public String listEvents(@PathVariable Long organiserId, Model model) {
+    public String listUpcomingEvents(@PathVariable Long organiserId, Model model) {
         User organiser = organiserService.findById(organiserId)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid organiser ID"));
-        List<Event> events = eventService.getUpcomingEventsForOrganiser(organiser);
-        model.addAttribute("events", events);
+        List<Event> upcomingEvents = eventService.getUpcomingEventsForOrganiser(organiser);
+        List<Event> pastEvents = eventService.getPastEventsForOrganiser(organiser);
+        model.addAttribute("upcomingEvents", upcomingEvents);
+        model.addAttribute("pastEvents", pastEvents);
         model.addAttribute("organiser", organiser);
         return "organiser-dashboard";
     }
