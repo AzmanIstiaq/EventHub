@@ -190,7 +190,9 @@
 
       <!-- Date range -->
       <label>From:</label>
-      <input type="date" name="startDate" th:value="${#dates.format(#dates.createNow(), 'yyyy-MM-dd')}" min="${#dates.format(#dates.createNow(), 'yyyy-MM-dd')}"/>
+      <input type="date" name="startDate"
+             th:value="${#dates.format(#dates.createNow(), 'yyyy-MM-dd')}"
+             min="${#dates.format(#dates.createNow(), 'yyyy-MM-dd')}"/>
       <label>To:</label>
       <input type="date" name="endDate" min="${#dates.format(#dates.createNow(), 'yyyy-MM-dd')}"/>
 
@@ -199,11 +201,18 @@
         <option value="">All Categories</option>
         <option th:each="cat : ${categories}" th:value="${cat.id}" th:text="${cat.name}"></option>
       </select>
-      <input th:if="${currentUser}" type="hidden" name="userId" th:value="${currentUser.getId()}"/>
-      <button type="submit" class="btn btn-grey">Search</button>
-    </form>
 
-    <!-- Results -->
+      <!-- Include userId if logged in -->
+      <input th:if="${currentUser}" type="hidden" name="userId" th:value="${currentUser.getId()}"/>
+
+      <button type="submit" class="btn btn-grey">Search</button>
+      <!-- Clear Filters Button -->
+      <a th:href="@{/events/student/search}" class="btn btn-grey" style="margin-left:0.5rem;">Clear All Filters</a>
+    </form>
+  </div>
+
+
+  <!-- Results -->
     <div th:if="${searchResults != null}">
       <h3 th:if="${#lists.isEmpty(searchResults)}" class="empty-message">No events found.</h3>
       <div class="events-grid" th:unless="${#lists.isEmpty(searchResults)}">
