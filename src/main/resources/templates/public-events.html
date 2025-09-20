@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-  <title>Upcoming Events</title>
+  <title>Events</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -16,9 +16,7 @@
       padding: 1rem;
     }
 
-    h1, h2 {
-      margin-bottom: 1rem;
-    }
+    h1, h2 { margin-bottom: 1rem; }
 
     .btn {
       padding: 0.4rem 0.8rem;
@@ -63,6 +61,36 @@
       color: #666;
       margin: 1rem 0;
     }
+
+    /* Tabs */
+    .tabs {
+      display: flex;
+      border-bottom: 2px solid #ddd;
+      margin-bottom: 1rem;
+    }
+
+    .tab {
+      padding: 0.6rem 1.2rem;
+      cursor: pointer;
+      background: #f0f0f0;
+      margin-right: 0.2rem;
+      border-radius: 6px 6px 0 0;
+    }
+
+    .tab.active {
+      background: white;
+      border: 1px solid #ddd;
+      border-bottom: none;
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
   </style>
 </head>
 <body>
@@ -71,8 +99,59 @@
 <div class="container">
   <h1>Events</h1>
 
-  <!-- Section: Registered Events -->
-  <div th:if="${currentUser != null}">
+  <!-- Tab headers -->
+  <div class="tabs">
+    <div class="tab active" onclick="openTab('upcoming')">Upcoming Events</div>
+    <div class="tab" th:if="${currentUser != null}" onclick="openTab('registered')">Registered Events</div>
+    <div class="tab" onclick="openTab('search')">Search</div>
+  </div>
+
+  <!-- Upcoming Events Tab -->
+  <div id="upcoming" class="tab-content active">
+    <h2>All Upcoming Events</h2>
+    <div th:if="${#lists.isEmpty(events)}" class="empty-message">
+      There are no upcoming events.
+    </div>
+    <div class="events-grid" th:unless="${#lists.isEmpty(events)}">
+      <div class="event-card" th:each="event : ${events}">
+        <div class="event-header">
+          <h2 th:text="${event.title}"></h2>
+        </div>
+        <p class="event-meta">
+          <span th:text="${#temporals.format(event.dateTime, 'yyyy-MM-dd HH:mm')}"></span> @
+          <span th:text="${event.location}"></span>
+        </p>
+        <p th:text="${event.description}"></p>
+
+        <!-- Action buttons -->
+        <div th:if="${currentUser != null}">
+          <form th:if="${event.checkUserRegistered(currentUser)}"
+                th:action="@{'/events/student/cancel/' + ${event.id}}"
+                method="post" style="display:inline;">
+            <input type="hidden" name="userId" th:value="${currentUser.getId()}"/>
+            <button type="submit" class="btn btn-cancel">Cancel Registration</button>
+          </form>
+          <form th:if="${!event.checkUserRegistered(currentUser)}"
+                th:action="@{'/events/student/register/' + ${event.id}}"
+                method="post" style="display:inline;">
+            <input type="hidden" name="userId" th:value="${currentUser.getId()}"/>
+            <button type="submit" class="btn btn-register">Register</button>
+          </form>
+          <form th:action="@{'/events/student/detail/' + ${event.getId()}}"
+                method="get" style="display:inline;">
+            <input type="hidden" name="userId" th:value="${currentUser.getId()}"/>
+            <button type="submit" class="btn btn-grey">Event Detail</button>
+          </form>
+        </div>
+        <div th:if="${currentUser == null}">
+          <a th:href="@{'/events/student/public/detail/' + ${event.getId()}}" class="btn btn-grey">Event Detail</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Registered Events Tab -->
+  <div id="registered" class="tab-content" th:if="${currentUser != null}">
     <h2>Your Registered Events</h2>
     <div th:if="${#lists.isEmpty(currentUser.registrations)}" class="empty-message">
       You have not registered for any events.
@@ -82,23 +161,18 @@
         <div class="event-header">
           <h2 th:text="${registration.getEvent().title}"></h2>
         </div>
-
         <p class="event-meta">
           <span th:text="${#temporals.format(registration.getEvent().getDateTime(), 'yyyy-MM-dd HH:mm')}"></span> @
           <span th:text="${registration.getEvent().getLocation()}"></span>
         </p>
-
         <p th:text="${registration.getEvent().getDescription()}"></p>
 
-        <!-- Cancel Registration -->
         <form th:action="@{'/events/student/cancel/' + ${registration.getEvent().getId()}}"
               method="post" style="display:inline;">
           <input type="hidden" name="userId" th:value="${currentUser.getId()}"/>
           <button type="submit" class="btn btn-cancel">Cancel Registration</button>
         </form>
-        <!-- View Event Detail -->
-        <form th:if="${currentUser != null}"
-              th:action="@{'/events/student/detail/' + ${registration.getEvent().getId()}}"
+        <form th:action="@{'/events/student/detail/' + ${registration.getEvent().getId()}}"
               method="get" style="display:inline;">
           <input type="hidden" name="userId" th:value="${currentUser.getId()}"/>
           <button type="submit" class="btn btn-grey">Event Detail</button>
@@ -107,56 +181,42 @@
     </div>
   </div>
 
-  <!-- Section: All Events -->
-  <h2>All Upcoming Events</h2>
-  <div th:if="${#lists.isEmpty(events)}" class="empty-message">
-    There are no upcoming events.
-  </div>
+  <!-- Search Tab -->
+  <div id="search" class="tab-content">
+    <h2>Search Events</h2>
+    <form th:action="@{/events/search}" method="get">
+      <input type="text" name="query" placeholder="Search by title, location, or keyword"/>
+      <button type="submit" class="btn btn-grey">Search</button>
+    </form>
 
-  <div class="events-grid" th:unless="${#lists.isEmpty(events)}">
-    <div class="event-card" th:each="event : ${events}">
-      <div class="event-header">
-        <h2 th:text="${event.title}"></h2>
+    <!-- Results -->
+    <div th:if="${searchResults != null}">
+      <h3 th:if="${#lists.isEmpty(searchResults)}" class="empty-message">No events found.</h3>
+      <div class="events-grid" th:unless="${#lists.isEmpty(searchResults)}">
+        <div class="event-card" th:each="event : ${searchResults}">
+          <div class="event-header">
+            <h2 th:text="${event.title}"></h2>
+          </div>
+          <p class="event-meta">
+            <span th:text="${#temporals.format(event.dateTime, 'yyyy-MM-dd HH:mm')}"></span> @
+            <span th:text="${event.location}"></span>
+          </p>
+          <p th:text="${event.description}"></p>
+          <a th:href="@{'/events/student/public/detail/' + ${event.id}}" class="btn btn-grey">Event Detail</a>
+        </div>
       </div>
-
-      <p class="event-meta">
-        <span th:text="${#temporals.format(event.dateTime, 'yyyy-MM-dd HH:mm')}"></span> @
-        <span th:text="${event.location}"></span>
-      </p>
-
-      <p th:text="${event.description}"></p>
-
-      <!-- Action buttons -->
-      <div th:if="${currentUser != null}">
-        <!-- Cancel if registered -->
-        <form th:if="${event.checkUserRegistered(currentUser)}"
-              th:action="@{'/events/student/cancel/' + ${event.id}}"
-              method="post" style="display:inline;">
-          <input type="hidden" name="userId" th:value="${currentUser.getId()}"/>
-          <button type="submit" class="btn btn-cancel">Cancel Registration</button>
-        </form>
-
-        <!-- Register if not registered -->
-        <form th:if="${!event.checkUserRegistered(currentUser)}"
-              th:action="@{'/events/student/register/' + ${event.id}}"
-              method="post" style="display:inline;">
-          <input type="hidden" name="userId" th:value="${currentUser.getId()}"/>
-          <button type="submit" class="btn btn-register">Register</button>
-        </form>
-        <!-- View Event Detail -->
-        <form th:action="@{'/events/student/detail/' + ${event.getId()}}"
-              method="get" style="display:inline;">
-          <input type="hidden" name="userId" th:value="${currentUser.getId()}"/>
-          <button type="submit" class="btn btn-grey">Event Detail</button>
-        </form>
-      </div>
-      <!-- View Event Detail -->
-      <div th:if="${currentUser == null}">
-        <a th:href="@{'/events/student/public/detail/' + ${event.getId()}}" class="btn btn-grey">Event Detail</a>
-      </div>
-
     </div>
   </div>
 </div>
+
+<script>
+  function openTab(tabId) {
+    document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+
+    document.getElementById(tabId).classList.add('active');
+    event.target.classList.add('active');
+  }
+</script>
 </body>
 </html>
