@@ -95,6 +95,17 @@ public class Event {
         return false;
     }
 
+    public double getStarRating() {
+        if (feedbacks.isEmpty()) {
+            return 0;
+        }
+        double score = 0;
+        for (Feedback feedback : feedbacks) {
+            score += feedback.getRating();
+        }
+        return score / feedbacks.size();
+    }
+
     public User getOrganiser() { return organiser; }
     public void setOrganiser(User organiser) { this.organiser = organiser; }
 

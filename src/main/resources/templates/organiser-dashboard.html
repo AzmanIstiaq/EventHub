@@ -63,7 +63,7 @@
             color: #666;
         }
 
-        .toggle-btn {
+        .toggle {
             margin-top: 1rem;
             background: #e9ecef;
             border: none;
@@ -73,7 +73,7 @@
             font-size: 0.9rem;
         }
 
-        .toggle-btn.active { background: #ced4da; }
+        .toggle.active { background: #ced4da; }
 
         .registrations {
             margin-top: 0.8rem;
@@ -209,6 +209,7 @@
             <div th:id="'card-' + ${event.id}">
                 <div class="event-header">
                     <h2 th:text="${event.title}"></h2>
+
                     <div class="event-actions">
                         <button class="btn btn-edit"
                                 th:if="${event.dateTime.isAfter(T(java.time.LocalDateTime).now())}"
@@ -228,7 +229,7 @@
                 </p>
 
 
-                <button class="toggle-btn">Show Registrations ▼</button>
+                <button class="toggle toggle-btn">Show Registrations ▼</button>
                 <ul class="registrations hidden">
                     <li th:each="registration : ${event.registrations}">
                         <strong th:text="${registration.getUser().getName()}"></strong>
@@ -247,10 +248,11 @@
         <div class="event-card" th:each="event : ${pastEvents}">
             <div class="event-header">
                 <h2 th:text="${event.title}"></h2>
-                <div class="event-actions">
-                    <a class="btn btn-delete"
-                       th:href="@{'/organiser/' + ${organiser.id} + '/events/' + ${event.id} + '/delete'}">Delete</a>
-                </div>
+                <h3 th:text="'Star Rating: ' + ${event.getStarRating()}"></h3>
+<!--                <div class="event-actions">-->
+<!--                    <a class="btn btn-delete"-->
+<!--                       th:href="@{'/organiser/' + ${organiser.id} + '/events/' + ${event.id} + '/delete'}">Delete</a>-->
+<!--                </div>-->
             </div>
             <p class="event-meta">
                 <span th:text="${event.dateTime}"></span> @
@@ -263,14 +265,14 @@
             </p>
 
 
-            <button class="toggle-btn">Show Registrations ▼</button>
+            <button class="toggle toggle-btn">Show Registrations ▼</button>
             <ul class="registrations hidden">
                 <li th:each="registration : ${event.registrations}">
                     <strong th:text="${registration.getUser().getName()}"></strong>
                     (<span th:text="${registration.getRegistrationDate()}"></span>)
                 </li>
             </ul>
-            <button class="toggle-btn">Show Feedback ▼</button>
+            <button class="toggle toggle-btn-feedback">Show Feedback ▼</button>
             <ul class="registrations hidden">
                 <li th:each="feedback : ${event.feedbacks}">
                     <strong th:text="${feedback.getRating()}"></strong>
@@ -293,6 +295,24 @@
                 registrations.classList.toggle("hidden", !isHidden);
                 btn.classList.toggle("active", isHidden);
                 btn.textContent = isHidden ? "Hide Registrations ▲" : "Show Registrations ▼";
+            });
+        });
+
+        // Create form toggle
+        document.getElementById("create-btn").addEventListener("click", () => {
+            document.getElementById("create-form").classList.toggle("hidden");
+        });
+    });
+
+    document.addEventListener("DOMContentLoaded", () => {
+        const toggleButtons = document.querySelectorAll(".toggle-btn-feedback");
+        toggleButtons.forEach(btn => {
+            btn.addEventListener("click", () => {
+                const registrations = btn.nextElementSibling;
+                const isHidden = registrations.classList.contains("hidden");
+                registrations.classList.toggle("hidden", !isHidden);
+                btn.classList.toggle("active", isHidden);
+                btn.textContent = isHidden ? "Hide Feedback ▲" : "Show Feedback ▼";
             });
         });
 
