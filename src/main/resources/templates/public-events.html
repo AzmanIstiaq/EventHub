@@ -30,6 +30,7 @@
       cursor: pointer;
     }
 
+    .btn-grey { background: #6c757d; }
     .btn-register { background: #28a745; }
     .btn-cancel { background: #dc3545; }
 
@@ -95,6 +96,13 @@
           <input type="hidden" name="userId" th:value="${currentUser.getId()}"/>
           <button type="submit" class="btn btn-cancel">Cancel Registration</button>
         </form>
+        <!-- View Event Detail -->
+        <form th:if="${currentUser != null}"
+              th:action="@{'/events/student/detail/' + ${registration.getEvent().getId()}}"
+              method="get" style="display:inline;">
+          <input type="hidden" name="userId" th:value="${currentUser.getId()}"/>
+          <button type="submit" class="btn btn-grey">Event Detail</button>
+        </form>
       </div>
     </div>
   </div>
@@ -135,7 +143,18 @@
           <input type="hidden" name="userId" th:value="${currentUser.getId()}"/>
           <button type="submit" class="btn btn-register">Register</button>
         </form>
+        <!-- View Event Detail -->
+        <form th:action="@{'/events/student/detail/' + ${event.getId()}}"
+              method="get" style="display:inline;">
+          <input type="hidden" name="userId" th:value="${currentUser.getId()}"/>
+          <button type="submit" class="btn btn-grey">Event Detail</button>
+        </form>
       </div>
+      <!-- View Event Detail -->
+      <div th:if="${currentUser == null}">
+        <a th:href="@{'/events/student/public/detail/' + ${event.getId()}}" class="btn btn-grey">Event Detail</a>
+      </div>
+
     </div>
   </div>
 </div>

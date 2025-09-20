@@ -70,4 +70,31 @@ public class PublicEventController {
 
         return "redirect:/events/student/" + userId;  // back to event list
     }
+
+    @GetMapping("/detail/{eventId}")
+    public String getEventDetailLoggedIn(Model model, @PathVariable Long eventId,
+                                         @RequestParam Long userId) {
+        Event event = eventService.findById(eventId)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid event ID"));
+        User currentUser = userService.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid user ID"));
+
+        model.addAttribute("event", event);
+        model.addAttribute("currentUser", currentUser);
+
+        return "event-detail";
+    }
+
+    @GetMapping("/public/detail/{eventId}")
+    public String getEventDetail(Model model, @PathVariable Long eventId) {
+        Event event = eventService.findById(eventId)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid event ID"));
+
+        User currentUser = null;
+
+        model.addAttribute("event", event);
+        model.addAttribute("currentUser", currentUser);
+
+        return "event-detail";
+    }
 }
