@@ -56,6 +56,7 @@ public class PublicEventController {
         currentUser.ifPresent(user -> model.addAttribute("currentUser", user));
         model.addAttribute("activeTab", "upcoming");
         model.addAttribute("categories", categoryService.findAll());
+        model.addAttribute("pastEvents", eventService.getPastEvents());
         return "public-events";  // Thymeleaf template
     }
 

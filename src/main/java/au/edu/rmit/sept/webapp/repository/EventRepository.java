@@ -17,6 +17,8 @@ public interface EventRepository extends JpaRepository<Event, Long> {
     List<Event> findByOrganiserAndDateTimeAfterOrderByDateTimeAsc(User organiser, LocalDateTime dateTime);
     // All past events for a given organiser
     List<Event> findByOrganiserAndDateTimeBeforeOrderByDateTimeAsc(User organiser, LocalDateTime dateTime);
+    // all past events
+    List<Event> findByDateTimeBeforeOrderByDateTimeAsc(LocalDateTime dateTime);
 
     // All upcoming events (public view)
     List<Event> findByDateTimeAfterOrderByDateTimeAsc(LocalDateTime dateTime);

@@ -38,7 +38,7 @@ public class WebappApplication {
 			// Events
 			Event hackathon = eventRepo.save(new Event(
 					"Hackathon", "24hr coding challenge",
-					LocalDateTime.now().plusDays(2), "Library", csit, cat1
+					LocalDateTime.now().minusDays(2), "Library", csit, cat1
 			));
 
 			Event bbqNight = eventRepo.save(new Event(

@@ -29,6 +29,10 @@ public class Event {
     @JsonManagedReference
     private Set<Registration> registrations;
 
+    @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
+    private Set<Feedback> feedbacks;
+
     @ManyToOne
     @JoinColumn(name = "organiser_id", nullable = false)
     @JsonBackReference
@@ -79,6 +83,8 @@ public class Event {
 
     public Set<Registration> getRegistrations() { return registrations; }
     public void setRegistrations(Set<Registration> registrations) { this.registrations = registrations; }
+
+    public Set<Feedback> getFeedbacks() { return feedbacks; }
 
     public Boolean checkUserRegistered(User user) {
         for (Registration registration : registrations) {

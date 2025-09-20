@@ -103,6 +103,7 @@
   <div class="tabs">
     <div class="tab" th:classappend="${activeTab == 'upcoming'} ? 'active'" onclick="openTab('upcoming')">Upcoming Events</div>
     <div class="tab" th:if="${currentUser != null}" onclick="openTab('registered')">Registered Events</div>
+    <div class="tab" th:if="${currentUser != null}" onclick="openTab('past')">Past Events</div>
     <div class="tab" th:classappend="${activeTab == 'search'} ? ' active'" onclick="openTab('search')">Search</div>
   </div>
 
@@ -149,9 +150,6 @@
         <div class="share-section" style="margin-top: 0.5rem;">
           <strong>Share:</strong>
           <div th:with="eventUrl=@{/events/student/public/detail/{id}(id=${event.id})}">
-
-            <!-- Example debug check: confirm Thymeleaf resolves the id -->
-            <!-- <span th:text="${event.id}">EVENT ID</span> -->
 
             <!-- Facebook -->
             <a th:href="'https://www.facebook.com/sharer/sharer.php?u=' + ${eventUrl}"
@@ -244,7 +242,42 @@
       </div>
     </div>
   </div>
+  <!-- Past registered events -->
+  <div id="past" class="tab-content" th:if="${currentUser != null}">
+    <h2>Your Past Events</h2>
+    <div th:if="${#lists.isEmpty(pastEvents)}" class="empty-message">
+      You have no past events.
+    </div>
+    <div class="events-grid" th:unless="${#lists.isEmpty(pastEvents)}">
+      <div class="event-card" th:each="event : ${pastEvents}">
+        <div class="event-header">
+          <h2 th:text="${event.title}"></h2>
+        </div>
+        <p class="event-meta">
+          <span th:text="${#temporals.format(event.getDateTime(), 'yyyy-MM-dd HH:mm')}"></span> @
+          <span th:text="${event.getLocation()}"></span>
+        </p>
+        <p th:text="${event.getDescription()}"></p>
 
+
+        <form th:action="@{'/events/student/detail/' + ${event.getId()}}"
+              method="get" style="display:inline;">
+          <input type="hidden" name="userId" th:value="${currentUser.getId()}"/>
+          <button type="submit" class="btn btn-grey">Event Detail</button>
+        </form>
+        <form th:action="@{'/events/' + ${event.getId()} + '/feedback'}" method="post">
+          <label>Rating (1-5):</label>
+          <input type="number" name="rating" min="1" max="5" required />
+
+          <label>Comment:</label>
+          <textarea name="comment" rows="4" cols="50"></textarea>
+          <input type="hidden" name="userId" th:value="${currentUser.getId()}"/>
+          <button type="submit">Submit Feedback</button>
+        </form>
+        </div>
+      </div>
+    </div>
+  </div>
   <!-- Search Tab -->
   <div id="search" class="tab-content" th:classappend="${activeTab == 'search'} ? ' active'">
     <h2>Search Events</h2>

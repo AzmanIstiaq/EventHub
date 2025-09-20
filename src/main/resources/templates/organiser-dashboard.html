@@ -270,6 +270,14 @@
                     (<span th:text="${registration.getRegistrationDate()}"></span>)
                 </li>
             </ul>
+            <button class="toggle-btn">Show Feedback ▼</button>
+            <ul class="registrations hidden">
+                <li th:each="feedback : ${event.feedbacks}">
+                    <strong th:text="${feedback.getRating()}"></strong>
+                    (<span th:text="${feedback.getComment()}"></span>)
+                </li>
+            </ul>
+
         </div>
     </div>
 </div>
