@@ -2,34 +2,142 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
   <title>Upcoming Events</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      background: #f5f7fa;
+      color: #333;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: 2rem auto;
+      padding: 1rem;
+    }
+
+    h1, h2 {
+      margin-bottom: 1rem;
+    }
+
+    .btn {
+      padding: 0.4rem 0.8rem;
+      border: none;
+      border-radius: 6px;
+      text-decoration: none;
+      color: white;
+      font-size: 0.9rem;
+      cursor: pointer;
+    }
+
+    .btn-register { background: #28a745; }
+    .btn-cancel { background: #dc3545; }
+
+    .events-grid {
+      display: grid;
+      gap: 1.5rem;
+    }
+
+    .event-card {
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      padding: 1rem 1.5rem;
+    }
+
+    .event-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .event-meta {
+      font-size: 0.9rem;
+      color: #666;
+      margin: 0.5rem 0 1rem;
+    }
+
+    .empty-message {
+      font-style: italic;
+      color: #666;
+      margin: 1rem 0;
+    }
+  </style>
 </head>
 <body>
-<div th:replace="fragments/navbar"></div>
-<h1>Upcoming Events</h1>
-<table>
-  <thead>
-  <tr>
-    <th>Title</th>
-    <th>Description</th>
-    <th>Date & Time</th>
-    <th>Location</th>
-    <th>Action</th>
-  </tr>
-  </thead>
-  <tbody>
-  <tr th:each="event : ${events}">
-    <td th:text="${event.title}"></td>
-    <td th:text="${event.description}"></td>
-    <td th:text="${#temporals.format(event.dateTime, 'yyyy-MM-dd HH:mm')}"></td>
-    <td th:text="${event.location}"></td>
-    <td>
-      <form th:action="@{'/events/' + ${event.id} + '/register'}" method="post">
-        <input type="hidden" name="userId" th:value="${1}"/> <!-- Replace with current logged-in user ID -->
-        <button type="submit">Register</button>
-      </form>
-    </td>
-  </tr>
-  </tbody>
-</table>
+<div th:replace="~{fragments/navbar}"></div>
+
+<div class="container">
+  <h1>Events</h1>
+
+  <!-- Section: Registered Events -->
+  <div th:if="${currentUser != null}">
+    <h2>Your Registered Events</h2>
+    <div th:if="${#lists.isEmpty(currentUser.registrations)}" class="empty-message">
+      You have not registered for any events.
+    </div>
+    <div class="events-grid" th:unless="${#lists.isEmpty(currentUser.registrations)}">
+      <div class="event-card" th:each="registration : ${currentUser.registrations}">
+        <div class="event-header">
+          <h2 th:text="${registration.getEvent().title}"></h2>
+        </div>
+
+        <p class="event-meta">
+          <span th:text="${#temporals.format(registration.getEvent().getDateTime(), 'yyyy-MM-dd HH:mm')}"></span> @
+          <span th:text="${registration.getEvent().getLocation()}"></span>
+        </p>
+
+        <p th:text="${registration.getEvent().getDescription()}"></p>
+
+        <!-- Cancel Registration -->
+        <form th:action="@{'/events/student/cancel/' + ${registration.getEvent().getId()}}"
+              method="post" style="display:inline;">
+          <input type="hidden" name="userId" th:value="${currentUser.getId()}"/>
+          <button type="submit" class="btn btn-cancel">Cancel Registration</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section: All Events -->
+  <h2>All Upcoming Events</h2>
+  <div th:if="${#lists.isEmpty(events)}" class="empty-message">
+    There are no upcoming events.
+  </div>
+
+  <div class="events-grid" th:unless="${#lists.isEmpty(events)}">
+    <div class="event-card" th:each="event : ${events}">
+      <div class="event-header">
+        <h2 th:text="${event.title}"></h2>
+      </div>
+
+      <p class="event-meta">
+        <span th:text="${#temporals.format(event.dateTime, 'yyyy-MM-dd HH:mm')}"></span> @
+        <span th:text="${event.location}"></span>
+      </p>
+
+      <p th:text="${event.description}"></p>
+
+      <!-- Action buttons -->
+      <div th:if="${currentUser != null}">
+        <!-- Cancel if registered -->
+        <form th:if="${event.checkUserRegistered(currentUser)}"
+              th:action="@{'/events/student/cancel/' + ${event.id}}"
+              method="post" style="display:inline;">
+          <input type="hidden" name="userId" th:value="${currentUser.getId()}"/>
+          <button type="submit" class="btn btn-cancel">Cancel Registration</button>
+        </form>
+
+        <!-- Register if not registered -->
+        <form th:if="${!event.checkUserRegistered(currentUser)}"
+              th:action="@{'/events/student/register/' + ${event.id}}"
+              method="post" style="display:inline;">
+          <input type="hidden" name="userId" th:value="${currentUser.getId()}"/>
+          <button type="submit" class="btn btn-register">Register</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
 </body>
 </html>

@@ -80,6 +80,15 @@ public class Event {
     public Set<Registration> getRegistrations() { return registrations; }
     public void setRegistrations(Set<Registration> registrations) { this.registrations = registrations; }
 
+    public Boolean checkUserRegistered(User user) {
+        for (Registration registration : registrations) {
+            if (registration.getUser().equals(user)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public User getOrganiser() { return organiser; }
     public void setOrganiser(User organiser) { this.organiser = organiser; }
 

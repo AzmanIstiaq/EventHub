@@ -10,10 +10,12 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
+
 /// This controller is to be used for public facing event operations (performed by student users)
 /// such as listing all events and registering for events.
 @Controller
-@RequestMapping("/events")
+@RequestMapping("/events/student")
 public class PublicEventController {
 
     private final EventService eventService;
@@ -36,8 +38,17 @@ public class PublicEventController {
         return "public-events";  // Thymeleaf template
     }
 
+    @GetMapping("/{userId}")
+    public String listEventsLoggedIn(Model model, @PathVariable Long userId) {
+        List<Event> events = eventService.getAllUpcomingEvents();
+        model.addAttribute("events", events);
+        Optional<User> currentUser = userService.findById(userId);
+        currentUser.ifPresent(user -> model.addAttribute("currentUser", user));
+        return "public-events";  // Thymeleaf template
+    }
+
     // 2. Register for an event
-    @PostMapping("/{eventId}/register")
+    @PostMapping("/register/{eventId}")
     public String registerForEvent(@PathVariable Long eventId,
                                    @RequestParam Long userId) {
         User user = userService.findById(userId)
@@ -48,6 +59,15 @@ public class PublicEventController {
 
         registrationService.registerUserForEvent(user, event);
 
-        return "redirect:/events";  // back to event list
+        return "redirect:/events/student/" + userId;  // back to event list
+    }
+
+    // 2. Register for an event
+    @PostMapping("/cancel/{eventId}")
+    public String cancelEventRegistration(@PathVariable Long eventId,
+                                   @RequestParam Long userId) {
+        registrationService.deleteRegistrationForEvent(userId, eventId);
+
+        return "redirect:/events/student/" + userId;  // back to event list
     }
 }

@@ -41,4 +41,8 @@ public class RegistrationService {
     public List<Registration> getRegistrationsForEvent(Event event) {
         return registrationRepository.findByEvent(event);
     }
+
+    public void deleteRegistrationForEvent(Long userId, Long eventId) {
+        registrationRepository.deleteByUserIdAndEventId(userId, eventId);
+    }
 }
