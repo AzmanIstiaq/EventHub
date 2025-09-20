@@ -122,7 +122,7 @@
 <div class="container">
     <header>
         <h1 th:text="'Events for ' + ${organiser.name}"></h1>
-        <button id="create-btn" class="btn btn-primary">+ Create New Event</button>
+        <button id="create-btn" class="btn btn-primary" onclick="openCreateForm()">+ Create New Event</button>
     </header>
 
     <!-- Hidden Create Event Form -->
@@ -321,6 +321,11 @@
             document.getElementById("create-form").classList.toggle("hidden");
         });
     });
+    function openCreateForm() {
+        const formWrapper = document.getElementById("create-form");
+        formWrapper.classList.remove("hidden");
+        formWrapper.querySelector("form").reset();
+    }
 
     // Cancel Create
     function cancelCreateForm() {
