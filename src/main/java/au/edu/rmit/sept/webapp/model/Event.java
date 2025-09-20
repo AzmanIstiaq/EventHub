@@ -27,11 +27,11 @@ public class Event {
 
     @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
-    private Set<Registration> registrations;
+    private Set<Registration> registrations = new HashSet<>();
 
     @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
-    private Set<Feedback> feedbacks;
+    private Set<Feedback> feedbacks = new HashSet<>();
 
     @ManyToOne
     @JoinColumn(name = "organiser_id", nullable = false)

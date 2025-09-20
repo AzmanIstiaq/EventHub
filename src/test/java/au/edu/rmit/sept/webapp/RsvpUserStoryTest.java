@@ -9,6 +9,7 @@ import au.edu.rmit.sept.webapp.repository.*;
 import au.edu.rmit.sept.webapp.service.EventService;
 import au.edu.rmit.sept.webapp.service.RegistrationService;
 import au.edu.rmit.sept.webapp.service.UserService;
+import au.edu.rmit.sept.webapp.service.CategoryService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
@@ -49,6 +50,7 @@ class RsvpUserStoryTest {
     @MockBean EventService eventService;
     @MockBean RegistrationService registrationService;
     @MockBean UserService userService;
+    @MockBean CategoryService categoryService;
 
     // Repos mocked to satisfy WebappApplication.init(...) seeder on context startup
     @MockBean UserRepository userRepository;
@@ -67,7 +69,7 @@ class RsvpUserStoryTest {
 
         when(eventService.getAllUpcomingEvents()).thenReturn(List.of(e));
 
-        mvc.perform(get("/events"))
+        mvc.perform(get("/events/student"))
                 .andExpect(status().isOk())
                 .andExpect(model().attributeExists("events"))
                 .andExpect(view().name("public-events"));
@@ -86,11 +88,11 @@ class RsvpUserStoryTest {
         when(eventService.findById(eventId)).thenReturn(Optional.of(e));
         when(registrationService.registerUserForEvent(u, e)).thenReturn(new Registration(u, e));
 
-        mvc.perform(post("/events/{eventId}/register", eventId)
+        mvc.perform(post("/events/student/register/{eventId}", eventId)
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                         .param("userId", Long.toString(userId)))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/events"));
+                .andExpect(redirectedUrl("/events/student/" + userId));
 
         verify(registrationService).registerUserForEvent(u, e);
     }
@@ -119,7 +121,7 @@ class RsvpUserStoryTest {
     void notLoggedInRsvpReturnsBadRequest() throws Exception {
         long eventId = 10L;
 
-        mvc.perform(post("/events/{eventId}/register", eventId))
+        mvc.perform(post("/events/student/register/{eventId}", eventId))
                 .andExpect(status().isBadRequest()); // Required request param 'userId' missing
 
         verify(registrationService, never()).registerUserForEvent(ArgumentMatchers.any(), ArgumentMatchers.any());
