@@ -54,4 +54,10 @@ public class EventService {
         return eventRepository.findAll();
     }
 
+    public List<Event> searchEvents(String query, LocalDateTime from, LocalDateTime to, Long categoryId) {
+        if (to == null) {
+            return eventRepository.searchEvents(query, from, categoryId);
+        }
+        return eventRepository.searchEventsWithEnd(query, from, to, categoryId);
+    }
 }

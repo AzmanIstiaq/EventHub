@@ -101,13 +101,13 @@
 
   <!-- Tab headers -->
   <div class="tabs">
-    <div class="tab active" onclick="openTab('upcoming')">Upcoming Events</div>
+    <div class="tab" th:classappend="${activeTab == 'upcoming'} ? 'active'" onclick="openTab('upcoming')">Upcoming Events</div>
     <div class="tab" th:if="${currentUser != null}" onclick="openTab('registered')">Registered Events</div>
-    <div class="tab" onclick="openTab('search')">Search</div>
+    <div class="tab" th:classappend="${activeTab == 'search'} ? ' active'" onclick="openTab('search')">Search</div>
   </div>
 
   <!-- Upcoming Events Tab -->
-  <div id="upcoming" class="tab-content active">
+  <div id="upcoming" class="tab-content" th:classappend="${activeTab == 'upcoming'} ? ' active'">
     <h2>All Upcoming Events</h2>
     <div th:if="${#lists.isEmpty(events)}" class="empty-message">
       There are no upcoming events.
@@ -182,10 +182,24 @@
   </div>
 
   <!-- Search Tab -->
-  <div id="search" class="tab-content">
+  <div id="search" class="tab-content" th:classappend="${activeTab == 'search'} ? ' active'">
     <h2>Search Events</h2>
-    <form th:action="@{/events/search}" method="get">
+    <form th:action="@{/events/student/search}" method="get">
+      <!-- Text search -->
       <input type="text" name="query" placeholder="Search by title, location, or keyword"/>
+
+      <!-- Date range -->
+      <label>From:</label>
+      <input type="date" name="startDate" th:value="${#dates.format(#dates.createNow(), 'yyyy-MM-dd')}" min="${#dates.format(#dates.createNow(), 'yyyy-MM-dd')}"/>
+      <label>To:</label>
+      <input type="date" name="endDate" min="${#dates.format(#dates.createNow(), 'yyyy-MM-dd')}"/>
+
+      <!-- Category dropdown -->
+      <select name="categoryId">
+        <option value="">All Categories</option>
+        <option th:each="cat : ${categories}" th:value="${cat.id}" th:text="${cat.name}"></option>
+      </select>
+      <input th:if="${currentUser}" type="hidden" name="userId" th:value="${currentUser.getId()}"/>
       <button type="submit" class="btn btn-grey">Search</button>
     </form>
 
@@ -202,7 +216,28 @@
             <span th:text="${event.location}"></span>
           </p>
           <p th:text="${event.description}"></p>
-          <a th:href="@{'/events/student/public/detail/' + ${event.id}}" class="btn btn-grey">Event Detail</a>
+          <div th:if="${currentUser != null}">
+            <form th:if="${event.checkUserRegistered(currentUser)}"
+                  th:action="@{'/events/student/cancel/' + ${event.id}}"
+                  method="post" style="display:inline;">
+              <input type="hidden" name="userId" th:value="${currentUser.getId()}"/>
+              <button type="submit" class="btn btn-cancel">Cancel Registration</button>
+            </form>
+            <form th:if="${!event.checkUserRegistered(currentUser)}"
+                  th:action="@{'/events/student/register/' + ${event.id}}"
+                  method="post" style="display:inline;">
+              <input type="hidden" name="userId" th:value="${currentUser.getId()}"/>
+              <button type="submit" class="btn btn-register">Register</button>
+            </form>
+            <form th:action="@{'/events/student/detail/' + ${event.getId()}}"
+                  method="get" style="display:inline;">
+              <input type="hidden" name="userId" th:value="${currentUser.getId()}"/>
+              <button type="submit" class="btn btn-grey">Event Detail</button>
+            </form>
+          </div>
+          <div th:if="${currentUser == null}">
+            <a th:href="@{'/events/student/public/detail/' + ${event.getId()}}" class="btn btn-grey">Event Detail</a>
+          </div>
         </div>
       </div>
     </div>
