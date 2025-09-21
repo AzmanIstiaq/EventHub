@@ -20,8 +20,8 @@ class EventModelTest {
         Event e = new Event();
         assertThat(e.getKeywordsAsString()).isEqualTo("");
 
-        Keyword k1 = new Keyword(); k1.setName("ai");
-        Keyword k2 = new Keyword(); k2.setName("ml");
+        Keyword k1 = new Keyword(); k1.setKeyword("ai");
+        Keyword k2 = new Keyword(); k2.setKeyword("ml");
         e.addKeyword(k1);
         e.addKeyword(k2);
         String s = e.getKeywordsAsString();
@@ -45,13 +45,13 @@ class EventModelTest {
     @DisplayName("Event.checkUserRegistered(): true/false")
     void checkUserRegistered() {
         Event e = new Event();
-        User u1 = new User(); u1.setId(1L);
-        User u2 = new User(); u2.setId(2L);
+        User u1 = new User(); u1.setUserId(1L);
+        User u2 = new User(); u2.setUserId(2L);
         e.setDateTime(LocalDateTime.now());
         Registration r = new Registration(u1, e);
         e.getRegistrations().add(r);
 
-        assertThat(e.checkUserRegistered(u1.getId())).isTrue();
-        assertThat(e.checkUserRegistered(u2.getId())).isFalse();
+        assertThat(e.checkUserRegistered(u1.getUserId())).isTrue();
+        assertThat(e.checkUserRegistered(u2.getUserId())).isFalse();
     }
 }

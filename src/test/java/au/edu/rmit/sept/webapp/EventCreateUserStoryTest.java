@@ -37,7 +37,7 @@ class EventCreateUserStoryTest {
     void createFormVisibleOnDashboard() throws Exception {
         long organiserId = 42L;
         User organiser = new User();
-        organiser.setId(organiserId);
+        organiser.setUserId(organiserId);
         when(organiserService.findById(organiserId)).thenReturn(Optional.of(organiser));
         when(eventService.getUpcomingEventsForOrganiser(organiser)).thenReturn(List.of());
         when(eventService.getPastEventsForOrganiser(organiser)).thenReturn(List.of());
@@ -58,7 +58,7 @@ class EventCreateUserStoryTest {
     void submitValidCreateSavesEvent() throws Exception {
         long organiserId = 42L;
         User organiser = new User();
-        organiser.setId(organiserId);
+        organiser.setUserId(organiserId);
 
         // category to bind into Event via nested property "category.id"
         Category cat = new Category("CAT1");
@@ -67,11 +67,11 @@ class EventCreateUserStoryTest {
         when(organiserService.findById(organiserId)).thenReturn(Optional.of(organiser));
         when(categoryService.findAll()).thenReturn(List.of(cat));
         Keyword kwWelcome = new Keyword();
-        kwWelcome.setName("welcome");   // adjust setter if your field isn’t "name"
+        kwWelcome.setKeyword("welcome");   // adjust setter if your field isn’t "name"
         when(keywordService.findOrCreateByName("welcome")).thenReturn(kwWelcome);
 
         Keyword kwParty = new Keyword();
-        kwParty.setName("party");
+        kwParty.setKeyword("party");
         when(keywordService.findOrCreateByName("party")).thenReturn(kwParty);
 
         when(eventService.save(any(Event.class))).thenAnswer(i -> i.getArgument(0));
@@ -97,7 +97,7 @@ class EventCreateUserStoryTest {
         assertThat(saved.getCategory()).isNotNull();
         assertThat(saved.getCategory().getId()).isEqualTo(cat.getId());
         assertThat(saved.getOrganiser()).isEqualTo(organiser);
-        assertThat(saved.getKeywords()).extracting(Keyword::getName)
+        assertThat(saved.getKeywords()).extracting(Keyword::getKeyword)
                 .containsExactlyInAnyOrder("welcome", "party");
     }
 
@@ -105,7 +105,7 @@ class EventCreateUserStoryTest {
     @DisplayName("AC2: missing required fields should trigger validation errors (current controller: TODO)")
     void submitMissingFieldsShowsValidationErrors() throws Exception {
         long organiserId = 42L;
-        User organiser = new User(); organiser.setId(organiserId);
+        User organiser = new User(); organiser.setUserId(organiserId);
         when(organiserService.findById(organiserId)).thenReturn(Optional.of(organiser));
         CustomUserDetails cud = org.mockito.Mockito.mock(CustomUserDetails.class);
         when(cud.getId()).thenReturn(organiserId);

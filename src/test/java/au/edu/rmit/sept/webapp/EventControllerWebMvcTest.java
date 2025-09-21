@@ -34,7 +34,7 @@ class EventControllerWebMvcTest {
     @DisplayName("Organiser list events view OK with model")
     void organiserListEventsOk() throws Exception {
         long organiserId = 55L;
-        User organiser = new User(); organiser.setId(organiserId);
+        User organiser = new User(); organiser.setUserId(organiserId);
         Event up = new Event(); up.setDateTime(LocalDateTime.now().plusDays(1));
         Event past = new Event(); past.setDateTime(LocalDateTime.now().minusDays(1));
         when(organiserService.findById(organiserId)).thenReturn(Optional.of(organiser));
@@ -57,7 +57,7 @@ class EventControllerWebMvcTest {
     @DisplayName("Create event redirects to organiser list")
     void createEventRedirects() throws Exception {
         long organiserId = 55L;
-        User organiser = new User(); organiser.setId(organiserId);
+        User organiser = new User(); organiser.setUserId(organiserId);
         when(organiserService.findById(organiserId)).thenReturn(Optional.of(organiser));
         when(eventService.save(any(Event.class))).thenAnswer(inv -> inv.getArgument(0));
 
@@ -75,8 +75,8 @@ class EventControllerWebMvcTest {
     void updateEventRedirects() throws Exception {
         long organiserId = 55L;
         long eventId = 101L;
-        User organiser = new User(); organiser.setId(organiserId);
-        Event existing = new Event(); existing.setId(eventId);
+        User organiser = new User(); organiser.setUserId(organiserId);
+        Event existing = new Event(); existing.setEventId(eventId);
         when(organiserService.findById(organiserId)).thenReturn(Optional.of(organiser));
         when(eventService.findById(eventId)).thenReturn(Optional.of(existing));
         when(eventService.save(existing)).thenReturn(existing);

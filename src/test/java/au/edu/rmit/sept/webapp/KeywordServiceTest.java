@@ -24,8 +24,8 @@ class KeywordServiceTest {
     @Test
     @DisplayName("findOrCreateByName(): returns existing keyword")
     void returnsExisting() {
-        Keyword existing = new Keyword(); existing.setId(1L); existing.setName("hackathon");
-        when(keywordRepository.findByName("hackathon")).thenReturn(existing);
+        Keyword existing = new Keyword(); existing.setId(1L); existing.setKeyword("hackathon");
+        when(keywordRepository.findByKeyword("hackathon")).thenReturn(existing);
 
         Keyword result = keywordService.findOrCreateByName("hackathon");
         assertThat(result).isSameAs(existing);
@@ -35,11 +35,11 @@ class KeywordServiceTest {
     @Test
     @DisplayName("findOrCreateByName(): creates when missing")
     void createsWhenMissing() {
-        when(keywordRepository.findByName("ai")).thenReturn(null);
+        when(keywordRepository.findByKeyword("ai")).thenReturn(null);
         when(keywordRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
         Keyword created = keywordService.findOrCreateByName("ai");
-        assertThat(created.getName()).isEqualTo("ai");
+        assertThat(created.getKeyword()).isEqualTo("ai");
         verify(keywordRepository).save(any(Keyword.class));
     }
 }

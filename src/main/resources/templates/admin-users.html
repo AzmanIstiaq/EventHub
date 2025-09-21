@@ -80,38 +80,38 @@
     </thead>
     <tbody>
     <tr th:each="user : ${users}">
-        <td th:text="${user.id}">1</td>
+        <td th:text="${user.userId}">1</td>
         <td>
             <strong th:text="${user.name}">User Name</strong>
         </td>
         <td th:text="${user.email}">user@example.com</td>
         <td>
-            <span th:if="${user.type.name() == 'ADMIN'}" class="user-type type-admin">ADMIN</span>
-            <span th:if="${user.type.name() == 'ORGANISER'}" class="user-type type-organiser">ORGANIZER</span>
-            <span th:if="${user.type.name() == 'STUDENT'}" class="user-type type-student">STUDENT</span>
+            <span th:if="${user.role.toString() == 'ADMIN'}" class="user-type type-admin">ADMIN</span>
+            <span th:if="${user.role.toString() == 'ORGANISER'}" class="user-type type-organiser">ORGANIZER</span>
+            <span th:if="${user.role.toString() == 'STUDENT'}" class="user-type type-student">STUDENT</span>
         </td>
         <td>
             <span th:text="${user.organisedEvents != null ? #lists.size(user.organisedEvents) : 0}">0</span>
             <br>
             <a th:if="${user.organisedEvents != null and #lists.size(user.organisedEvents) > 0}"
-               th:href="@{'/users/' + ${user.id} + '/organizedEvents'}"
+               th:href="@{'/users/' + ${user.userId} + '/organizedEvents'}"
                style="font-size: 0.8em; color: #007bff;">View Events</a>
         </td>
         <td>
             <span th:text="${user.registrations != null ? #lists.size(user.registrations) : 0}">0</span>
             <br>
             <a th:if="${user.registrations != null and #lists.size(user.registrations) > 0}"
-               th:href="@{'/users/' + ${user.id} + '/attendingEvents'}"
+               th:href="@{'/users/' + ${user.userId} + '/attendingEvents'}"
                style="font-size: 0.8em; color: #007bff;">View Registrations</a>
         </td>
         <td>
             <!-- View User Details -->
-            <a th:href="@{'/users/' + ${user.id}}"
+            <a th:href="@{'/users/' + ${user.userId}}"
                class="btn btn-info"
                style="font-size: 0.8em;">👁️ View</a>
 
             <!-- Edit User (if needed) -->
-            <a th:href="@{'/admin/users/' + ${user.id} + '/edit'}"
+            <a th:href="@{'/admin/users/' + ${user.userId} + '/edit'}"
                class="btn btn-warning"
                style="font-size: 0.8em;">✏️ Edit</a>
 
@@ -123,7 +123,7 @@
                 <button type="submit"
                         class="btn btn-danger"
                         style="font-size: 0.8em;"
-                        th:disabled="${user.type.name() == 'ADMIN'}">
+                        th:disabled="${user.role.toString() == 'ADMIN'}">
                     🚫 Deactivate
                 </button>
             </form>

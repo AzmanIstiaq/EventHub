@@ -10,11 +10,12 @@ public class Feedback {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "feedback_id", nullable = false)
     private Long id;
 
     @ManyToOne
     @JsonBackReference
-    @JoinColumn(name = "event_id", nullable = false)
+    @JoinColumn(name = "event", nullable = false)
     private Event event;
 
     @ManyToOne

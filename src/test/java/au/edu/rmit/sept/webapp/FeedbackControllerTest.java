@@ -8,8 +8,6 @@ import au.edu.rmit.sept.webapp.service.FeedbackService;
 import au.edu.rmit.sept.webapp.service.UserService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.ui.ExtendedModelMap;
-import org.springframework.ui.Model;
 
 import java.util.Optional;
 
@@ -28,8 +26,8 @@ class FeedbackControllerTest {
     void submitFeedbackRedirects() {
         long eventId = 9L;
         long userId = 3L;
-        Event e = new Event(); e.setId(eventId);
-        User u = new User(); u.setId(userId);
+        Event e = new Event(); e.setEventId(eventId);
+        User u = new User(); u.setUserId(userId);
         when(eventService.findById(eventId)).thenReturn(Optional.of(e));
         when(userService.findById(userId)).thenReturn(Optional.of(u));
 

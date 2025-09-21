@@ -3,6 +3,7 @@ package au.edu.rmit.sept.webapp.model;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -12,7 +13,7 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")
-    private int userId;
+    private long userId;
 
     @Column(name = "name", nullable = false)
     private String name;
@@ -25,6 +26,9 @@ public class User {
 
     @Column(name = "password", nullable = false)
     private String password;
+
+    @Column(name = "join_date", nullable = false)
+    private LocalDateTime joinDate;
 
     // Bans (one-to-one)
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -42,13 +46,13 @@ public class User {
     private Set<Feedback> feedback;
 
     // RSVP's (one-to-many)
-    @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
     private Set<Registration> registrations;
 
     // -- Constructors -- //
     public User() {}
-    public User(String name, String email, UserType role, String password) {
+    public User(String name, String email, String password, UserType role) {
         this.name = name;
         this.email = email;
         this.role = role;
@@ -57,11 +61,12 @@ public class User {
         this.registrations = new HashSet<>();
         this.feedback = new HashSet<>();
         this.ban = null;
+        this.joinDate = LocalDateTime.now();
     }
 
     // -- Getters and Setters -- //
-    public int getUserId() { return userId; }
-    public void setUserId(int userId) { this.userId = userId; }
+    public long getUserId() { return userId; }
+    public void setUserId(long userId) { this.userId = userId; }
 
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
@@ -86,6 +91,8 @@ public class User {
 
     public Set<Feedback> getFeedback() { return feedback; }
     public void setFeedback(Set<Feedback> feedback) { this.feedback = feedback; }
+
+    public LocalDateTime getJoinDate() { return joinDate; }
 
     // Helper methods
     public boolean isOrganiser() {

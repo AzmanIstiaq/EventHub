@@ -62,9 +62,9 @@
         <!-- If user is logged in -->
         <div th:if="${#authorization.expression('isAuthenticated()')}" class="user-info">
             <div><strong th:text="${#authentication.principal.user.name}">User Name</strong></div>
-            <div>User Type: <span th:text="${#authentication.principal.user.type}">STUDENT</span></div>
+            <div>User Type: <span th:text="${#authentication.principal.user.role}">STUDENT</span></div>
             <div>Member Since:
-                <span th:text="${#dates.format(#authentication.principal.user.id, 'yyyy-MM-dd')}">2025-01-01</span>
+                <span th:text="${#temporals.format(#authentication.principal.user.joinDate, 'yyyy-MM-dd')}">2025-01-01</span>
             </div>
         </div>
 

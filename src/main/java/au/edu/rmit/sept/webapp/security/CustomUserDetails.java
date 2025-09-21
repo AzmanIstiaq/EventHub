@@ -23,7 +23,7 @@ public class CustomUserDetails implements UserDetails {
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         // Single role from your enum
-        return Collections.singleton(new SimpleGrantedAuthority("ROLE_" + user.getType().name()));
+        return Collections.singleton(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()));
     }
 
     public User getUser() {
@@ -48,6 +48,6 @@ public class CustomUserDetails implements UserDetails {
     @Override
     public boolean isEnabled() { return true; }
 
-    public int getId() { return user.getId(); } // custom getter
+    public long getId() { return user.getUserId(); } // custom getter
 
 }

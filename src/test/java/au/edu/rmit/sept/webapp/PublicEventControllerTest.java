@@ -3,7 +3,6 @@ package au.edu.rmit.sept.webapp;
 import au.edu.rmit.sept.webapp.controller.PublicEventController;
 import au.edu.rmit.sept.webapp.model.Event;
 import au.edu.rmit.sept.webapp.model.User;
-import au.edu.rmit.sept.webapp.repository.*;
 import au.edu.rmit.sept.webapp.service.CategoryService;
 import au.edu.rmit.sept.webapp.service.EventService;
 import au.edu.rmit.sept.webapp.service.RegistrationService;
@@ -11,7 +10,6 @@ import au.edu.rmit.sept.webapp.service.UserService;
 import au.edu.rmit.sept.webapp.security.CustomUserDetails;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.ui.ExtendedModelMap;
 import org.springframework.ui.Model;
 
@@ -53,8 +51,8 @@ class PublicEventControllerTest {
         long eventId = 11L;
         long userId = 7L;
 
-        Event e = new Event(); e.setId(eventId); e.setTitle("Tech Talk"); e.setDateTime(LocalDateTime.now().plusDays(4));
-        User u = new User(); u.setId(userId); u.setName("Pat");
+        Event e = new Event(); e.setEventId(eventId); e.setTitle("Tech Talk"); e.setDateTime(LocalDateTime.now().plusDays(4));
+        User u = new User(); u.setUserId(userId); u.setName("Pat");
         when(eventService.findById(eventId)).thenReturn(Optional.of(e));
         when(userService.findById(userId)).thenReturn(Optional.of(u));
 
@@ -72,7 +70,7 @@ class PublicEventControllerTest {
     @DisplayName("Event detail (public): OK with view")
     void eventDetailPublicOk() {
         long eventId = 12L;
-        Event e = new Event(); e.setId(eventId); e.setTitle("Open Day"); e.setDateTime(LocalDateTime.now().plusDays(8));
+        Event e = new Event(); e.setEventId(eventId); e.setTitle("Open Day"); e.setDateTime(LocalDateTime.now().plusDays(8));
         when(eventService.findById(eventId)).thenReturn(Optional.of(e));
 
         Model model = new ExtendedModelMap();
@@ -99,8 +97,8 @@ class PublicEventControllerTest {
     @DisplayName("List events for logged-in user -> OK with model")
     void listEventsLoggedInOk() {
         long userId = 9L;
-        Event e = new Event(); e.setId(30L); e.setTitle("Seminar"); e.setDateTime(LocalDateTime.now().plusDays(1));
-        User u = new User(); u.setId(userId); u.setName("Taylor");
+        Event e = new Event(); e.setEventId(30L); e.setTitle("Seminar"); e.setDateTime(LocalDateTime.now().plusDays(1));
+        User u = new User(); u.setUserId(userId); u.setName("Taylor");
         when(eventService.getAllUpcomingEvents()).thenReturn(List.of(e));
         when(eventService.getPastEvents()).thenReturn(List.of());
         when(userService.findById(userId)).thenReturn(Optional.of(u));

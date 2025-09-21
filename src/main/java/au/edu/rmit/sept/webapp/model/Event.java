@@ -13,7 +13,8 @@ public class Event {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @Column(name = "event_id")
+    private Long eventId;
     private String title;
 
     @Column(length = 1000)
@@ -25,17 +26,21 @@ public class Event {
     @Column(nullable = false)
     private String location;
 
-    @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     @JsonManagedReference
-    private Set<Registration> registrations;
+    private Set<Registration> registrations = new HashSet<>();
+
+    @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @JsonManagedReference
+    private Set<Feedback> feedbacks = new HashSet<>();
 
     @ManyToOne
-    @JoinColumn(name = "organiser_id", nullable = false)
+    @JoinColumn(name = "organiser", nullable = false)
     @JsonBackReference
     private User organiser;
 
     // Category (single choice)
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "category_id")
     private Category category;
 
@@ -62,8 +67,8 @@ public class Event {
     }
 
     // --- Getters and setters ---
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    public Long getEventId() { return eventId; }
+    public void setEventId(Long eventId) { this.eventId = eventId; }
 
     public String getTitle() { return title; }
     public void setTitle(String title) { this.title = title; }
@@ -79,6 +84,28 @@ public class Event {
 
     public Set<Registration> getRegistrations() { return registrations; }
     public void setRegistrations(Set<Registration> registrations) { this.registrations = registrations; }
+
+    public Set<Feedback> getFeedbacks() { return feedbacks; }
+
+    public Boolean checkUserRegistered(Long userId) {
+        for (Registration registration : registrations) {
+            if (registration.getUser().getUserId() == (userId)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public double getStarRating() {
+        if (feedbacks.isEmpty()) {
+            return 0;
+        }
+        double score = 0;
+        for (Feedback feedback : feedbacks) {
+            score += feedback.getRating();
+        }
+        return score / feedbacks.size();
+    }
 
     public User getOrganiser() { return organiser; }
     public void setOrganiser(User organiser) { this.organiser = organiser; }
@@ -96,7 +123,7 @@ public class Event {
 
         StringBuilder sb = new StringBuilder();
         for (Keyword word : keywords) {
-            sb.append(word.getName()).append(", ");
+            sb.append(word.getKeyword()).append(", ");
         }
 
         // Remove the last comma and space
@@ -119,11 +146,11 @@ public class Event {
     @Override
     public String toString() {
         return "Event{" +
-                "id=" + id +
+                "id=" + eventId +
                 ", title='" + title + '\'' +
                 ", dateTime=" + dateTime +
                 ", location='" + location + '\'' +
-                ", category=" + (category != null ? category.getName() : null) +
+                ", category=" + (category != null ? category.getCategory() : null) +
                 '}';
     }
 }

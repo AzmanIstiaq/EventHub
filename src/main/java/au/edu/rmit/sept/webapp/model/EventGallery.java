@@ -13,7 +13,7 @@ public class EventGallery {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "photo_id", nullable = false)
-    private int photoId;
+    private long photoId;
 
     @ManyToOne
     @JoinColumn(name = "event_id", nullable = false)
@@ -30,7 +30,7 @@ public class EventGallery {
     }
 
     // -- Getters and Setters -- //
-    public int getPhotoId() { return photoId; }
+    public long getPhotoId() { return photoId; }
 
     public Event getEvent() { return event; }
     public void setEvent(Event event) { this.event = event; }

@@ -36,7 +36,7 @@ class OrganiserServiceTest {
     @Test
     @DisplayName("findById(): returns Optional")
     void findByIdOptional() {
-        User u = new User(); u.setId(10L);
+        User u = new User(); u.setUserId(10L);
         when(repo.findById(10L)).thenReturn(Optional.of(u));
         assertThat(service.findById(10L)).contains(u);
     }

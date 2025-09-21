@@ -27,14 +27,14 @@ public class RegistrationController {
 
     // Create a new registration
     @PostMapping
-    public ResponseEntity<Registration> createRegistration(@RequestParam int userId,
-                                                           @RequestParam int eventId
+    public ResponseEntity<Registration> createRegistration(@RequestParam long userId,
+                                                           @RequestParam long eventId
                                                            ) {
         User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
         Event event = eventRepository.findById(eventId).orElseThrow(() -> new RuntimeException("Event not found"));
 
         Registration registration = new Registration();
-        registration.setStudent(user);
+        registration.setUser(user);
         registration.setEvent(event);
 
         return ResponseEntity.ok(registrationRepository.save(registration));
@@ -54,7 +54,7 @@ public class RegistrationController {
 
     // Get registrations for a specific user
     @GetMapping("/user/{userId}")
-    public List<Registration> getRegistrationsByUser(@PathVariable int userId) {
-        return registrationRepository.findByStudent_UserId(userId);
+    public List<Registration> getRegistrationsByUser(@PathVariable long userId) {
+        return registrationRepository.findByUser_UserId(userId);
     }
 }

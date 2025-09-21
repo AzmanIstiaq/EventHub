@@ -61,7 +61,7 @@ class AdminControllerExtendedTest {
     @Test
     @DisplayName("Admin delete event success redirects")
     void adminDeleteEventSuccess() throws Exception {
-        Event e = new Event(); e.setId(100L); e.setTitle("Title");
+        Event e = new Event(); e.setEventId(100L); e.setTitle("Title");
         when(eventService.findById(100L)).thenReturn(Optional.of(e));
 
         mvc.perform(post("/admin/events/{eventId}/delete", 100L))
@@ -96,7 +96,7 @@ class AdminControllerExtendedTest {
     @Test
     @DisplayName("Admin deactivate user success redirects")
     void adminDeactivateUser() throws Exception {
-        User u = new User(); u.setId(44L); u.setName("X");
+        User u = new User(); u.setUserId(44L); u.setName("X");
         when(userService.findById(44L)).thenReturn(Optional.of(u));
 
         mvc.perform(post("/admin/users/{userId}/deactivate", 44L))
@@ -107,7 +107,7 @@ class AdminControllerExtendedTest {
     @Test
     @DisplayName("Admin view event detail shows model")
     void adminViewEventDetail() throws Exception {
-        Event e = new Event(); e.setId(77L);
+        Event e = new Event(); e.setEventId(77L);
         when(eventService.findById(77L)).thenReturn(Optional.of(e));
         when(registrationService.getRegistrationsForEvent(e)).thenReturn(List.of());
 

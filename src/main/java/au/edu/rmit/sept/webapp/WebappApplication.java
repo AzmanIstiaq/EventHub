@@ -22,7 +22,6 @@ public class WebappApplication {
 	}
 
 	@Bean
-	@Profile("dev")
 	CommandLineRunner init(UserRepository userRepo,
 						   EventRepository eventRepo,
 						   RegistrationRepository registrationRepo,

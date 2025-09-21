@@ -25,10 +25,10 @@ class CustomUserDetailsServiceTest {
         CustomUserDetailsService svc = new CustomUserDetailsService(repo);
 
         User u = new User();
-        u.setId(5L);
+        u.setUserId(5L);
         u.setEmail("user@ex.com");
         u.setPassword("pw");
-        u.setType(UserType.ORGANISER);
+        u.setRole(UserType.ORGANISER);
         when(repo.findByEmail("user@ex.com")).thenReturn(Optional.of(u));
 
         UserDetails d = svc.loadUserByUsername("user@ex.com");

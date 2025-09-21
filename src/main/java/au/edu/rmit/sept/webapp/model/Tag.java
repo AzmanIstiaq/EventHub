@@ -15,7 +15,7 @@ public class Tag {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "tag_id", nullable = false)
-    private int tagId;
+    private long tagId;
 
     @ManyToOne
     @JoinColumn(name = "event_id", referencedColumnName = "event_id")
@@ -33,7 +33,7 @@ public class Tag {
     }
 
     // -- Getters and Setters -- //
-    public int getTagId() { return tagId; }
+    public long getTagId() { return tagId; }
 
     public Event getEvent() { return event; }
     public void setEvent(Event event) { this.event = event; }

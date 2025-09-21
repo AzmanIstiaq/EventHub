@@ -145,7 +145,7 @@
             <label>Category:</label>
             <select name="category.id" required>
                 <option value="" disabled selected>Select category</option>
-                <option th:each="cat : ${categories}" th:value="${cat.id}" th:text="${cat.name}"></option>
+                <option th:each="cat : ${categories}" th:value="${cat.id}" th:text="${cat.category}"></option>
             </select>
 
             <!-- Keywords (comma-separated) -->
@@ -166,9 +166,9 @@
     <div class="events-grid" th:unless="${#lists.isEmpty(upcomingEvents)}">
         <div class="event-card" th:each="event : ${upcomingEvents}">
             <!-- Inline edit form -->
-            <div th:id="'form-' + ${event.id}" class="form-card hidden">
+            <div th:id="'form-' + ${event.eventId}" class="form-card hidden">
                 <h2>Edit Event</h2>
-                <form th:action="@{'/organiser/events/' + ${event.id} + '/edit'}"
+                <form th:action="@{'/organiser/events/' + ${event.eventId} + '/edit'}"
                       method="post" onsubmit="return validateEventForm(this)">
                     <label>Title:</label>
                     <input type="text" name="title" th:value="${event.title}" required>
@@ -189,7 +189,7 @@
                         <option value="" disabled>Select category</option>
                         <option th:each="cat : ${categories}"
                                 th:value="${cat.id}"
-                                th:text="${cat.name}"
+                                th:text="${cat.category}"
                                 th:selected="${event.category != null and cat.id == event.category.id}">
                         </option>
                     </select>
@@ -200,31 +200,31 @@
                     <input type="text" name="keywordsText" th:value="${event.getKeywordsAsString()}" placeholder="e.g. Music, Workshop, Tech">
 
                     <button type="submit">Save</button>
-                    <button type="button" th:onclick="'cancelEditForm(' + ${event.id} + ')'">Cancel</button>
+                    <button type="button" th:onclick="'cancelEditForm(' + ${event.eventId} + ')'">Cancel</button>
                 </form>
 
             </div>
 
             <!-- Normal event display -->
-            <div th:id="'card-' + ${event.id}">
+            <div th:id="'card-' + ${event.eventId}">
                 <div class="event-header">
                     <h2 th:text="${event.title}"></h2>
 
                     <div class="event-actions">
                         <button class="btn btn-edit"
                                 th:if="${event.dateTime.isAfter(T(java.time.LocalDateTime).now())}"
-                                th:onclick="'showEditForm(' + ${event.id} + ')'">Edit</button>
+                                th:onclick="'showEditForm(' + ${event.eventId} + ')'">Edit</button>
                         <a class="btn btn-delete"
-                           th:href="@{'/organiser/events/' + ${event.id} + '/delete'}">Delete</a>
+                           th:href="@{'/organiser/events/' + ${event.eventId} + '/delete'}">Delete</a>
                     </div>
                 </div>
                 <p class="event-meta">
                     <span th:text="${event.dateTime}"></span> @
                     <span th:text="${event.location}"></span><br>
-                    <strong th:if="${event.getCategory() != null}">Category:</strong> <span th:text="${event.getCategory()?.getName()}"></span><br>
+                    <strong th:if="${event.getCategory() != null}">Category:</strong> <span th:text="${event.category.category}"></span><br>
                     <strong th:if="${!#lists.isEmpty(event.keywords)}">Keywords:</strong>
                     <span th:each="kw, iterStat : ${event.keywords}">
-                        <span th:text="${kw.name}"></span><span th:if="${!iterStat.last}">, </span>
+                        <span th:text="${kw.keyword}"></span><span th:if="${!iterStat.last}">, </span>
                     </span>
                 </p>
 
@@ -257,10 +257,15 @@
             <p class="event-meta">
                 <span th:text="${event.dateTime}"></span> @
                 <span th:text="${event.location}"></span><br>
-                <strong th:if="${event.category != null}">Category:</strong> <span th:text="${event.category.getName()}"></span><br>
+
+                <span th:if="${event.category != null}">
+                    <strong>Category:</strong>
+                    <span th:text="${event.category.category}"></span><br>
+                </span>
+
                 <strong th:if="${!#lists.isEmpty(event.keywords)}">Keywords:</strong>
                 <span th:each="kw, iterStat : ${event.keywords}">
-                    <span th:text="${kw.name}"></span><span th:if="${!iterStat.last}">, </span>
+                    <span th:text="${kw.keyword}"></span><span th:if="${!iterStat.last}">, </span>
                 </span>
             </p>
 

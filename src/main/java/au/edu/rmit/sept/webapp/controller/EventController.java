@@ -53,6 +53,11 @@ public class EventController {
         // Add categories for form dropdown
         List<Category> categories = categoryService.findAll();
 
+        System.out.println("DEBUG: Upcoming Events: " + upcomingEvents);
+        System.out.println("DEBUG: Past Events: " + pastEvents);
+        System.out.println("DEBUG: Categorey1: " + categories.get(0).getCategory());
+        System.out.println("DEBUG: Organiser: " + organiser.getName());
+
         model.addAttribute("upcomingEvents", upcomingEvents);
         model.addAttribute("pastEvents", pastEvents);
         model.addAttribute("organiser", organiser);

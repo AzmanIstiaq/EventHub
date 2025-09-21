@@ -28,7 +28,7 @@ public interface EventRepository extends JpaRepository<Event, Long> {
             "AND (:categoryId IS NULL OR e.category.id = :categoryId) " +
             "AND (:query IS NULL OR LOWER(e.title) LIKE LOWER(CONCAT('%', :query, '%')) " +
             "     OR LOWER(e.location) LIKE LOWER(CONCAT('%', :query, '%')) " +
-            "     OR EXISTS (SELECT k FROM e.keywords k WHERE LOWER(k.name) LIKE LOWER(CONCAT('%', :query, '%'))))")
+            "     OR EXISTS (SELECT k FROM e.keywords k WHERE LOWER(k.keyword) LIKE LOWER(CONCAT('%', :query, '%'))))")
     List<Event> searchEvents(@Param("query") String query,
                              @Param("from") LocalDateTime from,
                              @Param("categoryId") Long categoryId);
@@ -38,7 +38,7 @@ public interface EventRepository extends JpaRepository<Event, Long> {
             "AND (:categoryId IS NULL OR e.category.id = :categoryId) " +
             "AND (:query IS NULL OR LOWER(e.title) LIKE LOWER(CONCAT('%', :query, '%')) " +
             "     OR LOWER(e.location) LIKE LOWER(CONCAT('%', :query, '%')) " +
-            "     OR EXISTS (SELECT k FROM e.keywords k WHERE LOWER(k.name) LIKE LOWER(CONCAT('%', :query, '%'))))")
+            "     OR EXISTS (SELECT k FROM e.keywords k WHERE LOWER(k.keyword) LIKE LOWER(CONCAT('%', :query, '%'))))")
     List<Event> searchEventsWithEnd(@Param("query") String query,
                                     @Param("from") LocalDateTime from,
                                     @Param("to") LocalDateTime to,

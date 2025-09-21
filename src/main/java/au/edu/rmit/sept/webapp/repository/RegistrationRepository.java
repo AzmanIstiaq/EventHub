@@ -19,12 +19,12 @@ public interface RegistrationRepository extends JpaRepository<Registration, Long
     // Registrations for a specific event
     List<Registration> findByEvent(Event event);
 
-    List<Registration> findByEventId(Long eventId);
+    List<Registration> findByEvent_EventId(Long eventId);
 
-    List<Registration> findByUserId(Long userId);
+    List<Registration> findByUser_UserId(Long userId);
     // Check if a user is already registered for an event
     boolean existsByUserAndEvent(User user, Event event);
     @Transactional
     @Modifying
-    void deleteByUserIdAndEventId(Long userId, Long eventId);
+    void deleteByUser_UserIdAndEvent_EventId(Long userId, Long eventId);
 }

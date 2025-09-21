@@ -43,7 +43,7 @@ class CategoryServiceTest {
     @DisplayName("findByName(): delegates to repo")
     void findByNameDelegates() {
         Category c = new Category("Y");
-        when(repo.findByName("Y")).thenReturn(c);
+        when(repo.findByCategory("Y")).thenReturn(c);
         assertThat(service.findByName("Y")).isSameAs(c);
     }
 

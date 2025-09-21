@@ -126,30 +126,30 @@
 
         <!-- Action buttons -->
         <div th:if="${currentUser != null}">
-          <form th:if="${event.checkUserRegistered(currentUser.getId())}"
-                th:action="@{'/student/events/cancel/' + ${event.id}}"
+          <form th:if="${event.checkUserRegistered(currentUser.userId)}"
+                th:action="@{'/student/events/cancel/' + ${event.eventId}}"
                 method="post" style="display:inline;">
-            <input type="hidden" name="userId" th:value="${currentUser.getId()}"/>
+            <input type="hidden" name="userId" th:value="${currentUser.userId}"/>
             <button type="submit" class="btn btn-cancel">Cancel Registration</button>
           </form>
-          <form th:if="${!event.checkUserRegistered(currentUser.getId())}"
-                th:action="@{'/student/events/register/' + ${event.id}}"
+          <form th:if="${!event.checkUserRegistered(currentUser.userId)}"
+                th:action="@{'/student/events/register/' + ${event.eventId}}"
                 method="post" style="display:inline;">
-            <input type="hidden" name="userId" th:value="${currentUser.getId()}"/>
+            <input type="hidden" name="userId" th:value="${currentUser.userId}"/>
             <button type="submit" class="btn btn-register">Register</button>
           </form>
-          <form th:action="@{'/student/events/detail/' + ${event.getId()}}"
+          <form th:action="@{'/student/events/detail/' + ${event.getEventId()}}"
                 method="get" style="display:inline;">
-            <input type="hidden" name="userId" th:value="${currentUser.getId()}"/>
+            <input type="hidden" name="userId" th:value="${currentUser.userId}"/>
             <button type="submit" class="btn btn-grey">Event Detail</button>
           </form>
         </div>
         <div th:if="${currentUser == null}">
-          <a th:href="@{'/events/detail/' + ${event.getId()}}" class="btn btn-grey">Event Detail</a>
+          <a th:href="@{'/events/detail/' + ${event.getEventId()}}" class="btn btn-grey">Event Detail</a>
         </div>
         <div class="share-section" style="margin-top: 0.5rem;">
           <strong>Share:</strong>
-          <div th:with="eventUrl=@{/events/detail/{id}(id=${event.id})}">
+          <div th:with="eventUrl=@{/events/detail/{id}(id=${event.eventId})}">
 
             <!-- Facebook -->
             <a th:href="'https://www.facebook.com/sharer/sharer.php?u=' + ${eventUrl}"
@@ -197,19 +197,19 @@
         </p>
         <p th:text="${registration.getEvent().getDescription()}"></p>
 
-        <form th:action="@{'/student/events/cancel/' + ${registration.getEvent().getId()}}"
+        <form th:action="@{'/student/events/cancel/' + ${registration.event.eventId}}"
               method="post" style="display:inline;">
-          <input type="hidden" name="userId" th:value="${currentUser.getId()}"/>
+          <input type="hidden" name="userId" th:value="${currentUser.userId}"/>
           <button type="submit" class="btn btn-cancel">Cancel Registration</button>
         </form>
-        <form th:action="@{'/student/events/detail/' + ${registration.getEvent().getId()}}"
+        <form th:action="@{'/student/events/detail/' + ${registration.event.eventId}}"
               method="get" style="display:inline;">
-          <input type="hidden" name="userId" th:value="${currentUser.getId()}"/>
+          <input type="hidden" name="userId" th:value="${currentUser.userId}"/>
           <button type="submit" class="btn btn-grey">Event Detail</button>
         </form>
         <div class="share-section" style="margin-top: 0.5rem;">
           <strong>Share:</strong>
-          <div th:with="eventUrl=@{/student/events/detail/{id}(id=${registration.getEvent().getId()})}">
+          <div th:with="eventUrl=@{/student/events/detail/{id}(id=${registration.event.eventId})}">
 
             <!-- Example debug check: confirm Thymeleaf resolves the id -->
             <!-- <span th:text="${event.id}">EVENT ID</span> -->
@@ -260,18 +260,18 @@
         <p th:text="${event.getDescription()}"></p>
 
 
-        <form th:action="@{'/student/events/detail/' + ${event.getId()}}"
+        <form th:action="@{'/student/events/detail/' + ${event.getEventId()}}"
               method="get" style="display:inline;">
-          <input type="hidden" name="userId" th:value="${currentUser.getId()}"/>
+          <input type="hidden" name="userId" th:value="${currentUser.userId}"/>
           <button type="submit" class="btn btn-grey">Event Detail</button>
         </form>
-        <form th:action="@{'/student/events/' + ${event.getId()} + '/feedback'}" method="post">
+        <form th:action="@{'/student/events/' + ${event.getEventId()} + '/feedback'}" method="post">
           <label>Rating (1-5):</label>
           <input type="number" name="rating" min="1" max="5" required />
 
           <label>Comment:</label>
           <textarea name="comment" rows="4" cols="50"></textarea>
-          <input type="hidden" name="userId" th:value="${currentUser.getId()}"/>
+          <input type="hidden" name="userId" th:value="${currentUser.userId}"/>
           <button type="submit">Submit Feedback</button>
         </form>
         </div>
@@ -294,16 +294,16 @@
       <!-- Category dropdown -->
       <select name="categoryId">
         <option value="">All Categories</option>
-        <option th:each="cat : ${categories}" th:value="${cat.id}" th:text="${cat.name}"></option>
+        <option th:each="cat : ${categories}" th:value="${cat.id}" th:text="${cat.category}"></option>
       </select>
 
       <!-- Include userId if logged in -->
-      <input th:if="${currentUser}" type="hidden" name="userId" th:value="${currentUser.getId()}"/>
+      <input th:if="${currentUser}" type="hidden" name="userId" th:value="${currentUser.userId}"/>
 
       <button type="submit" class="btn btn-grey">Search</button>
       <!-- Clear Filters Button -->
       <a th:if="${currentUser != null}"
-         th:href="@{/student/events/search(userId=${currentUser.Id})}"
+         th:href="@{/student/events/search(userId=${currentUser.userId})}"
          class="btn btn-grey"
          style="margin-left:0.5rem;">
         Clear All Filters
@@ -331,11 +331,11 @@
       <!-- Category dropdown -->
       <select name="categoryId">
         <option value="">All Categories</option>
-        <option th:each="cat : ${categories}" th:value="${cat.id}" th:text="${cat.name}"></option>
+        <option th:each="cat : ${categories}" th:value="${cat.id}" th:text="${cat.category}"></option>
       </select>
 
       <!-- Include userId if logged in -->
-      <input th:if="${currentUser}" type="hidden" name="userId" th:value="${currentUser.getId()}"/>
+      <input th:if="${currentUser}" type="hidden" name="userId" th:value="${currentUser.userId}"/>
 
       <button type="submit" class="btn btn-grey">Search</button>
       <!-- Clear Filters Button -->
@@ -363,31 +363,31 @@
           </p>
           <p th:text="${event.description}"></p>
           <div th:if="${currentUser != null}">
-            <form th:if="${event.checkUserRegistered(currentUser.getId())}"
-                  th:action="@{'/student/events/cancel/' + ${event.id}}"
+            <form th:if="${event.checkUserRegistered(currentUser.userId)}"
+                  th:action="@{'/student/events/cancel/' + ${event.eventId}}"
                   method="post" style="display:inline;">
-              <input type="hidden" name="userId" th:value="${currentUser.getId()}"/>
+              <input type="hidden" name="userId" th:value="${currentUser.userId}"/>
               <button type="submit" class="btn btn-cancel">Cancel Registration</button>
             </form>
-            <form th:if="${!event.checkUserRegistered(currentUser.getId())}"
-                  th:action="@{'/student/events/register/' + ${event.id}}"
+            <form th:if="${!event.checkUserRegistered(currentUser.userId)}"
+                  th:action="@{'/student/events/register/' + ${event.eventId}}"
                   method="post" style="display:inline;">
-              <input type="hidden" name="userId" th:value="${currentUser.getId()}"/>
+              <input type="hidden" name="userId" th:value="${currentUser.userId}"/>
               <button type="submit" class="btn btn-register">Register</button>
             </form>
-            <form th:action="@{'/student/events/detail/' + ${event.getId()}}"
+            <form th:action="@{'/student/events/detail/' + ${event.getEventId()}}"
                   method="get" style="display:inline;">
-              <input type="hidden" name="userId" th:value="${currentUser.getId()}"/>
+              <input type="hidden" name="userId" th:value="${currentUser.userId}"/>
               <button type="submit" class="btn btn-grey">Event Detail</button>
             </form>
           </div>
           <div th:if="${currentUser == null}">
-            <a th:href="@{'/events/detail/' + ${event.getId()}}" class="btn btn-grey">Event Detail</a>
+            <a th:href="@{'/events/detail/' + ${event.getEventId()}}" class="btn btn-grey">Event Detail</a>
           </div>
 
           <div class="share-section" style="margin-top: 0.5rem;">
             <strong>Share:</strong>
-            <div th:with="eventUrl=@{/events/detail/{id}(id=${event.id})}">
+            <div th:with="eventUrl=@{/events/detail/{id}(id=${event.eventId})}">
 
               <!-- Example debug check: confirm Thymeleaf resolves the id -->
               <!-- <span th:text="${event.id}">EVENT ID</span> -->

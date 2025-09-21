@@ -20,13 +20,13 @@ public class RegistrationService {
     // Register a user for an event
     public Registration registerUserForEvent(User user, Event event) {
         // Prevent duplicate registration
-        boolean alreadyRegistered = registrationRepository.existsByStudentAndEvent(user, event);
+        boolean alreadyRegistered = registrationRepository.existsByUserAndEvent(user, event);
         if (alreadyRegistered) {
             throw new IllegalStateException("User already registered for this event");
         }
 
         Registration registration = new Registration();
-        registration.setStudent(user);
+        registration.setUser(user);
         registration.setEvent(event);
 
         return registrationRepository.save(registration);
@@ -34,7 +34,7 @@ public class RegistrationService {
 
     // Get all registrations for a user
     public List<Registration> getRegistrationsForUser(User user) {
-        return registrationRepository.findByStudent(user);
+        return registrationRepository.findByUser(user);
     }
 
     // Get all registrations for an event
@@ -43,7 +43,7 @@ public class RegistrationService {
     }
 
     public void deleteRegistrationForEvent(Long userId, Long eventId) {
-        registrationRepository.deleteByUserIdAndEventId(userId, eventId);
+        registrationRepository.deleteByUser_UserIdAndEvent_EventId(userId, eventId);
     }
 }
 

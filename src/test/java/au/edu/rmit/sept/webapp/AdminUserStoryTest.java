@@ -1,6 +1,7 @@
 package au.edu.rmit.sept.webapp;
 
 import au.edu.rmit.sept.webapp.controller.AdminController;
+import au.edu.rmit.sept.webapp.model.Category;
 import au.edu.rmit.sept.webapp.model.Event;
 import au.edu.rmit.sept.webapp.model.User;
 import au.edu.rmit.sept.webapp.repository.CategoryRepository;
@@ -53,11 +54,11 @@ public class AdminUserStoryTest {
     @DisplayName("US: Admin can view list of all events")
     void adminCanViewAllEvents() throws Exception {
         Event e = new Event();
-        e.setEventId(1);
+        e.setEventId(1L);
         e.setTitle("Sample Event");
         e.setDescription("Desc");
         e.setLocation("Hall");
-        e.setEventDate(LocalDateTime.now().plusDays(1));
+        e.setDateTime(LocalDateTime.now().plusDays(1));
 
         // Provide organiser + category to match template expectations
         User org = new User();
@@ -66,8 +67,8 @@ public class AdminUserStoryTest {
         org.setEmail("csit@uni.edu");
         e.setOrganiser(org);
 
-        String cat = "CAT1";
-        e.addCategory(cat);
+        Category cat1 = new Category("ORIENTATION");
+        e.setCategory(cat1);
 
         when(eventService.getAllEvents()).thenReturn(List.of(e));
 
@@ -81,11 +82,11 @@ public class AdminUserStoryTest {
     @DisplayName("US: Admin can view event details")
     void adminCanViewEventDetails() throws Exception {
         Event e = new Event();
-        e.setEventId(2);
+        e.setEventId(2L);
         e.setTitle("Welcome Week");
         e.setDescription("Big welcome party");
         e.setLocation("Campus Hall");
-        e.setEventDate(LocalDateTime.now().plusDays(3));
+        e.setDateTime(LocalDateTime.now().plusDays(3));
 
         //  organiser + category so `${event.organiser.name}` etc. won’t be null
         User org = new User();
@@ -94,8 +95,8 @@ public class AdminUserStoryTest {
         org.setEmail("csit@uni.edu");
         e.setOrganiser(org);
 
-        String cat = "ORIENTATION";
-        e.addCategory(cat);
+        Category cat1 = new Category("ORIENTATION");
+        e.setCategory(cat1);
 
         when(eventService.findById(2)).thenReturn(Optional.of(e));
         // If the controller adds "registrations" via registrationService, it can also stub it here:

@@ -22,7 +22,7 @@ class UserControllerTest {
     @DisplayName("GET /users/{id}: returns user details (positive)")
     void getUserById() throws Exception {
         User u = new User();
-        u.setId(5L);
+        u.setUserId(5L);
         u.setName("Alice");
         when(userRepository.findById(5L)).thenReturn(Optional.of(u));
         // Inject repository via reflection

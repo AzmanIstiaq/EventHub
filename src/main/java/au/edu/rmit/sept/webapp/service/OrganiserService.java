@@ -19,7 +19,7 @@ public class OrganiserService {
         return repo.save(organiser);
     }
 
-    public Optional<User> findById(int id) {
+    public Optional<User> findById(long id) {
         return repo.findById(id);
     }
 

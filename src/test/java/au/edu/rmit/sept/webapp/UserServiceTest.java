@@ -27,7 +27,7 @@ class UserServiceTest {
     @Test
     @DisplayName("findById(): returns Optional")
     void findByIdOptional() {
-        User u = new User(); u.setId(1L);
+        User u = new User(); u.setUserId(1L);
         when(userRepository.findById(1L)).thenReturn(Optional.of(u));
         assertThat(userService.findById(1L)).contains(u);
     }

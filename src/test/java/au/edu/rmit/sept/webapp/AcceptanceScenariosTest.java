@@ -35,13 +35,13 @@ class AcceptanceScenariosTest {
     void userRegistersForEvent() throws Exception {
         User u = new User();
         u.setName("Sam");
-        u.setType(UserType.STUDENT); // instead of PUBLIC
+        u.setRole(UserType.STUDENT); // instead of PUBLIC
         userRepository.save(u);
 
         // Create an organiser (required by Event.organiser not-null)
         User organiser = new User();
         organiser.setName("Olivia Organiser");
-        organiser.setType(UserType.ORGANISER);
+        organiser.setRole(UserType.ORGANISER);
         userRepository.save(organiser);
 
         Event e = new Event();
@@ -53,6 +53,6 @@ class AcceptanceScenariosTest {
 
         registrationService.registerUserForEvent(u, e);
 
-        assertThat(registrationRepository.findByEventId(e.getId())).isNotEmpty();
+        assertThat(registrationRepository.findByEvent_EventId(e.getEventId())).isNotEmpty();
     } }
 

@@ -38,8 +38,8 @@ public class FeedbackServiceTest {
     @Test
     @DisplayName("submitFeedback(): prevents duplicate feedback (negative)")
     void preventsDuplicateFeedback() {
-        User user = new User(); user.setId(1L);
-        Event event = new Event(); event.setId(10L);
+        User user = new User(); user.setUserId(1L);
+        Event event = new Event(); event.setEventId(10L);
 
         when(feedbackRepository.findByEventAndUser(event, user)).thenReturn(Optional.of(new Feedback()));
 
@@ -50,8 +50,8 @@ public class FeedbackServiceTest {
     @Test
     @DisplayName("submitFeedback(): submits successfully (positive)")
     void submitsSuccessfully() {
-        User user = new User(); user.setId(2L);
-        Event event = new Event(); event.setId(20L);
+        User user = new User(); user.setUserId(2L);
+        Event event = new Event(); event.setEventId(20L);
 
         when(feedbackRepository.findByEventAndUser(event, user)).thenReturn(Optional.empty());
         when(feedbackRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));

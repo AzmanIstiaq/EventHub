@@ -17,10 +17,10 @@ class CustomUserDetailsTest {
     @DisplayName("CustomUserDetails: authorities and getters")
     void authoritiesAndGetters() {
         User u = new User();
-        u.setId(99L);
+        u.setUserId(99L);
         u.setEmail("user@ex.com");
         u.setPassword("pw");
-        u.setType(UserType.STUDENT);
+        u.setRole(UserType.STUDENT);
 
         CustomUserDetails cud = new CustomUserDetails(u);
         assertThat(cud.getId()).isEqualTo(99L);

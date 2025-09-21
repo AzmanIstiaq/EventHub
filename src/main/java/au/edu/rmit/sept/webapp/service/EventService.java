@@ -19,7 +19,7 @@ public class EventService {
     }
 
     // Find a single event
-    public Optional<Event> findById(int id) {
+    public Optional<Event> findById(long id) {
         return eventRepository.findById(id);
     }
 
@@ -29,18 +29,18 @@ public class EventService {
     }
 
     // Delete an event
-    public void delete(int id) {
+    public void delete(long id) {
         eventRepository.deleteById(id);
     }
 
     // Events for a specific organiser
     public List<Event> getUpcomingEventsForOrganiser(User organiser) {
-        return eventRepository.findByOrganiserAndEventDateAfterOrderByEventDateAsc(
+        return eventRepository.findByOrganiserAndDateTimeAfterOrderByDateTimeAsc(
                 organiser, LocalDateTime.now());
     }
 
     public List<Event> getPastEventsForOrganiser(User organiser) {
-        return eventRepository.findByOrganiserAndEventDateBeforeOrderByEventDateAsc(
+        return eventRepository.findByOrganiserAndDateTimeBeforeOrderByDateTimeAsc(
                 organiser, LocalDateTime.now());
     }
 
@@ -50,7 +50,7 @@ public class EventService {
 
     // All upcoming events for public view
     public List<Event> getAllUpcomingEvents() {
-        return eventRepository.findByEventDateAfterOrderByEventDateAsc(LocalDateTime.now());
+        return eventRepository.findByDateTimeAfterOrderByDateTimeAsc(LocalDateTime.now());
     }
 
 

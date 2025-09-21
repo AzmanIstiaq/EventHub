@@ -42,10 +42,10 @@ public class AdminController {
         // Calculate statistics
         LocalDateTime now = LocalDateTime.now();
         int upcomingEventsCount = (int) allEvents.stream()
-                .filter(event -> event.getEventDate().isAfter(now))
+                .filter(event -> event.getDateTime().isAfter(now))
                 .count();
         int pastEventsCount = (int) allEvents.stream()
-                .filter(event -> event.getEventDate().isBefore(now))
+                .filter(event -> event.getDateTime().isBefore(now))
                 .count();
 
         model.addAttribute("upcomingEventsCount", upcomingEventsCount);

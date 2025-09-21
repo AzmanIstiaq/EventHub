@@ -67,12 +67,12 @@
         <p><strong>Location:</strong> <span th:text="${event.location}"></span></p>
         <p><strong>Organiser:</strong> <span th:text="${event.organiser.name}"></span></p>
         <p th:if="${event.category != null}">
-            <strong>Category:</strong> <span th:text="${event.category.name}"></span>
+            <strong>Category:</strong> <span th:text="${event.category.category}"></span>
         </p>
         <p th:if="${!#lists.isEmpty(event.keywords)}">
             <strong>Keywords:</strong>
             <span th:each="kw, iterStat : ${event.keywords}">
-                <span th:text="${kw.name}"></span><span th:if="${!iterStat.last}">, </span>
+                <span th:text="${kw.keyword}"></span><span th:if="${!iterStat.last}">, </span>
             </span>
         </p>
     </div>
@@ -83,17 +83,17 @@
     <div th:if="${currentUser != null}">
         <!-- Cancel if registered -->
         <form th:if="${event.checkUserRegistered(currentUser)}"
-              th:action="@{'/student/events/cancel/' + ${event.id}}"
+              th:action="@{'/student/events/cancel/' + ${event.eventId}}"
               method="post" style="display:inline;">
-            <input type="hidden" name="userId" th:value="${currentUser.id}"/>
+            <input type="hidden" name="userId" th:value="${currentUser.userId}"/>
             <button type="submit" class="btn btn-cancel">Cancel Registration</button>
         </form>
 
         <!-- Register if not registered -->
         <form th:if="${!event.checkUserRegistered(currentUser)}"
-              th:action="@{'/student/events/register/' + ${event.id}}"
+              th:action="@{'/student/events/register/' + ${event.eventId}}"
               method="post" style="display:inline;">
-            <input type="hidden" name="userId" th:value="${currentUser.id}"/>
+            <input type="hidden" name="userId" th:value="${currentUser.userId}"/>
             <button type="submit" class="btn btn-register">Register</button>
         </form>
 
