@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <link rel="stylesheet" th:href="@{/style.css}">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
 <body>
     <div th:replace="~{fragments/navbar-common :: navbar-common}"></div>
@@ -19,7 +19,7 @@
         <div class="event-grid">
             <a class="event-card-link"
                th:each="event : ${events}"
-               th:href="@{'/events/student/public/detail/' + ${event.id}}">
+               th:href="@{'/events/detail/' + ${event.eventId}}">
                 <div class="event-card">
                     <h3 th:text="${event.title}"></h3>
                     <p class="event-date">

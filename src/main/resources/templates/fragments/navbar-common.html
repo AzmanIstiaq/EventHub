@@ -1,18 +1,38 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <body>
 <div th:fragment="navbar-common">
     <header class="main-header">
-        <div class="logo"><a th:href="@{/}" style="text-decoration:none; color:inherit;">EventHub</a></div>
+        <!-- Brand -->
+        <div class="logo">
+            <a th:href="@{/}" style="text-decoration:none; color:inherit;">EventHub</a>
+        </div>
+
+        <!-- Right side links -->
         <nav class="nav-links">
-            <a th:href="@{/organiser/public-events}">Events</a>
-            <a th:href="@{/organisations}">Organisations</a>
-            <a th:href="@{/admin/dashboard}">Admin</a>
-            <a th:href="@{/login}">Login</a>
+            <!-- If user is NOT logged in -->
+            <a th:if="${#authorization.expression('!isAuthenticated()')}"
+               th:href="@{/login}">Login</a>
+
+            <!-- If user IS logged in -->
+            <div th:if="${#authorization.expression('isAuthenticated()')}" style="display:flex; align-items:center; gap:1rem;">
+                <div class="user-info" style="text-align:right; font-size:0.9rem;">
+                    <div><strong th:text="${#authentication.principal.user.name}">User Name</strong></div>
+                    <div>User Type: <span th:text="${#authentication.principal.user.role}">STUDENT</span></div>
+                    <div>Member Since:
+                        <span th:text="${#temporals.format(#authentication.principal.user.joinDate, 'yyyy-MM-dd')}">2025-01-01</span>
+                    </div>
+                </div>
+
+                <!-- Logout button styled with existing .btn-grey -->
+                <form th:action="@{/logout}" method="post" style="margin:0;">
+                    <button type="submit" class="btn-grey">Logout</button>
+                </form>
+            </div>
         </nav>
     </header>
 </div>
-
 </body>
 </html>

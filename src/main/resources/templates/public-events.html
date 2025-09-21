@@ -2,7 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
   <title>Events</title>
-    <link rel="stylesheet" th:href="@{/style.css}">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
 <body>
 <div th:replace="~{fragments/navbar-common}"></div>
@@ -14,6 +14,7 @@
   <div class="tabs">
     <div class="tab" th:classappend="${activeTab == 'upcoming' or activeTab == null} ? ' active'" onclick="openTab('upcoming')">Upcoming Events</div>
     <div class="tab" th:if="${currentUser != null}" th:classappend="${activeTab == 'registered'} ? ' active'" onclick="openTab('registered')">Registered Events</div>
+    <div class="tab" th:if="${currentUser != null}" onclick="openTab('past')">Past Events</div>
     <div class="tab" th:classappend="${activeTab == 'search'} ? ' active'" onclick="openTab('search')">Search</div>
   </div>
 

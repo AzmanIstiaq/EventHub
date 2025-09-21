@@ -2,7 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org" lang="en">
 <head>
     <title>Admin - Manage Users</title>
-    <link rel="stylesheet" th:href="@{/style.css}">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
     <style>
         body { margin: 20px; }
         .admin-header { background-color: #dc3545; color: white; padding: 15px; margin-bottom: 20px; border-radius: 5px; }
@@ -117,7 +117,7 @@
                style="font-size: 0.8em;">✏️ Edit</a>
 
             <!-- Deactivate User -->
-            <form th:action="@{'/admin/users/' + ${user.id} + '/deactivate'}"
+            <form th:action="@{'/admin/users/' + ${user.userId} + '/deactivate'}"
                   method="post"
                   style="display: inline;"
                   onsubmit="return confirm('Are you sure you want to deactivate this user? This will prevent them from logging in.');">

@@ -41,7 +41,7 @@ public class PublicEventController {
     }
 
     // 1. List all upcoming events
-    @GetMapping("")
+    @GetMapping("/events")
     public String listEvents(@AuthenticationPrincipal CustomUserDetails currentUser, Model model) {
         model.addAttribute("events", eventService.getAllUpcomingEvents());
         model.addAttribute("currentUSer", currentUser);
