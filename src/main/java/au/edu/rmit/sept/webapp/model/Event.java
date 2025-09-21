@@ -27,7 +27,11 @@ public class Event {
 
     @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
-    private Set<Registration> registrations;
+    private Set<Registration> registrations = new HashSet<>();
+
+    @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
+    private Set<Feedback> feedbacks = new HashSet<>();
 
     @ManyToOne
     @JoinColumn(name = "organiser_id", nullable = false)
@@ -80,13 +84,26 @@ public class Event {
     public Set<Registration> getRegistrations() { return registrations; }
     public void setRegistrations(Set<Registration> registrations) { this.registrations = registrations; }
 
-    public Boolean checkUserRegistered(User user) {
+    public Set<Feedback> getFeedbacks() { return feedbacks; }
+
+    public Boolean checkUserRegistered(Long userId) {
         for (Registration registration : registrations) {
-            if (registration.getUser().equals(user)) {
+            if (registration.getUser().getId().equals(userId)) {
                 return true;
             }
         }
         return false;
+    }
+
+    public double getStarRating() {
+        if (feedbacks.isEmpty()) {
+            return 0;
+        }
+        double score = 0;
+        for (Feedback feedback : feedbacks) {
+            score += feedback.getRating();
+        }
+        return score / feedbacks.size();
     }
 
     public User getOrganiser() { return organiser; }

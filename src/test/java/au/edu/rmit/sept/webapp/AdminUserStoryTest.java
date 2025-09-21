@@ -31,6 +31,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 /** As an EventHub administrator, I want to view any event so that I can monitor and review event content.
  * */
 @WebMvcTest(controllers = AdminController.class)
+@org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc(addFilters = false)
 // Remove this line if  we want Thymeleaf to render real templates in this test
 @TestPropertySource(properties = { "spring.thymeleaf.enabled=false" })
 public class AdminUserStoryTest {
