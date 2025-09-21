@@ -21,13 +21,16 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import jakarta.servlet.ServletException;
 
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * User Story: RSVP to an Event
@@ -126,5 +129,105 @@ class RsvpUserStoryTest {
 
         verify(registrationService, never()).registerUserForEvent(ArgumentMatchers.any(), ArgumentMatchers.any());
     }
-}
 
+    @Test
+    @DisplayName("Edge: event not found -> 5xx")
+    void eventNotFoundRsvp() throws Exception {
+        long eventId = 999L;
+        long userId = 5L;
+
+        User u = new User(); u.setId(userId); u.setName("Sam");
+        when(userService.findById(userId)).thenReturn(Optional.of(u));
+        when(eventService.findById(eventId)).thenReturn(Optional.empty());
+
+        assertThrows(ServletException.class, () ->
+                mvc.perform(post("/events/student/register/{eventId}", eventId)
+                                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                                .param("userId", Long.toString(userId)))
+                        .andReturn());
+    }
+
+    @Test
+    @DisplayName("Edge: user not found -> 5xx")
+    void userNotFoundRsvp() throws Exception {
+        long eventId = 10L;
+        long userId = 404L;
+
+        Event e = new Event(); e.setId(eventId); e.setTitle("Welcome Week"); e.setDateTime(LocalDateTime.now().plusDays(2));
+        when(eventService.findById(eventId)).thenReturn(Optional.of(e));
+        when(userService.findById(userId)).thenReturn(Optional.empty());
+
+        assertThrows(ServletException.class, () ->
+                mvc.perform(post("/events/student/register/{eventId}", eventId)
+                                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                                .param("userId", Long.toString(userId)))
+                        .andReturn());
+    }
+
+    @Test
+    @DisplayName("Edge: already registered -> 5xx")
+    void alreadyRegisteredRsvp() throws Exception {
+        long eventId = 10L;
+        long userId = 5L;
+
+        User u = new User(); u.setId(userId); u.setName("Sam");
+        Event e = new Event(); e.setId(eventId); e.setTitle("Welcome Week"); e.setDateTime(LocalDateTime.now().plusDays(3));
+
+        when(userService.findById(userId)).thenReturn(Optional.of(u));
+        when(eventService.findById(eventId)).thenReturn(Optional.of(e));
+        when(registrationService.registerUserForEvent(u, e)).thenThrow(new IllegalStateException("duplicate"));
+
+        assertThrows(ServletException.class, () ->
+                mvc.perform(post("/events/student/register/{eventId}", eventId)
+                                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                                .param("userId", Long.toString(userId)))
+                        .andReturn());
+    }
+
+    @Test
+    @DisplayName("Edge: invalid/empty search -> OK with empty results")
+    void emptySearchOk() throws Exception {
+        when(categoryService.findAll()).thenReturn(List.of());
+        when(eventService.getAllUpcomingEvents()).thenReturn(List.of());
+        when(eventService.searchEvents(any(), any(), any(), any())).thenReturn(List.of());
+
+        mvc.perform(get("/events/student/search")
+                        .param("query", ""))
+                .andExpect(status().isOk())
+                .andExpect(view().name("public-events"))
+                .andExpect(model().attributeExists("searchResults"));
+    }
+
+    @Test
+    @DisplayName("Edge: date range end before start -> OK")
+    void dateRangeEndBeforeStartOk() throws Exception {
+        when(categoryService.findAll()).thenReturn(List.of());
+        when(eventService.getAllUpcomingEvents()).thenReturn(List.of());
+        when(eventService.searchEvents(any(), any(), any(), any())).thenReturn(List.of());
+
+        mvc.perform(get("/events/student/search")
+                        .param("query", "q")
+                        .param("startDate", LocalDate.now().plusDays(10).toString())
+                        .param("endDate", LocalDate.now().plusDays(5).toString()))
+                .andExpect(status().isOk())
+                .andExpect(view().name("public-events"))
+                .andExpect(model().attributeExists("searchResults"));
+        verify(eventService).searchEvents(any(), any(), any(), any());
+    }
+
+    @Test
+    @DisplayName("Edge: only endDate provided -> OK")
+    void onlyEndDateProvidedOk() throws Exception {
+        when(categoryService.findAll()).thenReturn(List.of());
+        when(eventService.getAllUpcomingEvents()).thenReturn(List.of());
+        when(eventService.searchEvents(any(), any(), any(), any())).thenReturn(List.of());
+
+        mvc.perform(get("/events/student/search")
+                        .param("query", "q")
+                        .param("endDate", LocalDate.now().plusDays(1).toString()))
+                .andExpect(status().isOk())
+                .andExpect(view().name("public-events"))
+                .andExpect(model().attributeExists("searchResults"));
+        verify(eventService).searchEvents(any(), any(), any(), any());
+    }
+}
