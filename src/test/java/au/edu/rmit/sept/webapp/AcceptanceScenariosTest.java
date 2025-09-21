@@ -1,5 +1,6 @@
 package au.edu.rmit.sept.webapp;
 
+import au.edu.rmit.sept.webapp.model.Category;
 import au.edu.rmit.sept.webapp.model.Event;
 import au.edu.rmit.sept.webapp.model.User;
 import au.edu.rmit.sept.webapp.model.UserType;
@@ -33,22 +34,15 @@ class AcceptanceScenariosTest {
     @Test
     @DisplayName("As a student user, I can register for an upcoming event")
     void userRegistersForEvent() throws Exception {
-        User u = new User();
-        u.setName("Sam");
-        u.setRole(UserType.STUDENT); // instead of PUBLIC
+        User u = new User("Sam Student", "sam@sam.com", "password", UserType.STUDENT);
         userRepository.save(u);
 
         // Create an organiser (required by Event.organiser not-null)
-        User organiser = new User();
-        organiser.setName("Olivia Organiser");
-        organiser.setRole(UserType.ORGANISER);
+        User organiser = new User("Olivia Organiser", "org@org.com", "password", UserType.ORGANISER);
         userRepository.save(organiser);
 
-        Event e = new Event();
-        e.setTitle("Welcome Week");
-        e.setDateTime(LocalDateTime.now().plusDays(3)); // use setDateTime
-        e.setLocation("Main Hall"); // Event.location is non-null
-        e.setOrganiser(organiser);   // organiser is non-null
+        Event e = new Event("Welcome week", "desc.", LocalDateTime.now().plusDays(3),
+                "Main Hall", organiser, null);
         eventRepository.save(e);
 
         registrationService.registerUserForEvent(u, e);

@@ -9,7 +9,4 @@ import java.util.List;
 public interface CategoryRepository extends JpaRepository<Category, Long> {
     Category findByCategory(String category);
 
-    // Find all unique categories
-    @Query("SELECT DISTINCT c FROM Category c")
-    List<Category> findAllCategories();
 }

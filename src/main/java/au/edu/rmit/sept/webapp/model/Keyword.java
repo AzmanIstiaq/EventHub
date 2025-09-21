@@ -23,7 +23,7 @@ public class Keyword {
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     public String getKeyword() { return keyword; }
-    public void setKeyword(String keyword) { this.keyword = this.keyword; }
+    public void setKeyword(String keyword) { this.keyword = keyword; }
     public Set<Event> getEvents() { return events; }
     public void setEvents(Set<Event> events) { this.events = events; }
 }
