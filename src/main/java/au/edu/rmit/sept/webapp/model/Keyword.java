@@ -1,28 +1,43 @@
 package au.edu.rmit.sept.webapp.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 
-import java.util.HashSet;
-import java.util.Set;
 
-@Entity
-@Table(name = "keywords")
+@Entity()
+@Table(
+        name = "keywords",
+        uniqueConstraints = {
+                @UniqueConstraint(columnNames = {"event_id", "keyword"})
+        }
+)
 public class Keyword {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @Column(name = "keyword_id", nullable = false)
+    private int keywordId;
 
-    @Column(unique = true, nullable = false)
-    private String name;
+    @ManyToOne
+    @JoinColumn(name = "event_id", referencedColumnName = "event_id")
+    @JsonBackReference
+    private Event event;
 
-    @ManyToMany(mappedBy = "keywords")
-    private Set<Event> events = new HashSet<>();
+    @Column(name = "keyword", nullable = false)
+    private String keyword;
 
-    // getters/setters
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
-    public String getName() { return name; }
-    public void setName(String name) { this.name = name; }
-    public Set<Event> getEvents() { return events; }
-    public void setEvents(Set<Event> events) { this.events = events; }
+    // -- Constructor -- //
+    public Keyword() {}
+    public Keyword(Event event, String keyword) {
+        this.event = event;
+        this.keyword = keyword;
+    }
+
+    // -- Getters and Setters -- //
+    public int getKeywordId() { return keywordId; }
+
+    public Event getEvent() { return event; }
+    public void setEvent(Event event) { this.event = event; }
+
+    public String getKeyword() { return keyword; }
+    public void setKeyword(String keyword) { this.keyword = keyword; }
 }

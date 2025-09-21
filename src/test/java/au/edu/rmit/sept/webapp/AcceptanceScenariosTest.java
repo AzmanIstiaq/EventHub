@@ -37,17 +37,17 @@ class AcceptanceScenariosTest {
     void userRegistersForEvent() throws Exception {
         User u = new User();
         u.setName("Sam");
-        u.setType(UserType.STUDENT); // instead of PUBLIC
+        u.setRole(UserType.STUDENT); // instead of PUBLIC
         userRepository.save(u);
 
         Event e = new Event();
         e.setTitle("Welcome Week");
-        e.setDateTime(LocalDateTime.now().plusDays(3)); // use setDateTime
+        e.setEventDate(LocalDateTime.now().plusDays(3)); // use setDateTime
         eventRepository.save(e);
 
-        mvc.perform(post("/events/" + e.getId() + "/register")
-                        .param("userId", u.getId().toString()))
+        mvc.perform(post("/events/" + e.getEventId() + "/register")
+                        .param("userId", Integer.toString(u.getUserId())))
                 .andExpect(status().is3xxRedirection());
 
-        assertThat(registrationRepository.findByEventId(e.getId())).isNotEmpty();
+        assertThat(registrationRepository.findByEvent_EventId(e.getEventId())).isNotEmpty();
     } }

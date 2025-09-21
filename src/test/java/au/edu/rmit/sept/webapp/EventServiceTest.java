@@ -31,24 +31,24 @@ public class EventServiceTest {
     void saveCreatesEvent() {
         Event e = new Event();
         e.setTitle("Welcome Back");
-        e.setDateTime(LocalDateTime.now().plusDays(7));
+        e.setEventDate(LocalDateTime.now().plusDays(7));
         when(eventRepository.save(any())).thenAnswer(i -> {
             Event saved = i.getArgument(0);
-            saved.setId(1L);
+            saved.setEventId(1);
             return saved;
         });
 
         Event saved = eventService.save(e);
 
-        assertThat(saved.getId()).isNotNull();
+        assertThat(saved.getEventId()).isNotNull();
         verify(eventRepository).save(e);
     }
 
     @Test
     @DisplayName("findById(): returns Optional.empty when missing (negative)")
     void findByIdMissing() {
-        when(eventRepository.findById(999L)).thenReturn(Optional.empty());
-        Optional<Event> result = eventService.findById(999L);
+        when(eventRepository.findById(999)).thenReturn(Optional.empty());
+        Optional<Event> result = eventService.findById(999);
         assertThat(result).isEmpty();
     }
 
@@ -56,16 +56,16 @@ public class EventServiceTest {
     @DisplayName("getUpcomingEventsForOrganiser(): returns only future events (boundary: now)")
     void upcomingBoundaryNow() {
         User organiser = new User();
-        organiser.setId(42L);
+        organiser.setUserId(42);
 
         Event past = new Event();
-        past.setDateTime(LocalDateTime.now().minusMinutes(1));
+        past.setEventDate(LocalDateTime.now().minusMinutes(1));
         Event nowEdge = new Event();
-        nowEdge.setDateTime(LocalDateTime.now());
+        nowEdge.setEventDate(LocalDateTime.now());
         Event future = new Event();
-        future.setDateTime(LocalDateTime.now().plusMinutes(1));
+        future.setEventDate(LocalDateTime.now().plusMinutes(1));
 
-        when(eventRepository.findByOrganiserAndDateTimeAfterOrderByDateTimeAsc(eq(organiser), any(LocalDateTime.class)))
+        when(eventRepository.findByOrganiserAndEventDateAfterOrderByEventDateAsc(eq(organiser), any(LocalDateTime.class)))
                 .thenReturn(List.of(nowEdge, future));
 
         List<Event> upcoming = eventService.getUpcomingEventsForOrganiser(organiser);

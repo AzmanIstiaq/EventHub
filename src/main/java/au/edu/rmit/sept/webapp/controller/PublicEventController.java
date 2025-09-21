@@ -38,8 +38,8 @@ public class PublicEventController {
 
     // 2. Register for an event
     @PostMapping("/{eventId}/register")
-    public String registerForEvent(@PathVariable Long eventId,
-                                   @RequestParam Long userId) {
+    public String registerForEvent(@PathVariable int eventId,
+                                   @RequestParam int userId) {
         User user = userService.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid user ID"));
 

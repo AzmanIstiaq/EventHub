@@ -32,7 +32,7 @@ public class UserController {
 
     // Get a single user by ID
     @GetMapping("/{id}")
-    public ResponseEntity<User> getUserById(@PathVariable Long id) {
+    public ResponseEntity<User> getUserById(@PathVariable int id) {
         return userRepository.findById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
@@ -40,8 +40,8 @@ public class UserController {
 
     // Get events this user is attending
     @GetMapping("/{id}/attendingEvents")
-    public List<Event> getAttendingEvents(@PathVariable Long id) {
-        return registrationRepository.findByUserId(id)
+    public List<Event> getAttendingEvents(@PathVariable int id) {
+        return registrationRepository.findByStudent_UserId(id)
                 .stream()
                 .map(Registration::getEvent)
                 .collect(Collectors.toList());
@@ -49,7 +49,7 @@ public class UserController {
 
     // Get events this user has organized
     @GetMapping("/{id}/organizedEvents")
-    public ResponseEntity<Set<Event>> getOrganizedEvents(@PathVariable Long id) {
+    public ResponseEntity<Set<Event>> getOrganizedEvents(@PathVariable int id) {
         return userRepository.findById(id)
                 .map(user -> ResponseEntity.ok(user.getOrganisedEvents()))
                 .orElse(ResponseEntity.notFound().build());

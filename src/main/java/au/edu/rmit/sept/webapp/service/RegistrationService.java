@@ -20,13 +20,13 @@ public class RegistrationService {
     // Register a user for an event
     public Registration registerUserForEvent(User user, Event event) {
         // Prevent duplicate registration
-        boolean alreadyRegistered = registrationRepository.existsByUserAndEvent(user, event);
+        boolean alreadyRegistered = registrationRepository.existsByStudentAndEvent(user, event);
         if (alreadyRegistered) {
             return null; // or throw an exception
         }
 
         Registration registration = new Registration();
-        registration.setUser(user);
+        registration.setStudent(user);
         registration.setEvent(event);
 
         return registrationRepository.save(registration);
@@ -34,7 +34,7 @@ public class RegistrationService {
 
     // Get all registrations for a user
     public List<Registration> getRegistrationsForUser(User user) {
-        return registrationRepository.findByUser(user);
+        return registrationRepository.findByStudent(user);
     }
 
     // Get all registrations for an event

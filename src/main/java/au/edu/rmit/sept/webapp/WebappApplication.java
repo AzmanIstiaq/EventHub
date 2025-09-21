@@ -20,56 +20,59 @@ public class WebappApplication {
 	CommandLineRunner init(UserRepository userRepo, EventRepository eventRepo, RegistrationRepository registrationRepo, CategoryRepository categoryRepo, KeywordRepository keywordRepo) {
 		return args -> {
 			// Organisers
-			User csit = userRepo.save(new User("CSIT Club", "csit@uni.edu", "password", UserType.ORGANISER));
-			User nerdSociety = userRepo.save(new User("Nerd Society", "nerds@uni.edu", "password", UserType.ORGANISER));
+			User csit = userRepo.save(new User("CSIT Club", "csit@uni.edu", UserType.ORGANISER, "password"));
+			User nerdSociety = userRepo.save(new User("Nerd Society", "nerds@uni.edu", UserType.ORGANISER, "password"));
 
 			// Students
-			User alice = userRepo.save(new User("Alice Blogs", "alice@uni.edu", "password", UserType.STUDENT));
-			User charlie = userRepo.save(new User("Charlie Brown", "charlie@uni.edu", "password", UserType.STUDENT));
-			User diana = userRepo.save(new User("Diana Prince", "diana@uni.edu", "password", UserType.STUDENT));
-			User eric = userRepo.save(new User("Eric Yang", "eric@uni.edu", "password", UserType.STUDENT));
+			User alice = userRepo.save(new User("Alice Blogs", "alice@uni.edu", UserType.STUDENT, "password"));
+			User charlie = userRepo.save(new User("Charlie Brown", "charlie@uni.edu", UserType.STUDENT, "password"));
+			User diana = userRepo.save(new User("Diana Prince", "diana@uni.edu", UserType.STUDENT, "password"));
+			User eric = userRepo.save(new User("Eric Yang", "eric@uni.edu", UserType.STUDENT, "password"));
 
-			Category cat1 = new Category("CAT1");
-			Category cat2 = new Category("CAT2");
+			String category1 = "CAT1";
+			String category2 = "CAT2";
 
-			categoryRepo.save(cat1);
-			categoryRepo.save(cat2);
 
 			// Events
 			Event hackathon = eventRepo.save(new Event(
 					"Hackathon", "24hr coding challenge",
-					LocalDateTime.now().plusDays(2), "Library", csit, cat1
+					LocalDateTime.now().plusDays(2), LocalDateTime.now(),
+					10, "Library", csit
 			));
+			hackathon.addCategory(category1);
 
 			Event bbqNight = eventRepo.save(new Event(
 					"BBQ Night", "Free food and fun networking!",
-					LocalDateTime.now().plusDays(5), "Campus Park", csit, cat1
+					LocalDateTime.now().plusDays(5), LocalDateTime.now(),
+					10, "Campus Park", csit
 			));
+			hackathon.addCategory(category1);
 
 			Event musicJam = eventRepo.save(new Event(
 					"Music Jam", "Bring your instruments and jam with others!",
-					LocalDateTime.now().plusDays(3), "Auditorium", nerdSociety, cat2
+					LocalDateTime.now().plusDays(3), LocalDateTime.now(), 5, "Auditorium", nerdSociety
 			));
+			hackathon.addCategory(category2);
 
 			Event gameNight = eventRepo.save(new Event(
 					"Game Night", "Board games and snacks",
-					LocalDateTime.now().plusDays(7), "Student Lounge", nerdSociety, cat2
+					LocalDateTime.now().plusDays(7), LocalDateTime.now(), 20, "Student Lounge", nerdSociety
 			));
 
 			// Registrations (students only)
-			registrationRepo.save(new Registration(alice, hackathon));
-			registrationRepo.save(new Registration(charlie, hackathon));
-			registrationRepo.save(new Registration(diana, hackathon));
+			registrationRepo.save(new Registration(alice, hackathon, LocalDateTime.now()));
+			registrationRepo.save(new Registration(charlie, hackathon, LocalDateTime.now()));
+			registrationRepo.save(new Registration(diana, hackathon, LocalDateTime.now()));
 
-			registrationRepo.save(new Registration(eric, bbqNight));
-			registrationRepo.save(new Registration(alice, bbqNight));
+			registrationRepo.save(new Registration(eric, bbqNight, LocalDateTime.now()));
+			registrationRepo.save(new Registration(alice, bbqNight, LocalDateTime.now()));
 
-			registrationRepo.save(new Registration(charlie, musicJam));
-			registrationRepo.save(new Registration(diana, musicJam));
-			registrationRepo.save(new Registration(eric, musicJam));
+			registrationRepo.save(new Registration(charlie, musicJam, LocalDateTime.now()));
+			registrationRepo.save(new Registration(diana, musicJam, LocalDateTime.now()));
+			registrationRepo.save(new Registration(eric, musicJam, LocalDateTime.now()));
 
-			registrationRepo.save(new Registration(alice, gameNight));
-			registrationRepo.save(new Registration(diana, gameNight));
+			registrationRepo.save(new Registration(alice, gameNight, LocalDateTime.now()));
+			registrationRepo.save(new Registration(diana, gameNight, LocalDateTime.now()));
 		};
 	}
 

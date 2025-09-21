@@ -41,11 +41,11 @@ public class AdminController {
 
         // Calculate statistics
         LocalDateTime now = LocalDateTime.now();
-        long upcomingEventsCount = allEvents.stream()
-                .filter(event -> event.getDateTime().isAfter(now))
+        int upcomingEventsCount = (int) allEvents.stream()
+                .filter(event -> event.getEventDate().isAfter(now))
                 .count();
-        long pastEventsCount = allEvents.stream()
-                .filter(event -> event.getDateTime().isBefore(now))
+        int pastEventsCount = (int) allEvents.stream()
+                .filter(event -> event.getEventDate().isBefore(now))
                 .count();
 
         model.addAttribute("upcomingEventsCount", upcomingEventsCount);
@@ -56,7 +56,7 @@ public class AdminController {
 
     // Delete inappropriate events
     @PostMapping("/events/{eventId}/delete")
-    public String deleteEvent(@PathVariable Long eventId,
+    public String deleteEvent(@PathVariable int eventId,
                               RedirectAttributes redirectAttributes) {
         try {
             Event event = eventService.findById(eventId)
@@ -82,14 +82,14 @@ public class AdminController {
         model.addAttribute("users", allUsers);
 
         // Calculate user type statistics
-        long adminCount = allUsers.stream()
-                .filter(user -> user.getType() == UserType.ADMIN)
+        int adminCount = (int) allUsers.stream()
+                .filter(user -> user.getRole() == UserType.ADMIN)
                 .count();
-        long organiserCount = allUsers.stream()
-                .filter(user -> user.getType() == UserType.ORGANISER)
+        int organiserCount = (int) allUsers.stream()
+                .filter(user -> user.getRole() == UserType.ORGANISER)
                 .count();
-        long studentCount = allUsers.stream()
-                .filter(user -> user.getType() == UserType.STUDENT)
+        int studentCount = (int) allUsers.stream()
+                .filter(user -> user.getRole() == UserType.STUDENT)
                 .count();
 
         model.addAttribute("adminCount", adminCount);
@@ -101,7 +101,7 @@ public class AdminController {
 
     // Deactivate/ban user accounts
     @PostMapping("/users/{userId}/deactivate")
-    public String deactivateUser(@PathVariable Long userId,
+    public String deactivateUser(@PathVariable int userId,
                                  RedirectAttributes redirectAttributes) {
         try {
             User user = userService.findById(userId)
@@ -135,7 +135,7 @@ public class AdminController {
 
     // View individual event details (admin perspective)
     @GetMapping("/events/{eventId}")
-    public String viewEventDetail(@PathVariable Long eventId, Model model) {
+    public String viewEventDetail(@PathVariable int eventId, Model model) {
         Event event = eventService.findById(eventId)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid event ID"));
 

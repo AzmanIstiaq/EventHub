@@ -61,9 +61,9 @@ class RsvpUserStoryTest {
     @DisplayName("AC1: viewing events page loads with model 'events' and view 'public-events'")
     void eventListLoads() throws Exception {
         Event e = new Event();
-        e.setId(10L);
+        e.setEventId(10);
         e.setTitle("Welcome Week");
-        e.setDateTime(LocalDateTime.now().plusDays(2));
+        e.setEventDate(LocalDateTime.now().plusDays(2));
 
         when(eventService.getAllUpcomingEvents()).thenReturn(List.of(e));
 
@@ -76,15 +76,15 @@ class RsvpUserStoryTest {
     @Test
     @DisplayName("AC2: clicking RSVP registers and redirects")
     void rsvpRegistersAndRedirects() throws Exception {
-        long eventId = 10L;
-        long userId = 5L;
+        int eventId = 10;
+        int userId = 5;
 
-        User u = new User(); u.setId(userId); u.setName("Sam");
-        Event e = new Event(); e.setId(eventId); e.setTitle("Welcome Week"); e.setDateTime(LocalDateTime.now().plusDays(3));
+        User u = new User(); u.setUserId(userId); u.setName("Sam");
+        Event e = new Event(); e.setEventId(eventId); e.setTitle("Welcome Week"); e.setEventDate(LocalDateTime.now().plusDays(3));
 
         when(userService.findById(userId)).thenReturn(Optional.of(u));
         when(eventService.findById(eventId)).thenReturn(Optional.of(e));
-        when(registrationService.registerUserForEvent(u, e)).thenReturn(new Registration(u, e));
+        when(registrationService.registerUserForEvent(u, e)).thenReturn(new Registration(u, e, LocalDateTime.now()));
 
         mvc.perform(post("/events/{eventId}/register", eventId)
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
@@ -98,15 +98,17 @@ class RsvpUserStoryTest {
     @Test
     @DisplayName("AC3: 'My Events' shows RSVP’d event")
     void myEventsListsRsvpedEvent() throws Exception {
-        long userId = 5L;
-        long eventId = 10L;
+        int userId = 5;
+        int eventId = 10;
 
-        User u = new User(); u.setId(userId); u.setName("Sam");
-        Event e = new Event(); e.setId(eventId); e.setTitle("Welcome Week"); e.setDateTime(LocalDateTime.now().plusDays(3));
-        Registration r = new Registration(u, e);
+        User u = new User(); u.setUserId(userId); u.setName("Sam");
+        Event e = new Event(); e.setEventId(eventId); e.setTitle("Welcome Week"); e.setEventDate(LocalDateTime.now().plusDays(3));
+        Registration r = new Registration(u, e, LocalDateTime.now());
+
+        when(userService.findById(userId)).thenReturn(Optional.of(u));
 
         // UserController /users/{id}/attendingEvents uses registrationRepository.findByUserId(id)
-        when(registrationRepository.findByUserId(userId)).thenReturn(List.of(r));
+        when(registrationRepository.findByStudent_UserId(userId)).thenReturn(List.of(r));
 
         mvc.perform(get("/users/{id}/attendingEvents", userId).accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -117,7 +119,7 @@ class RsvpUserStoryTest {
     @Test
     @DisplayName("AC4: not logged in (no userId) -> 400 Bad Request")
     void notLoggedInRsvpReturnsBadRequest() throws Exception {
-        long eventId = 10L;
+        int eventId = 10;
 
         mvc.perform(post("/events/{eventId}/register", eventId))
                 .andExpect(status().isBadRequest()); // Required request param 'userId' missing

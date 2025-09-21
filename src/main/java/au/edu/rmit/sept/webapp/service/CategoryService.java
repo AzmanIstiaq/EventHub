@@ -17,15 +17,15 @@ public class CategoryService {
     }
 
     public List<Category> findAll() {
-        return categoryRepository.findAll();
+        return categoryRepository.findAllCategories();
     }
 
-    public Optional<Category> findById(Long id) {
+    public Optional<Category> findById(int id) {
         return categoryRepository.findById(id);
     }
 
-    public Category findByName(String name) {
-        return categoryRepository.findByName(name);
+    public Category findByName(String category) {
+        return categoryRepository.findByCategory(category);
     }
 
     public Category save(Category category) {

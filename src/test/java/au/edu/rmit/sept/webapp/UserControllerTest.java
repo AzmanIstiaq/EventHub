@@ -36,10 +36,10 @@ class UserControllerTest {
     @DisplayName("GET /users/{id}: returns user details (positive)")
     void getUserById() throws Exception {
         User u = new User();
-        u.setId(5L);
+        u.setUserId(5);
         u.setName("Alice");
 
-        when(userRepository.findById(5L)).thenReturn(Optional.of(u));
+        when(userRepository.findById(5)).thenReturn(Optional.of(u));
 
         mvc.perform(get("/users/5").accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())

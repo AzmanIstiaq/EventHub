@@ -27,9 +27,9 @@ public class RegistrationServiceTest {
     @Test
     @DisplayName("registerUserForEvent(): prevents duplicate registrations (negative)")
     void preventDuplicateRegistration() {
-        User user = new User(); user.setId(1L);
-        Event event = new Event(); event.setId(10L);
-        when(registrationRepository.existsByUserAndEvent(user, event)).thenReturn(true);
+        User user = new User(); user.setUserId(1);
+        Event event = new Event(); event.setEventId(10);
+        when(registrationRepository.existsByStudentAndEvent(user, event)).thenReturn(true);
 
         assertThrows(IllegalStateException.class,
                 () -> registrationService.registerUserForEvent(user, event));
@@ -38,15 +38,15 @@ public class RegistrationServiceTest {
     @Test
     @DisplayName("registerUserForEvent(): registers successfully (positive)")
     void registersSuccessfully() {
-        User user = new User(); user.setId(2L);
-        Event event = new Event(); event.setId(20L);
+        User user = new User(); user.setUserId(2);
+        Event event = new Event(); event.setEventId(20);
 
-        when(registrationRepository.existsByUserAndEvent(user, event)).thenReturn(false);
+        when(registrationRepository.existsByStudentAndEvent(user, event)).thenReturn(false);
         when(registrationRepository.save(any())).thenAnswer(i -> i.getArgument(0));
 
         Registration r = registrationService.registerUserForEvent(user, event);
 
-        assertThat(r.getUser()).isEqualTo(user);
+        assertThat(r.getStudent()).isEqualTo(user);
         assertThat(r.getEvent()).isEqualTo(event);
         verify(registrationRepository).save(any(Registration.class));
     }

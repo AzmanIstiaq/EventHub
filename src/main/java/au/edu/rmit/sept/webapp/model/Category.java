@@ -2,25 +2,42 @@ package au.edu.rmit.sept.webapp.model;
 
 import jakarta.persistence.*;
 
-@Entity
-@Table(name = "categories")
+
+@Entity()
+@Table(
+        name = "categories",
+        uniqueConstraints = {
+                @UniqueConstraint(columnNames = {"event_id", "category"})
+        }
+)
 public class Category {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @Column(name = "category_id")
+    private int categoryId;
 
-    @Column(unique = true, nullable = false)
-    private String name;
+    @ManyToOne
+    @JoinColumn(name = "event_id", referencedColumnName = "event_id")
+    private Event event;
 
+    @Column(name = "category", nullable = false)
+    private String category;
+
+    // -- Constructor -- //
     public Category() {}
 
-    public Category(String name) {
-        this.name = name;
+    public Category(Event event, String category) {
+
+        this.event = event;
+        this.category = category;
     }
 
-    // getters/setters
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
-    public String getName() { return name; }
-    public void setName(String name) { this.name = name; }
+    // -- Getters and Setters -- //
+    public int getCategoryId() { return categoryId; }
+
+    public Event getEvent() { return event; }
+    public void setEvent(Event event) { this.event = event; }
+
+    public String getCategory() { return category; }
+    public void setCategory(String category) { this.category = category; }
 }

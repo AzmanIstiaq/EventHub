@@ -9,13 +9,13 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
-public interface EventRepository extends JpaRepository<Event, Long> {
+public interface EventRepository extends JpaRepository<Event, Integer> {
 
     // All upcoming events for a given organiser
-    List<Event> findByOrganiserAndDateTimeAfterOrderByDateTimeAsc(User organiser, LocalDateTime dateTime);
+    List<Event> findByOrganiserAndEventDateAfterOrderByEventDateAsc(User organiser, LocalDateTime EventDate);
     // All past events for a given organiser
-    List<Event> findByOrganiserAndDateTimeBeforeOrderByDateTimeAsc(User organiser, LocalDateTime dateTime);
+    List<Event> findByOrganiserAndEventDateBeforeOrderByEventDateAsc(User organiser, LocalDateTime EventDate);
 
     // All upcoming events (public view)
-    List<Event> findByDateTimeAfterOrderByDateTimeAsc(LocalDateTime dateTime);
+    List<Event> findByEventDateAfterOrderByEventDateAsc(LocalDateTime EventDate);
 }

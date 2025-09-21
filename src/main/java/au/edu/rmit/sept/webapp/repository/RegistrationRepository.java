@@ -9,17 +9,17 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface RegistrationRepository extends JpaRepository<Registration, Long> {
+public interface RegistrationRepository extends JpaRepository<Registration, Integer> {
 
     // Registrations for a specific user
-    List<Registration> findByUser(User user);
+    List<Registration> findByStudent(User student);
 
     // Registrations for a specific event
     List<Registration> findByEvent(Event event);
 
-    List<Registration> findByEventId(Long eventId);
+    List<Registration> findByEvent_EventId(int eventId);
 
-    List<Registration> findByUserId(Long userId);
+    List<Registration> findByStudent_UserId(int userId);
     // Check if a user is already registered for an event
-    boolean existsByUserAndEvent(User user, Event event);
+    boolean existsByStudentAndEvent(User user, Event event);
 }

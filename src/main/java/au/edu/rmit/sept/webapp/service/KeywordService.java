@@ -17,10 +17,10 @@ public class KeywordService {
      * Finds a keyword by name or creates a new one if it doesn't exist.
      */
     public Keyword findOrCreateByName(String name) {
-        Keyword keyword = keywordRepository.findByName(name);
+        Keyword keyword = keywordRepository.findByKeyword(name);
         if (keyword == null) {
             keyword = new Keyword();
-            keyword.setName(name);
+            keyword.setKeyword(name);
             keyword = keywordRepository.save(keyword);
         }
         return keyword;
