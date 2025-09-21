@@ -1,0 +1,123 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > EventRepository</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">au.edu.rmit.sept.webapp.repository</a>
+</div>
+
+<h1>Coverage Summary for Class: EventRepository (au.edu.rmit.sept.webapp.repository)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+</tr>
+  <tr>
+    <td class="name">EventRepository$MockitoMock$Ghgz0v9x</td>
+  </tr>
+  <tr>
+    <td class="name">EventRepository$MockitoMock$Ghgz0v9x$auxiliary$byOF5ymY</td>
+  </tr>
+  <tr>
+    <td class="name">EventRepository$MockitoMock$Ghgz0v9x$auxiliary$U8nJzzqD</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package au.edu.rmit.sept.webapp.repository;
+&nbsp;
+&nbsp;import au.edu.rmit.sept.webapp.model.Event;
+&nbsp;import au.edu.rmit.sept.webapp.model.User;
+&nbsp;import org.springframework.data.jpa.repository.JpaRepository;
+&nbsp;import org.springframework.data.jpa.repository.Query;
+&nbsp;import org.springframework.data.repository.query.Param;
+&nbsp;import org.springframework.stereotype.Repository;
+&nbsp;
+&nbsp;import java.time.LocalDateTime;
+&nbsp;import java.util.List;
+&nbsp;
+&nbsp;@Repository
+&nbsp;public interface EventRepository extends JpaRepository&lt;Event, Long&gt; {
+&nbsp;
+&nbsp;    // All upcoming events for a given organiser
+&nbsp;    List&lt;Event&gt; findByOrganiserAndDateTimeAfterOrderByDateTimeAsc(User organiser, LocalDateTime dateTime);
+&nbsp;    // All past events for a given organiser
+&nbsp;    List&lt;Event&gt; findByOrganiserAndDateTimeBeforeOrderByDateTimeAsc(User organiser, LocalDateTime dateTime);
+&nbsp;    // all past events
+&nbsp;    List&lt;Event&gt; findByDateTimeBeforeOrderByDateTimeAsc(LocalDateTime dateTime);
+&nbsp;
+&nbsp;    // All upcoming events (public view)
+&nbsp;    List&lt;Event&gt; findByDateTimeAfterOrderByDateTimeAsc(LocalDateTime dateTime);
+&nbsp;
+&nbsp;    @Query(&quot;SELECT e FROM Event e &quot; +
+&nbsp;            &quot;WHERE e.dateTime &gt;= :from &quot; +
+&nbsp;            &quot;AND (:categoryId IS NULL OR e.category.id = :categoryId) &quot; +
+&nbsp;            &quot;AND (:query IS NULL OR LOWER(e.title) LIKE LOWER(CONCAT(&#39;%&#39;, :query, &#39;%&#39;)) &quot; +
+&nbsp;            &quot;     OR LOWER(e.location) LIKE LOWER(CONCAT(&#39;%&#39;, :query, &#39;%&#39;)) &quot; +
+&nbsp;            &quot;     OR EXISTS (SELECT k FROM e.keywords k WHERE LOWER(k.keyword) LIKE LOWER(CONCAT(&#39;%&#39;, :query, &#39;%&#39;))))&quot;)
+&nbsp;    List&lt;Event&gt; searchEvents(@Param(&quot;query&quot;) String query,
+&nbsp;                             @Param(&quot;from&quot;) LocalDateTime from,
+&nbsp;                             @Param(&quot;categoryId&quot;) Long categoryId);
+&nbsp;
+&nbsp;    @Query(&quot;SELECT e FROM Event e &quot; +
+&nbsp;            &quot;WHERE e.dateTime BETWEEN :from AND :to &quot; +
+&nbsp;            &quot;AND (:categoryId IS NULL OR e.category.id = :categoryId) &quot; +
+&nbsp;            &quot;AND (:query IS NULL OR LOWER(e.title) LIKE LOWER(CONCAT(&#39;%&#39;, :query, &#39;%&#39;)) &quot; +
+&nbsp;            &quot;     OR LOWER(e.location) LIKE LOWER(CONCAT(&#39;%&#39;, :query, &#39;%&#39;)) &quot; +
+&nbsp;            &quot;     OR EXISTS (SELECT k FROM e.keywords k WHERE LOWER(k.keyword) LIKE LOWER(CONCAT(&#39;%&#39;, :query, &#39;%&#39;))))&quot;)
+&nbsp;    List&lt;Event&gt; searchEventsWithEnd(@Param(&quot;query&quot;) String query,
+&nbsp;                                    @Param(&quot;from&quot;) LocalDateTime from,
+&nbsp;                                    @Param(&quot;to&quot;) LocalDateTime to,
+&nbsp;                                    @Param(&quot;categoryId&quot;) Long categoryId);
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2025-09-21 19:22</div>
+</div>
+</body>
+</html>

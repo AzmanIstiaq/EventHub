@@ -1,0 +1,260 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > EventController</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">au.edu.rmit.sept.webapp.controller</a>
+</div>
+
+<h1>Coverage Summary for Class: EventController (au.edu.rmit.sept.webapp.controller)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">EventController</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    83.3%
+  </span>
+  <span class="absValue">
+    (5/6)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    50%
+  </span>
+  <span class="absValue">
+    (4/8)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    81.8%
+  </span>
+  <span class="absValue">
+    (45/55)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package au.edu.rmit.sept.webapp.controller;
+&nbsp;
+&nbsp;import au.edu.rmit.sept.webapp.model.Category;
+&nbsp;import au.edu.rmit.sept.webapp.model.Event;
+&nbsp;import au.edu.rmit.sept.webapp.model.Keyword;
+&nbsp;import au.edu.rmit.sept.webapp.model.User;
+&nbsp;import au.edu.rmit.sept.webapp.security.CustomUserDetails;
+&nbsp;import au.edu.rmit.sept.webapp.service.CategoryService;
+&nbsp;import au.edu.rmit.sept.webapp.service.EventService;
+&nbsp;import au.edu.rmit.sept.webapp.service.KeywordService;
+&nbsp;import au.edu.rmit.sept.webapp.service.OrganiserService;
+&nbsp;import org.springframework.security.core.annotation.AuthenticationPrincipal;
+&nbsp;import org.springframework.stereotype.Controller;
+&nbsp;import org.springframework.ui.Model;
+&nbsp;import org.springframework.web.bind.annotation.*;
+&nbsp;
+&nbsp;import java.util.Arrays;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Set;
+&nbsp;import java.util.stream.Collectors;
+&nbsp;
+&nbsp;/// This controller is used for modifying event details, to be performed by Admin and organiser
+&nbsp;/// type users.
+&nbsp;@Controller
+&nbsp;@RequestMapping(&quot;/organiser&quot;)
+&nbsp;public class EventController {
+&nbsp;    private final EventService eventService;
+&nbsp;    private final OrganiserService organiserService;
+&nbsp;    // inject services
+&nbsp;    private final CategoryService categoryService;
+&nbsp;    private final KeywordService keywordService;
+&nbsp;
+&nbsp;    public EventController(EventService eventService,
+&nbsp;                           OrganiserService organiserService,
+&nbsp;                           CategoryService categoryService,
+<b class="fc">&nbsp;                           KeywordService keywordService) {</b>
+<b class="fc">&nbsp;        this.eventService = eventService;</b>
+<b class="fc">&nbsp;        this.organiserService = organiserService;</b>
+<b class="fc">&nbsp;        this.categoryService = categoryService;</b>
+<b class="fc">&nbsp;        this.keywordService = keywordService;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;
+&nbsp;    // List events for given organiser ID
+&nbsp;    @GetMapping(&quot;/events&quot;)
+&nbsp;    public String listOrganisersEvents(@AuthenticationPrincipal CustomUserDetails currentUser,
+&nbsp;                                       Model model) {
+<b class="fc">&nbsp;        User organiser = organiserService.findById(currentUser.getId())</b>
+<b class="fc">&nbsp;                .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Invalid organiser ID&quot;));</b>
+<b class="fc">&nbsp;        List&lt;Event&gt; upcomingEvents = eventService.getUpcomingEventsForOrganiser(organiser);</b>
+<b class="fc">&nbsp;        List&lt;Event&gt; pastEvents = eventService.getPastEventsForOrganiser(organiser);</b>
+&nbsp;
+&nbsp;        // Add categories for form dropdown
+<b class="fc">&nbsp;        List&lt;Category&gt; categories = categoryService.findAll();</b>
+&nbsp;
+<b class="fc">&nbsp;        System.out.println(&quot;DEBUG: Upcoming Events: &quot; + upcomingEvents);</b>
+<b class="fc">&nbsp;        System.out.println(&quot;DEBUG: Past Events: &quot; + pastEvents);</b>
+<b class="fc">&nbsp;        System.out.println(&quot;DEBUG: Categorey1: &quot; + categories.get(0).getCategory());</b>
+<b class="fc">&nbsp;        System.out.println(&quot;DEBUG: Organiser: &quot; + organiser.getName());</b>
+&nbsp;
+<b class="fc">&nbsp;        model.addAttribute(&quot;upcomingEvents&quot;, upcomingEvents);</b>
+<b class="fc">&nbsp;        model.addAttribute(&quot;pastEvents&quot;, pastEvents);</b>
+<b class="fc">&nbsp;        model.addAttribute(&quot;organiser&quot;, organiser);</b>
+<b class="fc">&nbsp;        model.addAttribute(&quot;categories&quot;, categories);</b>
+&nbsp;
+<b class="fc">&nbsp;        return &quot;organiser-dashboard&quot;;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;
+&nbsp;
+&nbsp;    // Create new event for given organiser
+&nbsp;    @PostMapping(&quot;/events/create&quot;)
+&nbsp;    public String createEvent(@AuthenticationPrincipal CustomUserDetails currentUser,
+&nbsp;                              @ModelAttribute Event event,
+&nbsp;                              @RequestParam(required = false) String keywordsText) {
+<b class="fc">&nbsp;        User organiser = organiserService.findById(currentUser.getId())</b>
+<b class="fc">&nbsp;                .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Invalid organiser ID&quot;));</b>
+<b class="fc">&nbsp;        event.setOrganiser(organiser);</b>
+&nbsp;
+&nbsp;        // Convert comma-separated keywords to Set&lt;Keyword&gt;
+<b class="pc">&nbsp;        if (keywordsText != null &amp;&amp; !keywordsText.isBlank()) {</b>
+<b class="fc">&nbsp;            Set&lt;Keyword&gt; keywordSet = Arrays.stream(keywordsText.split(&quot;,&quot;))</b>
+<b class="fc">&nbsp;                    .map(String::trim)</b>
+<b class="fc">&nbsp;                    .map(keywordService::findOrCreateByName)</b>
+<b class="fc">&nbsp;                    .collect(Collectors.toSet());</b>
+<b class="fc">&nbsp;            event.setKeywords(keywordSet);</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        eventService.save(event);</b>
+<b class="fc">&nbsp;        return &quot;redirect:/organiser/events&quot;;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;
+&nbsp;    /// Updates an event based on the form input received
+&nbsp;    @PostMapping(&quot;/events/{eventId}/edit&quot;)
+&nbsp;    public String updateEvent(@AuthenticationPrincipal CustomUserDetails currentUser,
+&nbsp;                              @PathVariable Long eventId,
+&nbsp;                              @ModelAttribute Event updatedEvent,
+&nbsp;                              @RequestParam(required = false) String keywordsText) {
+<b class="fc">&nbsp;        User organiser = organiserService.findById(currentUser.getId())</b>
+<b class="fc">&nbsp;                .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Invalid organiser ID&quot;));</b>
+&nbsp;
+<b class="fc">&nbsp;        Event event = eventService.findById(eventId)</b>
+<b class="fc">&nbsp;                .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Invalid event ID&quot;));</b>
+&nbsp;
+&nbsp;        // Copy form fields
+<b class="fc">&nbsp;        event.setTitle(updatedEvent.getTitle());</b>
+<b class="fc">&nbsp;        event.setDescription(updatedEvent.getDescription());</b>
+<b class="fc">&nbsp;        event.setDateTime(updatedEvent.getDateTime());</b>
+<b class="fc">&nbsp;        event.setLocation(updatedEvent.getLocation());</b>
+<b class="fc">&nbsp;        event.setCategory(updatedEvent.getCategory());</b>
+<b class="fc">&nbsp;        event.setOrganiser(organiser);</b>
+&nbsp;
+&nbsp;        // Convert comma-separated keywords to Set&lt;Keyword&gt;
+<b class="pc">&nbsp;        if (keywordsText != null &amp;&amp; !keywordsText.isBlank()) {</b>
+<b class="nc">&nbsp;            Set&lt;Keyword&gt; keywordSet = Arrays.stream(keywordsText.split(&quot;,&quot;))</b>
+<b class="nc">&nbsp;                    .map(String::trim)</b>
+<b class="nc">&nbsp;                    .map(keywordService::findOrCreateByName)</b>
+<b class="nc">&nbsp;                    .collect(Collectors.toSet());</b>
+<b class="nc">&nbsp;            event.setKeywords(keywordSet);</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        eventService.save(event);</b>
+&nbsp;
+<b class="fc">&nbsp;        return &quot;redirect:/organiser/events&quot;;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /// Deletes an event for a given organiser ID and event ID
+&nbsp;    @GetMapping(&quot;/events/{eventId}/delete&quot;)
+&nbsp;    public String deleteEvent(@AuthenticationPrincipal CustomUserDetails currentUser,
+&nbsp;                              @PathVariable Long eventId) {
+<b class="fc">&nbsp;        eventService.delete(eventId);</b>
+<b class="fc">&nbsp;        return &quot;redirect:/organiser/events&quot;;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @GetMapping(&quot;/public-events&quot;)
+&nbsp;    public String listPublicEvents(Model model) {
+<b class="nc">&nbsp;        List&lt;Event&gt; events = eventService.getAllEvents();</b>
+<b class="nc">&nbsp;        model.addAttribute(&quot;events&quot;, events);</b>
+<b class="nc">&nbsp;        model.addAttribute(&quot;categories&quot;, categoryService.findAll());</b>
+<b class="nc">&nbsp;        model.addAttribute(&quot;activeTab&quot;, &quot;upcoming&quot;);</b>
+<b class="nc">&nbsp;        return &quot;public-events&quot;;</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2025-09-21 19:22</div>
+</div>
+</body>
+</html>
