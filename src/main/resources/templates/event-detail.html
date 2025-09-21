@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
+    <link rel="stylesheet" th:href="@{/style.css}">
     <title th:text="${event.title}">Event Details</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
             margin: 0;
             background: #f5f7fa;
             color: #333;
@@ -52,7 +52,7 @@
     </style>
 </head>
 <body>
-<div th:replace="~{fragments/navbar}"></div>
+<div th:replace="~{fragments/navbar-common}"></div>
 
 <div class="details">
     <h1>Event Details:</h1>

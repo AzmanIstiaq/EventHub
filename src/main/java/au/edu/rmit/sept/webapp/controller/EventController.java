@@ -132,4 +132,13 @@ public class EventController {
         eventService.delete(eventId);
         return "redirect:/organiser/events";
     }
+
+    @GetMapping("/public-events")
+    public String listPublicEvents(Model model) {
+        List<Event> events = eventService.getAllEvents();
+        model.addAttribute("events", events);
+        model.addAttribute("categories", categoryService.findAll());
+        model.addAttribute("activeTab", "upcoming");
+        return "public-events";
+    }
 }

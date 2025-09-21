@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<body>
+<div th:fragment="navbar-common">
+    <header class="main-header">
+        <div class="logo"><a th:href="@{/}" style="text-decoration:none; color:inherit;">EventHub</a></div>
+        <nav class="nav-links">
+            <a th:href="@{/organiser/public-events}">Events</a>
+            <a th:href="@{/organisations}">Organisations</a>
+            <a th:href="@{/admin/dashboard}">Admin</a>
+            <a th:href="@{/login}">Login</a>
+        </nav>
+    </header>
+</div>
+
+</body>
+</html>
