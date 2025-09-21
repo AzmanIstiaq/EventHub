@@ -3,23 +3,28 @@ package au.edu.rmit.sept.webapp.repository;
 import au.edu.rmit.sept.webapp.model.Event;
 import au.edu.rmit.sept.webapp.model.Registration;
 import au.edu.rmit.sept.webapp.model.User;
+import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
 @Repository
-public interface RegistrationRepository extends JpaRepository<Registration, Integer> {
+public interface RegistrationRepository extends JpaRepository<Registration, Long> {
 
     // Registrations for a specific user
-    List<Registration> findByStudent(User student);
+    List<Registration> findByUser(User user);
 
     // Registrations for a specific event
     List<Registration> findByEvent(Event event);
 
-    List<Registration> findByEvent_EventId(int eventId);
+    List<Registration> findByEventId(Long eventId);
 
-    List<Registration> findByStudent_UserId(int userId);
+    List<Registration> findByUserId(Long userId);
     // Check if a user is already registered for an event
-    boolean existsByStudentAndEvent(User user, Event event);
+    boolean existsByUserAndEvent(User user, Event event);
+    @Transactional
+    @Modifying
+    void deleteByUserIdAndEventId(Long userId, Long eventId);
 }

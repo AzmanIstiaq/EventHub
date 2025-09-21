@@ -5,58 +5,69 @@ import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
 
-
-@Entity()
-@Table(
-        name = "feedback",
-        uniqueConstraints = {
-                @UniqueConstraint(columnNames = {"event_id", "user_id"})
-        }
-)
+@Entity
 public class Feedback {
+
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
     @ManyToOne
-    @JoinColumn(name = "event_id", nullable = false)
     @JsonBackReference
+    @JoinColumn(name = "event_id", nullable = false)
     private Event event;
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
-    @JsonBackReference
     private User user;
 
-    @Column(name = "date", nullable = false)
-    private LocalDateTime date;
+    @Column(nullable = false)
+    private int rating;  // 1-5
 
-    @Column(name = "feedback", length = 1000, nullable = false)
-    private String feedback;
+    @Column(length = 1000)
+    private String comment;
 
-    @Column(name = "rating", nullable = false)
-    private int rating;
+    private LocalDateTime createdAt = LocalDateTime.now();
 
-    // -- Constructor -- //
     public Feedback() {}
-    public Feedback(Event event, User user, LocalDateTime date, String feedback, int rating) {
+
+    public Feedback(Event event, User user, int rating, String comment) {
         this.event = event;
         this.user = user;
-        this.date = date;
-        this.feedback = feedback;
         this.rating = rating;
+        this.comment = comment;
+    }
+    public Long getId() {
+        return id;
+    }
+    public Event getEvent() {
+        return event;
+    }
+    public User getUser() {
+        return user;
+    }
+    public int getRating() {
+        return rating;
+    }
+    public String getComment() {
+        return comment;
+    }
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
     }
 
-    // -- Getters and Setters -- //
-    public Event getEvent() { return event; }
-    public void setEvent(Event event) { this.event = event; }
+    public void setUser(User user) {
+        this.user = user;
+    }
 
-    public User getUser() { return user; }
-    public void setUser(User user) { this.user = user; }
+    public void setEvent(Event event) {
+        this.event = event;
+    }
 
-    public LocalDateTime getDate() { return date; }
-    public void setDate(LocalDateTime date) { this.date = date; }
-
-    public String getFeedback() { return feedback; }
-    public void setFeedback(String feedback) { this.feedback = feedback; }
-
-    public int getRating() { return rating; }
-    public void setRating(int rating) { this.rating = rating; }
+    public void setRating(int rating) {
+        this.rating = rating;
+    }
+    public void setComment(String comment) {
+        this.comment = comment;
+    }
 }

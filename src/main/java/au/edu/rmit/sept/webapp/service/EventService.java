@@ -44,14 +44,26 @@ public class EventService {
                 organiser, LocalDateTime.now());
     }
 
+    public List<Event> getPastEvents() {
+        return eventRepository.findByDateTimeBeforeOrderByDateTimeAsc(LocalDateTime.now());
+    }
+
     // All upcoming events for public view
     public List<Event> getAllUpcomingEvents() {
         return eventRepository.findByEventDateAfterOrderByEventDateAsc(LocalDateTime.now());
     }
+
+
 
     // NEW: Get ALL events (for admin view)
     public List<Event> getAllEvents() {
         return eventRepository.findAll();
     }
 
+    public List<Event> searchEvents(String query, LocalDateTime from, LocalDateTime to, Long categoryId) {
+        if (to == null) {
+            return eventRepository.searchEvents(query, from, categoryId);
+        }
+        return eventRepository.searchEventsWithEnd(query, from, to, categoryId);
+    }
 }

@@ -4,10 +4,12 @@ import au.edu.rmit.sept.webapp.model.Category;
 import au.edu.rmit.sept.webapp.model.Event;
 import au.edu.rmit.sept.webapp.model.Keyword;
 import au.edu.rmit.sept.webapp.model.User;
+import au.edu.rmit.sept.webapp.security.CustomUserDetails;
 import au.edu.rmit.sept.webapp.service.CategoryService;
 import au.edu.rmit.sept.webapp.service.EventService;
 import au.edu.rmit.sept.webapp.service.KeywordService;
 import au.edu.rmit.sept.webapp.service.OrganiserService;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -40,23 +42,16 @@ public class EventController {
 
 
     // List events for given organiser ID
-    @GetMapping("/{organiserId}/events")
-    public String listOrganisersEvents(@PathVariable int organiserId, Model model) {
-        User organiser = organiserService.findById(organiserId)
+    @GetMapping("/events")
+    public String listOrganisersEvents(@AuthenticationPrincipal CustomUserDetails currentUser,
+                                       Model model) {
+        User organiser = organiserService.findById(currentUser.getId())
                 .orElseThrow(() -> new IllegalArgumentException("Invalid organiser ID"));
         List<Event> upcomingEvents = eventService.getUpcomingEventsForOrganiser(organiser);
-        System.out.println("Upcoming Events: " + upcomingEvents);
         List<Event> pastEvents = eventService.getPastEventsForOrganiser(organiser);
-        System.out.println("Past Events: " + pastEvents);
 
         // Add categories for form dropdown
         List<Category> categories = categoryService.findAll();
-        System.out.println("Categories: " + categories);
-        System.out.println("Organiser: " + organiser);
-
-        if (upcomingEvents.isEmpty()) {
-            System.out.println("No upcoming events found for organiser ID: " + organiserId);
-        }
 
         model.addAttribute("upcomingEvents", upcomingEvents);
         model.addAttribute("pastEvents", pastEvents);
@@ -69,11 +64,11 @@ public class EventController {
 
 
     // Create new event for given organiser
-    @PostMapping("/{organiserId}/events")
-    public String createEvent(@PathVariable int organiserId,
+    @PostMapping("/events/create")
+    public String createEvent(@AuthenticationPrincipal CustomUserDetails currentUser,
                               @ModelAttribute Event event,
                               @RequestParam(required = false) String keywordsText) {
-        User organiser = organiserService.findById(organiserId)
+        User organiser = organiserService.findById(currentUser.getId())
                 .orElseThrow(() -> new IllegalArgumentException("Invalid organiser ID"));
         event.setOrganiser(organiser);
 
@@ -87,17 +82,17 @@ public class EventController {
         }
 
         eventService.save(event);
-        return "redirect:/organiser/" + organiserId + "/events";
+        return "redirect:/organiser/events";
     }
 
 
     /// Updates an event based on the form input received
-    @PostMapping("/{organiserId}/events/{eventId}/edit")
-    public String updateEvent(@PathVariable int organiserId,
-                              @PathVariable int eventId,
+    @PostMapping("/events/{eventId}/edit")
+    public String updateEvent(@AuthenticationPrincipal CustomUserDetails currentUser,
+                              @PathVariable Long eventId,
                               @ModelAttribute Event updatedEvent,
                               @RequestParam(required = false) String keywordsText) {
-        User organiser = organiserService.findById(organiserId)
+        User organiser = organiserService.findById(currentUser.getId())
                 .orElseThrow(() -> new IllegalArgumentException("Invalid organiser ID"));
 
         Event event = eventService.findById(eventId)
@@ -106,9 +101,9 @@ public class EventController {
         // Copy form fields
         event.setTitle(updatedEvent.getTitle());
         event.setDescription(updatedEvent.getDescription());
-        event.setEventDate(updatedEvent.getEventDate());
+        event.setDateTime(updatedEvent.getDateTime());
         event.setLocation(updatedEvent.getLocation());
-        event.setCategories(updatedEvent.getCategories());
+        event.setCategory(updatedEvent.getCategory());
         event.setOrganiser(organiser);
 
         // Convert comma-separated keywords to Set<Keyword>
@@ -122,13 +117,14 @@ public class EventController {
 
         eventService.save(event);
 
-        return "redirect:/organiser/" + organiserId + "/events";
+        return "redirect:/organiser/events";
     }
 
     /// Deletes an event for a given organiser ID and event ID
-    @GetMapping("/{organiserId}/events/{eventId}/delete")
-    public String deleteEvent(@PathVariable int organiserId, @PathVariable int eventId) {
+    @GetMapping("/events/{eventId}/delete")
+    public String deleteEvent(@AuthenticationPrincipal CustomUserDetails currentUser,
+                              @PathVariable Long eventId) {
         eventService.delete(eventId);
-        return "redirect:/organiser/" + organiserId + "/events";
+        return "redirect:/organiser/events";
     }
 }

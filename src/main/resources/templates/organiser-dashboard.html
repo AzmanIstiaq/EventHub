@@ -63,7 +63,7 @@
             color: #666;
         }
 
-        .toggle-btn {
+        .toggle {
             margin-top: 1rem;
             background: #e9ecef;
             border: none;
@@ -73,7 +73,7 @@
             font-size: 0.9rem;
         }
 
-        .toggle-btn.active { background: #ced4da; }
+        .toggle.active { background: #ced4da; }
 
         .registrations {
             margin-top: 0.8rem;
@@ -122,13 +122,13 @@
 <div class="container">
     <header>
         <h1 th:text="'Events for ' + ${organiser.name}"></h1>
-        <button id="create-btn" class="btn btn-primary">+ Create New Event</button>
+        <button id="create-btn" class="btn btn-primary" onclick="openCreateForm()">+ Create New Event</button>
     </header>
 
     <!-- Hidden Create Event Form -->
     <div id="create-form" class="form-card hidden">
         <h2>Create Event</h2>
-        <form th:action="@{'/organiser/' + ${organiser.id} + '/events'}" method="post" onsubmit="return validateEventForm(this)">
+        <form th:action="@{'/organiser/events/create'}" method="post" onsubmit="return validateEventForm(this)">
             <label>Title:</label>
             <input type="text" name="title" required>
 
@@ -168,7 +168,7 @@
             <!-- Inline edit form -->
             <div th:id="'form-' + ${event.id}" class="form-card hidden">
                 <h2>Edit Event</h2>
-                <form th:action="@{'/organiser/' + ${organiser.id} + '/events/' + ${event.id} + '/edit'}"
+                <form th:action="@{'/organiser/events/' + ${event.id} + '/edit'}"
                       method="post" onsubmit="return validateEventForm(this)">
                     <label>Title:</label>
                     <input type="text" name="title" th:value="${event.title}" required>
@@ -209,12 +209,13 @@
             <div th:id="'card-' + ${event.id}">
                 <div class="event-header">
                     <h2 th:text="${event.title}"></h2>
+
                     <div class="event-actions">
                         <button class="btn btn-edit"
                                 th:if="${event.dateTime.isAfter(T(java.time.LocalDateTime).now())}"
                                 th:onclick="'showEditForm(' + ${event.id} + ')'">Edit</button>
                         <a class="btn btn-delete"
-                           th:href="@{'/organiser/' + ${organiser.id} + '/events/' + ${event.id} + '/delete'}">Delete</a>
+                           th:href="@{'/organiser/events/' + ${event.id} + '/delete'}">Delete</a>
                     </div>
                 </div>
                 <p class="event-meta">
@@ -228,7 +229,7 @@
                 </p>
 
 
-                <button class="toggle-btn">Show Registrations ▼</button>
+                <button class="toggle toggle-btn">Show Registrations ▼</button>
                 <ul class="registrations hidden">
                     <li th:each="registration : ${event.registrations}">
                         <strong th:text="${registration.getUser().getName()}"></strong>
@@ -247,10 +248,11 @@
         <div class="event-card" th:each="event : ${pastEvents}">
             <div class="event-header">
                 <h2 th:text="${event.title}"></h2>
-                <div class="event-actions">
-                    <a class="btn btn-delete"
-                       th:href="@{'/organiser/' + ${organiser.id} + '/events/' + ${event.id} + '/delete'}">Delete</a>
-                </div>
+                <h3 th:text="'Star Rating: ' + ${event.getStarRating()}"></h3>
+<!--                <div class="event-actions">-->
+<!--                    <a class="btn btn-delete"-->
+<!--                       th:href="@{'/organiser/' + ${organiser.id} + '/events/' + ${event.id} + '/delete'}">Delete</a>-->
+<!--                </div>-->
             </div>
             <p class="event-meta">
                 <span th:text="${event.dateTime}"></span> @
@@ -263,13 +265,21 @@
             </p>
 
 
-            <button class="toggle-btn">Show Registrations ▼</button>
+            <button class="toggle toggle-btn">Show Registrations ▼</button>
             <ul class="registrations hidden">
                 <li th:each="registration : ${event.registrations}">
                     <strong th:text="${registration.getUser().getName()}"></strong>
                     (<span th:text="${registration.getRegistrationDate()}"></span>)
                 </li>
             </ul>
+            <button class="toggle toggle-btn-feedback">Show Feedback ▼</button>
+            <ul class="registrations hidden">
+                <li th:each="feedback : ${event.feedbacks}">
+                    <strong th:text="${feedback.getRating()}"></strong>
+                    (<span th:text="${feedback.getComment()}"></span>)
+                </li>
+            </ul>
+
         </div>
     </div>
 </div>
@@ -293,6 +303,29 @@
             document.getElementById("create-form").classList.toggle("hidden");
         });
     });
+
+    document.addEventListener("DOMContentLoaded", () => {
+        const toggleButtons = document.querySelectorAll(".toggle-btn-feedback");
+        toggleButtons.forEach(btn => {
+            btn.addEventListener("click", () => {
+                const registrations = btn.nextElementSibling;
+                const isHidden = registrations.classList.contains("hidden");
+                registrations.classList.toggle("hidden", !isHidden);
+                btn.classList.toggle("active", isHidden);
+                btn.textContent = isHidden ? "Hide Feedback ▲" : "Show Feedback ▼";
+            });
+        });
+
+        // Create form toggle
+        document.getElementById("create-btn").addEventListener("click", () => {
+            document.getElementById("create-form").classList.toggle("hidden");
+        });
+    });
+    function openCreateForm() {
+        const formWrapper = document.getElementById("create-form");
+        formWrapper.classList.remove("hidden");
+        formWrapper.querySelector("form").reset();
+    }
 
     // Cancel Create
     function cancelCreateForm() {

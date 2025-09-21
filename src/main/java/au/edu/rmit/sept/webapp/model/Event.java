@@ -3,98 +3,67 @@ package au.edu.rmit.sept.webapp.model;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
-
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
-@Entity()
+@Entity
 @Table(name = "events")
 public class Event {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "event_id")
-    private int eventId;
-
-    @Column(name = "title", nullable = false)
+    private Long id;
     private String title;
 
-    @Column(name = "description", length = 1000)
+    @Column(length = 1000)
     private String description;
 
-    @Column(name = "event_date", nullable = false)
-    private LocalDateTime eventDate;
+    @Column(nullable = false)
+    private LocalDateTime dateTime;
 
-    @Column(name = "creation_date", nullable = false)
-    private LocalDateTime creationDate;
-
-    @Column(name = "rsvp_slots", nullable = false)
-    private int rsvpSlots;
-
-    @Column(name = "location", nullable = false)
+    @Column(nullable = false)
     private String location;
 
-    // Organiser (many-to-one)
+    @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
+    private Set<Registration> registrations;
+
     @ManyToOne
     @JoinColumn(name = "organiser_id", nullable = false)
     @JsonBackReference
     private User organiser;
 
-    // Tags (one-to-many)
-    @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference
-    private Set<Tag> tags;
+    // Category (single choice)
+    @ManyToOne
+    @JoinColumn(name = "category_id")
+    private Category category;
 
-    // Category (one-to-many)
-    @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference
-    private Set<Category> categories;
-
-    // Event gallery (one-to-many)
-    @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference
-    private Set<EventGallery> photos;
-
-    // RSVPS (one-to-many)
-    @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference
-    private Set<Registration> registrations;
-
-    // Feedback (one-to-many)
-    @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference
-    private Set<Feedback> feedback;
-
-    // Keywords (one-to-many)
-    @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference
-    private Set<Keyword> keywords;
+    // Keywords / tags (many-to-many)
+    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @JoinTable(
+            name = "event_keyword",
+            joinColumns = @JoinColumn(name = "event_id"),
+            inverseJoinColumns = @JoinColumn(name = "keyword_id")
+    )
+    private Set<Keyword> keywords = new HashSet<>();
 
     // --- Constructors ---
     public Event() {}
 
-    public Event(String title, String description, LocalDateTime eventDate,
-                 LocalDateTime creationDate, int rsvpSlots, String location,
-                 User organiser) {
+    public Event(String title, String description, LocalDateTime dateTime,
+                 String location, User organiser, Category category) {
         this.title = title;
         this.description = description;
-        this.eventDate = eventDate;
-        this.creationDate = creationDate;
-        this.rsvpSlots = rsvpSlots;
+        this.dateTime = dateTime;
         this.location = location;
         this.organiser = organiser;
-        this.categories = new HashSet<>();
-        this.tags = new HashSet<>();
-        this.photos = new HashSet<>();
-        this.registrations = new HashSet<>();
-        this.feedback = new HashSet<>();
-        this.keywords = new HashSet<>();
+        this.category = category;
     }
 
-    // --- Getters and Setters ---
-    public int getEventId() { return eventId; }
-    public void setEventId(int eventId) { this.eventId = this.eventId; }
+    // --- Getters and setters ---
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
     public String getTitle() { return title; }
     public void setTitle(String title) { this.title = title; }
@@ -102,35 +71,20 @@ public class Event {
     public String getDescription() { return description; }
     public void setDescription(String description) { this.description = description; }
 
-    public LocalDateTime getEventDate() { return eventDate; }
-    public void setEventDate(LocalDateTime eventDate) { this.eventDate = eventDate; }
-
-    public LocalDateTime getCreationDate() { return creationDate; }
-    public void setCreationDate(LocalDateTime creation_date) { this.creationDate = creation_date; }
-
-    public int getRsvpSlots() { return rsvpSlots; }
-    public void setRsvpSlots(int rsvpSlots) { this.rsvpSlots = rsvpSlots; }
+    public LocalDateTime getDateTime() { return dateTime; }
+    public void setDateTime(LocalDateTime dateTime) { this.dateTime = dateTime; }
 
     public String getLocation() { return location; }
     public void setLocation(String location) { this.location = location; }
 
+    public Set<Registration> getRegistrations() { return registrations; }
+    public void setRegistrations(Set<Registration> registrations) { this.registrations = registrations; }
+
     public User getOrganiser() { return organiser; }
     public void setOrganiser(User organiser) { this.organiser = organiser; }
 
-    public Set<Tag> getTags() { return tags; }
-    public void setTags(Set<Tag> tags) { this.tags = tags; }
-
-    public Set<Category> getCategories() { return categories; }
-    public void setCategories(Set<Category> categories) { this.categories = categories; }
-
-    public Set<EventGallery> getPhotos() { return photos; }
-    public void setPhotos(Set<EventGallery> photos) { this.photos = photos; }
-
-    public Set<Registration> getRsvps() { return registrations; }
-    public void setRsvps(Set<Registration> registrations) { this.registrations = registrations; }
-
-    public Set<Feedback> getFeedback() { return feedback; }
-    public void setFeedback(Set<Feedback> feedback) { this.feedback = feedback; }
+    public Category getCategory() { return category; }
+    public void setCategory(Category category) { this.category = category; }
 
     public Set<Keyword> getKeywords() { return keywords; }
     public void setKeywords(Set<Keyword> keywords) { this.keywords = keywords; }
@@ -142,7 +96,7 @@ public class Event {
 
         StringBuilder sb = new StringBuilder();
         for (Keyword word : keywords) {
-            sb.append(word.getKeyword()).append(", ");
+            sb.append(word.getName()).append(", ");
         }
 
         // Remove the last comma and space
@@ -150,36 +104,26 @@ public class Event {
         return sb.toString();
     }
 
+
     // Utility method to add a keyword
     public void addKeyword(Keyword keyword) {
         this.keywords.add(keyword);
-        keyword.setEvent(this);
+        keyword.getEvents().add(this);
     }
 
     public void removeKeyword(Keyword keyword) {
         this.keywords.remove(keyword);
-        keyword.setEvent(null);
-    }
-
-    public void addCategory(String category) {
-        Category newCategory = new Category(this, category);
-        this.categories.add(newCategory);
-    }
-
-    public void removeCategory(Category category) {
-        this.categories.remove(category);
+        keyword.getEvents().remove(this);
     }
 
     @Override
     public String toString() {
         return "Event{" +
-                "event_id=" + eventId +
+                "id=" + id +
                 ", title='" + title + '\'' +
-                ", description='" + description + '\'' +
-                ", eventDate=" + eventDate +
-                ", creation_date=" + creationDate +
-                ", rsvp_slots=" + rsvpSlots +
-                ", location='" + location +
+                ", dateTime=" + dateTime +
+                ", location='" + location + '\'' +
+                ", category=" + (category != null ? category.getName() : null) +
                 '}';
     }
 }

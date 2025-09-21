@@ -5,45 +5,35 @@ import au.edu.rmit.sept.webapp.model.User;
 import au.edu.rmit.sept.webapp.repository.*;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.http.ResponseEntity;
 
 import java.util.Optional;
 
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
 
-@WebMvcTest(UserController.class)
 class UserControllerTest {
-
-    @Autowired MockMvc mvc;
-
-    // Controller collaborators
-    @MockBean UserRepository userRepository;
-    @MockBean RegistrationRepository registrationRepository;
-
-    // Needed to satisfy WebappApplication.init(...) seeder during context start
-    @MockBean EventRepository eventRepository;
-    @MockBean CategoryRepository categoryRepository;
-    @MockBean KeywordRepository keywordRepository;
+    UserRepository userRepository = mock(UserRepository.class);
+    RegistrationRepository registrationRepository = mock(RegistrationRepository.class);
+    UserController controller = new UserController();
 
     @Test
     @DisplayName("GET /users/{id}: returns user details (positive)")
     void getUserById() throws Exception {
         User u = new User();
-        u.setUserId(5);
+        u.setId(5L);
         u.setName("Alice");
+        when(userRepository.findById(5L)).thenReturn(Optional.of(u));
+        // Inject repository via reflection
+        try {
+            var f = UserController.class.getDeclaredField("userRepository");
+            f.setAccessible(true);
+            f.set(controller, userRepository);
+        } catch (Exception e) { throw new RuntimeException(e); }
 
-        when(userRepository.findById(5)).thenReturn(Optional.of(u));
-
-        mvc.perform(get("/users/5").accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON));
-
+        ResponseEntity<User> resp = controller.getUserById(5L);
+        assertThat(resp.getStatusCode().is2xxSuccessful()).isTrue();
+        assertThat(resp.getBody()).isNotNull();
     }
 }

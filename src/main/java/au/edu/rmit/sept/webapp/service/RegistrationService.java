@@ -22,7 +22,7 @@ public class RegistrationService {
         // Prevent duplicate registration
         boolean alreadyRegistered = registrationRepository.existsByStudentAndEvent(user, event);
         if (alreadyRegistered) {
-            return null; // or throw an exception
+            throw new IllegalStateException("User already registered for this event");
         }
 
         Registration registration = new Registration();
@@ -41,4 +41,9 @@ public class RegistrationService {
     public List<Registration> getRegistrationsForEvent(Event event) {
         return registrationRepository.findByEvent(event);
     }
+
+    public void deleteRegistrationForEvent(Long userId, Long eventId) {
+        registrationRepository.deleteByUserIdAndEventId(userId, eventId);
+    }
 }
+

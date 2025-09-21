@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title th:text="${event.title}">Event Details</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background: #f5f7fa;
+            color: #333;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 1rem;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+
+        .details {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 1rem;
+
+        }
+
+        h1 { margin-top: 0; }
+
+        .event-meta {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 1rem;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-size: 0.9rem;
+            text-decoration: none;
+            color: white;
+            margin-top: 1rem;
+        }
+
+        .btn-back { background: #6c757d; }
+        .btn-register { background: #28a745; }
+        .btn-cancel { background: #dc3545; }
+    </style>
+</head>
+<body>
+<div th:replace="~{fragments/navbar}"></div>
+
+<div class="details">
+    <h1>Event Details:</h1>
+</div>
+<div class="container">
+    <h1 th:text="${event.title}">Event Title</h1>
+
+    <div class="event-meta">
+        <p><strong>Date/Time:</strong>
+            <span th:text="${#temporals.format(event.dateTime, 'yyyy-MM-dd HH:mm')}"></span>
+        </p>
+        <p><strong>Location:</strong> <span th:text="${event.location}"></span></p>
+        <p><strong>Organiser:</strong> <span th:text="${event.organiser.name}"></span></p>
+        <p th:if="${event.category != null}">
+            <strong>Category:</strong> <span th:text="${event.category.name}"></span>
+        </p>
+        <p th:if="${!#lists.isEmpty(event.keywords)}">
+            <strong>Keywords:</strong>
+            <span th:each="kw, iterStat : ${event.keywords}">
+                <span th:text="${kw.name}"></span><span th:if="${!iterStat.last}">, </span>
+            </span>
+        </p>
+    </div>
+
+    <p th:text="${event.description}"></p>
+
+    <!-- Actions shown only if user is logged in -->
+    <div th:if="${currentUser != null}">
+        <!-- Cancel if registered -->
+        <form th:if="${event.checkUserRegistered(currentUser)}"
+              th:action="@{'/student/events/cancel/' + ${event.id}}"
+              method="post" style="display:inline;">
+            <input type="hidden" name="userId" th:value="${currentUser.id}"/>
+            <button type="submit" class="btn btn-cancel">Cancel Registration</button>
+        </form>
+
+        <!-- Register if not registered -->
+        <form th:if="${!event.checkUserRegistered(currentUser)}"
+              th:action="@{'/student/events/register/' + ${event.id}}"
+              method="post" style="display:inline;">
+            <input type="hidden" name="userId" th:value="${currentUser.id}"/>
+            <button type="submit" class="btn btn-register">Register</button>
+        </form>
+
+        <!-- Back button -->
+        <div>
+            <a th:href="@{'/student/events'}" class="btn btn-back">← Back to Events</a>
+        </div>
+    </div>
+
+    <!-- If no logged-in user, show a different back button -->
+    <div th:if="${currentUser == null}">
+        <a href="/" class="btn btn-back">← Back to Events</a>
+    </div>
+</div>
+</body>
+</html>
