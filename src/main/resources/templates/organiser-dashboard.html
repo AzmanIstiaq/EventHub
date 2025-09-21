@@ -128,7 +128,7 @@
     <!-- Hidden Create Event Form -->
     <div id="create-form" class="form-card hidden">
         <h2>Create Event</h2>
-        <form th:action="@{'/organiser/' + ${organiser.id} + '/events'}" method="post" onsubmit="return validateEventForm(this)">
+        <form th:action="@{'/organiser/events/create'}" method="post" onsubmit="return validateEventForm(this)">
             <label>Title:</label>
             <input type="text" name="title" required>
 
@@ -168,7 +168,7 @@
             <!-- Inline edit form -->
             <div th:id="'form-' + ${event.id}" class="form-card hidden">
                 <h2>Edit Event</h2>
-                <form th:action="@{'/organiser/' + ${organiser.id} + '/events/' + ${event.id} + '/edit'}"
+                <form th:action="@{'/organiser/events/' + ${event.id} + '/edit'}"
                       method="post" onsubmit="return validateEventForm(this)">
                     <label>Title:</label>
                     <input type="text" name="title" th:value="${event.title}" required>
@@ -215,7 +215,7 @@
                                 th:if="${event.dateTime.isAfter(T(java.time.LocalDateTime).now())}"
                                 th:onclick="'showEditForm(' + ${event.id} + ')'">Edit</button>
                         <a class="btn btn-delete"
-                           th:href="@{'/organiser/' + ${organiser.id} + '/events/' + ${event.id} + '/delete'}">Delete</a>
+                           th:href="@{'/organiser/events/' + ${event.id} + '/delete'}">Delete</a>
                     </div>
                 </div>
                 <p class="event-meta">
