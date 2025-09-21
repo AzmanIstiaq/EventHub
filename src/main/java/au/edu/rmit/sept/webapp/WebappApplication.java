@@ -7,11 +7,14 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.security.crypto.password.PasswordEncoder;
-
+import org.springframework.context.annotation.Profile;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.time.LocalDateTime;
 
-
+/**
+ * Main application class.
+ */
 @SpringBootApplication
 public class WebappApplication {
 	public static void main(String[] args) {
@@ -19,13 +22,14 @@ public class WebappApplication {
 	}
 
 	@Bean
+	@Profile("dev")
 	CommandLineRunner init(UserRepository userRepo,
 						   EventRepository eventRepo,
 						   RegistrationRepository registrationRepo,
 						   CategoryRepository categoryRepo,
-						   KeywordRepository keywordRepo,
-						   PasswordEncoder passwordEncoder) {
+						   KeywordRepository keywordRepo) {
 		return args -> {
+			PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 			// Organisers
 			User csit = userRepo.save(new User(
 					"CSIT Club",

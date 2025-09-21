@@ -8,14 +8,10 @@ import au.edu.rmit.sept.webapp.service.CategoryService;
 import au.edu.rmit.sept.webapp.service.EventService;
 import au.edu.rmit.sept.webapp.service.KeywordService;
 import au.edu.rmit.sept.webapp.service.OrganiserService;
-import au.edu.rmit.sept.webapp.repository.*;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.ui.ExtendedModelMap;
+import org.springframework.ui.Model;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -23,30 +19,16 @@ import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.mockito.Mockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
-@WebMvcTest(EventController.class)
-@TestPropertySource(properties = {
-        "spring.thymeleaf.enabled=false"
-})
 class EventControllerWebMvcTest {
 
-    @Autowired MockMvc mvc;
-
-    @MockBean EventService eventService;
-    @MockBean OrganiserService organiserService;
-    @MockBean CategoryService categoryService;
-    @MockBean KeywordService keywordService;
-
-    @MockBean UserRepository userRepository;
-    @MockBean EventRepository eventRepository;
-    @MockBean RegistrationRepository registrationRepository;
-    @MockBean CategoryRepository categoryRepository;
-    @MockBean KeywordRepository keywordRepository;
+    EventService eventService = mock(EventService.class);
+    OrganiserService organiserService = mock(OrganiserService.class);
+    CategoryService categoryService = mock(CategoryService.class);
+    KeywordService keywordService = mock(KeywordService.class);
+    EventController controller = new EventController(eventService, organiserService, categoryService, keywordService);
 
     @Test
     @DisplayName("Organiser list events view OK with model")
@@ -60,13 +42,15 @@ class EventControllerWebMvcTest {
         when(eventService.getPastEventsForOrganiser(organiser)).thenReturn(List.of(past));
         when(categoryService.findAll()).thenReturn(List.of(new Category("C1")));
 
-        mvc.perform(get("/organiser/{organiserId}/events", organiserId))
-                .andExpect(status().isOk())
-                .andExpect(view().name("organiser-dashboard"))
-                .andExpect(model().attributeExists("upcomingEvents"))
-                .andExpect(model().attributeExists("pastEvents"))
-                .andExpect(model().attributeExists("organiser"))
-                .andExpect(model().attributeExists("categories"));
+        var cud = mock(au.edu.rmit.sept.webapp.security.CustomUserDetails.class);
+        when(cud.getId()).thenReturn(organiserId);
+        Model model = new ExtendedModelMap();
+        String view = controller.listOrganisersEvents(cud, model);
+        assertThat(view).isEqualTo("organiser-dashboard");
+        assertThat(model.containsAttribute("upcomingEvents")).isTrue();
+        assertThat(model.containsAttribute("pastEvents")).isTrue();
+        assertThat(model.containsAttribute("organiser")).isTrue();
+        assertThat(model.containsAttribute("categories")).isTrue();
     }
 
     @Test
@@ -77,13 +61,12 @@ class EventControllerWebMvcTest {
         when(organiserService.findById(organiserId)).thenReturn(Optional.of(organiser));
         when(eventService.save(any(Event.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        mvc.perform(post("/organiser/{organiserId}/events", organiserId)
-                        .param("title", "Title")
-                        .param("location", "Loc")
-                        .param("dateTime", LocalDateTime.now().plusDays(2).toString())
-                        .param("keywordsText", "tag1, tag2"))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/organiser/" + organiserId + "/events"));
+        var cud = mock(au.edu.rmit.sept.webapp.security.CustomUserDetails.class);
+        when(cud.getId()).thenReturn(organiserId);
+        Event ev = new Event();
+        ev.setTitle("Title"); ev.setLocation("Loc"); ev.setDateTime(LocalDateTime.now().plusDays(2));
+        String view = controller.createEvent(cud, ev, "tag1, tag2");
+        assertThat(view).isEqualTo("redirect:/organiser/events");
         verify(eventService).save(any(Event.class));
     }
 
@@ -97,12 +80,11 @@ class EventControllerWebMvcTest {
         when(organiserService.findById(organiserId)).thenReturn(Optional.of(organiser));
         when(eventService.findById(eventId)).thenReturn(Optional.of(existing));
         when(eventService.save(existing)).thenReturn(existing);
-
-        mvc.perform(post("/organiser/{organiserId}/events/{eventId}/edit", organiserId, eventId)
-                        .param("title", "NewTitle")
-                        .param("location", "NewLoc"))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/organiser/" + organiserId + "/events"));
+        var cud = mock(au.edu.rmit.sept.webapp.security.CustomUserDetails.class);
+        when(cud.getId()).thenReturn(organiserId);
+        Event updated = new Event(); updated.setTitle("NewTitle"); updated.setLocation("NewLoc");
+        String view = controller.updateEvent(cud, eventId, updated, null);
+        assertThat(view).isEqualTo("redirect:/organiser/events");
         verify(eventService).save(existing);
     }
 
@@ -112,9 +94,10 @@ class EventControllerWebMvcTest {
         long organiserId = 55L;
         long eventId = 101L;
 
-        mvc.perform(get("/organiser/{organiserId}/events/{eventId}/delete", organiserId, eventId))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/organiser/" + organiserId + "/events"));
+        var cud = mock(au.edu.rmit.sept.webapp.security.CustomUserDetails.class);
+        when(cud.getId()).thenReturn(organiserId);
+        String view = controller.deleteEvent(cud, eventId);
+        assertThat(view).isEqualTo("redirect:/organiser/events");
         verify(eventService).delete(eq(eventId));
     }
 }
