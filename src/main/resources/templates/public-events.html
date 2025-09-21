@@ -2,112 +2,23 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
   <title>Events</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      background: #f5f7fa;
-      color: #333;
-    }
-
-    .container {
-      max-width: 1000px;
-      margin: 2rem auto;
-      padding: 1rem;
-    }
-
-    h1, h2 { margin-bottom: 1rem; }
-
-    .btn {
-      padding: 0.4rem 0.8rem;
-      border: none;
-      border-radius: 6px;
-      text-decoration: none;
-      color: white;
-      font-size: 0.9rem;
-      cursor: pointer;
-    }
-
-    .btn-grey { background: #6c757d; }
-    .btn-register { background: #28a745; }
-    .btn-cancel { background: #dc3545; }
-
-    .events-grid {
-      display: grid;
-      gap: 1.5rem;
-    }
-
-    .event-card {
-      background: white;
-      border-radius: 10px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-      padding: 1rem 1.5rem;
-    }
-
-    .event-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .event-meta {
-      font-size: 0.9rem;
-      color: #666;
-      margin: 0.5rem 0 1rem;
-    }
-
-    .empty-message {
-      font-style: italic;
-      color: #666;
-      margin: 1rem 0;
-    }
-
-    /* Tabs */
-    .tabs {
-      display: flex;
-      border-bottom: 2px solid #ddd;
-      margin-bottom: 1rem;
-    }
-
-    .tab {
-      padding: 0.6rem 1.2rem;
-      cursor: pointer;
-      background: #f0f0f0;
-      margin-right: 0.2rem;
-      border-radius: 6px 6px 0 0;
-    }
-
-    .tab.active {
-      background: white;
-      border: 1px solid #ddd;
-      border-bottom: none;
-    }
-
-    .tab-content {
-      display: none;
-    }
-
-    .tab-content.active {
-      display: block;
-    }
-
-  </style>
+    <link rel="stylesheet" th:href="@{/style.css}">
 </head>
 <body>
-<div th:replace="~{fragments/navbar}"></div>
+<div th:replace="~{fragments/navbar-common}"></div>
 
 <div class="container">
   <h1>Events</h1>
 
   <!-- Tab headers -->
   <div class="tabs">
-    <div class="tab" th:classappend="${activeTab == 'upcoming'} ? 'active'" onclick="openTab('upcoming')">Upcoming Events</div>
-    <div class="tab" th:if="${currentUser != null}" onclick="openTab('registered')">Registered Events</div>
+    <div class="tab" th:classappend="${activeTab == 'upcoming' or activeTab == null} ? ' active'" onclick="openTab('upcoming')">Upcoming Events</div>
+    <div class="tab" th:if="${currentUser != null}" th:classappend="${activeTab == 'registered'} ? ' active'" onclick="openTab('registered')">Registered Events</div>
     <div class="tab" th:classappend="${activeTab == 'search'} ? ' active'" onclick="openTab('search')">Search</div>
   </div>
 
   <!-- Upcoming Events Tab -->
-  <div id="upcoming" class="tab-content" th:classappend="${activeTab == 'upcoming'} ? ' active'">
+  <div id="upcoming" class="tab-content" th:classappend="${activeTab == 'upcoming' or activeTab == null} ? ' active'">
     <h2>All Upcoming Events</h2>
     <div th:if="${#lists.isEmpty(events)}" class="empty-message">
       There are no upcoming events.

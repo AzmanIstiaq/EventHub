@@ -1,0 +1,283 @@
+/* ===== IMPORT FONT ===== */
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+
+/* ===== GLOBAL STYLING ===== */
+html, body {
+    margin: 0;
+    padding: 0;
+    font-family: "Montserrat", sans-serif;
+    background: #f5f7fa;
+    color: #333;
+    overflow-x: hidden;
+}
+
+body {
+    padding-top: 70px; /* space for fixed navbar */
+}
+
+/* ===== NAVBAR ===== */
+.main-header {
+    background: white;
+    color: black;
+    padding: 15px 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    z-index: 1000;
+    box-sizing: border-box;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+}
+
+.logo {
+    font-size: 1.6em;
+    font-weight: bold;
+}
+
+.nav-links a {
+    color: black;
+    margin-left: 20px;
+    text-decoration: none;
+    font-weight: bold;
+    transition: color 0.2s ease;
+}
+
+.nav-links a:hover {
+    color: #2563eb;
+}
+
+/* ===== HERO SECTION ===== */
+.hero {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    text-align: left;
+    margin: 20px auto;
+    max-width: 1200px;
+    border-radius: 20px;
+    overflow: hidden;
+}
+
+.hero img {
+    width: 100%;
+    max-height: 450px;
+    object-fit: cover;
+    border-radius: 20px;
+}
+
+.hero h1, .hero h2 {
+    position: absolute;
+    color: white;
+    text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.7);
+    margin: 0;
+}
+
+.hero h2 {
+    bottom: 30%;
+    left: 10%;
+    font-size: 1.8rem;
+}
+
+.hero h1 {
+    bottom: 15%;
+    left: 10%;
+    font-size: 3rem;
+    font-weight: bold;
+}
+
+/* ===== EVENT GRID ON HOMEPAGE ===== */
+.event-section {
+    max-width: 1100px;
+    margin: 2rem auto;
+    padding: 1rem;
+}
+
+.event-section h2 {
+    text-align: center;
+    font-size: 2rem;
+    margin-bottom: 1.5rem;
+}
+
+.event-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+}
+
+.event-card {
+    background: white;
+    padding: 1rem;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    cursor: pointer;
+}
+
+.event-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.15);
+}
+
+.event-card h3 {
+    margin: 0 0 0.5rem;
+    font-size: 1.3rem;
+    color: #2563eb;
+}
+
+.event-date {
+    font-size: 0.9rem;
+    color: #666;
+    margin-bottom: 0.5rem;
+}
+
+.event-card-link {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+}
+
+.event-card a,
+.event-card a:visited {
+    text-decoration: none;
+    color: inherit;
+}
+
+.event-card a:hover {
+    text-decoration: none;
+    color: #2563eb;
+}
+
+/* ===== EVENTS PAGE ===== */
+.container {
+    max-width: 1000px;
+    margin: 2rem auto;
+    padding: 1rem;
+}
+
+.events-grid {
+    display: grid;
+    gap: 1.5rem;
+    margin-top: 1rem;
+}
+
+.event-header h2 {
+    margin: 0;
+    font-size: 1.4rem;
+    font-weight: 700;
+}
+
+.event-meta {
+    font-size: 0.9rem;
+    color: #6b7280;
+    margin: 0.3rem 0 1rem;
+}
+
+.empty-message {
+    font-style: italic;
+    color: #666;
+    margin: 1rem 0;
+}
+
+/* ===== TABS ===== */
+.tabs {
+    display: flex;
+    border-bottom: 2px solid #ddd;
+    margin-bottom: 1rem;
+}
+
+.tab {
+    padding: 0.6rem 1.2rem;
+    cursor: pointer;
+    background: #f0f0f0;
+    margin-right: 0.2rem;
+    border-radius: 6px 6px 0 0;
+    transition: background 0.2s ease;
+}
+
+.tab.active {
+    background: #2563eb;
+    color: white;
+    border: 1px solid #ddd;
+    border-bottom: none;
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+/* ===== PRIMARY ACTION BUTTONS (Event Detail, Register, Cancel) ===== */
+.btn-grey, .btn-register, .btn-cancel,
+.btn-grey:link, .btn-grey:visited,
+.btn-register:link, .btn-register:visited,
+.btn-cancel:link, .btn-cancel:visited {
+    background: #2563eb; /* Blue background */
+    color: white !important;
+    border: none;
+    border-radius: 8px;
+    padding: 0.4rem 0.8rem;
+    font-size: 0.9rem;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    font-weight: 600;
+    transition: background 0.2s ease, transform 0.1s ease;
+}
+
+.btn-grey:hover, .btn-register:hover, .btn-cancel:hover {
+    background: #1e4ed8;
+    transform: translateY(-2px);
+}
+
+/* ===== SHARE BUTTONS ===== */
+.share-section a,
+.share-section button {
+    border: none;
+    border-radius: 6px;
+    padding: 0.35rem 0.75rem;
+    font-size: 0.85rem;
+    cursor: pointer;
+    margin: 0.2rem 0.2rem 0 0;
+    display: inline-block;
+    text-decoration: none;
+    transition: background 0.2s ease, transform 0.1s ease;
+}
+
+/* 🌐 Social Media Buttons (blue) */
+.share-section a[href*="facebook"],
+.share-section a[href*="twitter"],
+.share-section a[href*="linkedin"],
+.share-section a[href^="mailto"] {
+    background: #2563eb;
+    color: white;
+}
+
+.share-section a[href*="facebook"]:hover,
+.share-section a[href*="twitter"]:hover,
+.share-section a[href*="linkedin"]:hover,
+.share-section a[href^="mailto"]:hover {
+    background: #1e4ed8;
+    transform: translateY(-2px);
+}
+
+/* 📋 Copy Link & Share Buttons (black) */
+.share-section button,
+.share-section a:not([href*="facebook"]):not([href*="twitter"]):not([href*="linkedin"]):not([href^="mailto"]) {
+    background: #1f1f1f;
+    color: white;
+}
+
+.share-section button:hover,
+.share-section a:not([href*="facebook"]):not([href*="twitter"]):not([href*="linkedin"]):not([href^="mailto"]):hover {
+    background: #000;
+    transform: translateY(-2px);
+}

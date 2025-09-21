@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
+    <link rel="stylesheet" th:href="@{/style.css}">
     <title>Organiser Dashboard</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
             margin: 0;
             background: #f5f7fa;
             color: #333;
@@ -117,7 +117,7 @@
     </style>
 </head>
 <body>
-<div th:replace="~{fragments/navbar}"></div>
+<div th:replace="~{fragments/navbar-common}"></div>
 
 <div class="container">
     <header>
