@@ -66,6 +66,13 @@ public class WebappApplication {
 					UserType.STUDENT
 			));
 
+			User admin = userRepo.save(new User(
+					"Admin User",
+					"admin@uni.edu",
+					passwordEncoder.encode("password"),
+					UserType.ADMIN
+			));
+
 			// Continue with categories, events, registrations as before
 			Category cat1 = categoryRepo.save(new Category("CAT1"));
 			Category cat2 = categoryRepo.save(new Category("CAT2"));

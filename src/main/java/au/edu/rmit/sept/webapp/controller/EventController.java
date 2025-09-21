@@ -4,10 +4,12 @@ import au.edu.rmit.sept.webapp.model.Category;
 import au.edu.rmit.sept.webapp.model.Event;
 import au.edu.rmit.sept.webapp.model.Keyword;
 import au.edu.rmit.sept.webapp.model.User;
+import au.edu.rmit.sept.webapp.security.CustomUserDetails;
 import au.edu.rmit.sept.webapp.service.CategoryService;
 import au.edu.rmit.sept.webapp.service.EventService;
 import au.edu.rmit.sept.webapp.service.KeywordService;
 import au.edu.rmit.sept.webapp.service.OrganiserService;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -40,9 +42,10 @@ public class EventController {
 
 
     // List events for given organiser ID
-    @GetMapping("/{organiserId}/events")
-    public String listOrganisersEvents(@PathVariable Long organiserId, Model model) {
-        User organiser = organiserService.findById(organiserId)
+    @GetMapping("/events")
+    public String listOrganisersEvents(@AuthenticationPrincipal CustomUserDetails currentUser,
+                                       Model model) {
+        User organiser = organiserService.findById(currentUser.getId())
                 .orElseThrow(() -> new IllegalArgumentException("Invalid organiser ID"));
         List<Event> upcomingEvents = eventService.getUpcomingEventsForOrganiser(organiser);
         List<Event> pastEvents = eventService.getPastEventsForOrganiser(organiser);
@@ -61,11 +64,11 @@ public class EventController {
 
 
     // Create new event for given organiser
-    @PostMapping("/{organiserId}/events")
-    public String createEvent(@PathVariable Long organiserId,
+    @PostMapping("/events/create")
+    public String createEvent(@AuthenticationPrincipal CustomUserDetails currentUser,
                               @ModelAttribute Event event,
                               @RequestParam(required = false) String keywordsText) {
-        User organiser = organiserService.findById(organiserId)
+        User organiser = organiserService.findById(currentUser.getId())
                 .orElseThrow(() -> new IllegalArgumentException("Invalid organiser ID"));
         event.setOrganiser(organiser);
 
@@ -79,17 +82,17 @@ public class EventController {
         }
 
         eventService.save(event);
-        return "redirect:/organiser/" + organiserId + "/events";
+        return "redirect:/organiser/events";
     }
 
 
     /// Updates an event based on the form input received
-    @PostMapping("/{organiserId}/events/{eventId}/edit")
-    public String updateEvent(@PathVariable Long organiserId,
+    @PostMapping("/events/{eventId}/edit")
+    public String updateEvent(@AuthenticationPrincipal CustomUserDetails currentUser,
                               @PathVariable Long eventId,
                               @ModelAttribute Event updatedEvent,
                               @RequestParam(required = false) String keywordsText) {
-        User organiser = organiserService.findById(organiserId)
+        User organiser = organiserService.findById(currentUser.getId())
                 .orElseThrow(() -> new IllegalArgumentException("Invalid organiser ID"));
 
         Event event = eventService.findById(eventId)
@@ -114,13 +117,14 @@ public class EventController {
 
         eventService.save(event);
 
-        return "redirect:/organiser/" + organiserId + "/events";
+        return "redirect:/organiser/events";
     }
 
     /// Deletes an event for a given organiser ID and event ID
-    @GetMapping("/{organiserId}/events/{eventId}/delete")
-    public String deleteEvent(@PathVariable Long organiserId, @PathVariable Long eventId) {
+    @GetMapping("/events/{eventId}/delete")
+    public String deleteEvent(@AuthenticationPrincipal CustomUserDetails currentUser,
+                              @PathVariable Long eventId) {
         eventService.delete(eventId);
-        return "redirect:/organiser/" + organiserId + "/events";
+        return "redirect:/organiser/events";
     }
 }

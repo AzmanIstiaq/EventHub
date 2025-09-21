@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Optional;
 
 @Controller
-@RequestMapping("/events")
+@RequestMapping("/student/events")
 public class FeedbackController {
 
     @Autowired
@@ -27,12 +27,6 @@ public class FeedbackController {
         this.userService = userService;
     }
 
-    @GetMapping("/{eventId}/feedback")
-    public String showFeedbackForm(@PathVariable Long eventId, Model model, @RequestParam User user) {
-        model.addAttribute("eventId", eventId);
-        model.addAttribute("user", user);
-        return "feedback-form";
-    }
 
     @PostMapping("/{eventId}/feedback")
     public String submitFeedback(@PathVariable Long eventId,
@@ -44,6 +38,6 @@ public class FeedbackController {
         User currentUser = userService.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid event ID"));
         feedbackService.submitFeedback(currentUser, event, rating, comment);
-        return "redirect:/events/student/" + userId;
+        return "redirect:/student/events";
     }
 }

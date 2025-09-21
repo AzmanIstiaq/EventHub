@@ -86,9 +86,9 @@ public class Event {
 
     public Set<Feedback> getFeedbacks() { return feedbacks; }
 
-    public Boolean checkUserRegistered(User user) {
+    public Boolean checkUserRegistered(Long userId) {
         for (Registration registration : registrations) {
-            if (registration.getUser().equals(user)) {
+            if (registration.getUser().getId().equals(userId)) {
                 return true;
             }
         }

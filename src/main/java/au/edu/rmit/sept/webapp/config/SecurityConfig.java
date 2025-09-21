@@ -1,5 +1,6 @@
-package au.edu.rmit.sept.webapp.security;
+package au.edu.rmit.sept.webapp.config;
 
+import au.edu.rmit.sept.webapp.security.CustomUserDetailsService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -27,20 +28,31 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/login", "/css/**", "/js/**").permitAll()
+                        .requestMatchers("/","/login", "/css/**", "/js/**").permitAll()
+                        .requestMatchers("/events/**").permitAll()
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/organiser/**").hasRole("ORGANISER")
+                        .requestMatchers("/student/events/**").hasRole("STUDENT")
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
                         .loginPage("/login")
-                        .loginProcessingUrl("/login") // The POST URL that Spring Security listens on
-                        .defaultSuccessUrl("/", true)
-                        .failureUrl("/login?error=true") // <-- redirect here on failure
+                        .successHandler((request, response, authentication) -> {
+                            var auth = authentication.getAuthorities().iterator().next().getAuthority();
+                            if (auth.equals("ROLE_ADMIN")) {
+                                response.sendRedirect("/admin/events");
+                            } else if (auth.equals("ROLE_ORGANISER")) {
+                                response.sendRedirect("/organiser/events");
+                            } else if (auth.equals("ROLE_STUDENT")) {
+                                response.sendRedirect("/student/events");
+                            } else {
+                                response.sendRedirect("/events");
+                            }
+                        })
+                        .failureUrl("/login?error=true")
                         .permitAll()
                 )
                 .logout(logout -> logout.permitAll());
-
-        // If you need to disable CSRF (e.g., for testing APIs)
-        // http.csrf(csrf -> csrf.disable());
 
         return http.build();
     }

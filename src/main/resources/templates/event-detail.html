@@ -83,7 +83,7 @@
     <div th:if="${currentUser != null}">
         <!-- Cancel if registered -->
         <form th:if="${event.checkUserRegistered(currentUser)}"
-              th:action="@{'/events/student/cancel/' + ${event.id}}"
+              th:action="@{'/student/events/cancel/' + ${event.id}}"
               method="post" style="display:inline;">
             <input type="hidden" name="userId" th:value="${currentUser.id}"/>
             <button type="submit" class="btn btn-cancel">Cancel Registration</button>
@@ -91,7 +91,7 @@
 
         <!-- Register if not registered -->
         <form th:if="${!event.checkUserRegistered(currentUser)}"
-              th:action="@{'/events/student/register/' + ${event.id}}"
+              th:action="@{'/student/events/register/' + ${event.id}}"
               method="post" style="display:inline;">
             <input type="hidden" name="userId" th:value="${currentUser.id}"/>
             <button type="submit" class="btn btn-register">Register</button>
@@ -99,13 +99,13 @@
 
         <!-- Back button -->
         <div>
-            <a th:href="@{'/events/student/' + ${currentUser.id}}" class="btn btn-back">← Back to Events</a>
+            <a th:href="@{'/student/events'}" class="btn btn-back">← Back to Events</a>
         </div>
     </div>
 
     <!-- If no logged-in user, show a different back button -->
     <div th:if="${currentUser == null}">
-        <a href="/events/student" class="btn btn-back">← Back to Events</a>
+        <a href="/" class="btn btn-back">← Back to Events</a>
     </div>
 </div>
 </body>

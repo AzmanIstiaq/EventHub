@@ -26,6 +26,10 @@ public class CustomUserDetails implements UserDetails {
         return Collections.singleton(new SimpleGrantedAuthority("ROLE_" + user.getType().name()));
     }
 
+    public User getUser() {
+        return user;
+    }
+
     @Override
     public String getPassword() { return user.getPassword(); }
 
@@ -46,20 +50,4 @@ public class CustomUserDetails implements UserDetails {
 
     public Long getId() { return user.getId(); } // custom getter
 
-//    @Service
-//    public static class CustomUserDetailsService implements UserDetailsService {
-//
-//        private final UserRepository userRepository;
-//
-//        public CustomUserDetailsService(UserRepository userRepository) {
-//            this.userRepository = userRepository;
-//        }
-//
-//        @Override
-//        public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-//            User user = userRepository.findByEmail(email)
-//                    .orElseThrow(() -> new UsernameNotFoundException("User not found"));
-//            return new CustomUserDetails(user);
-//        }
-//    }
 }
