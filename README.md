@@ -13,6 +13,10 @@
 - Nghi Le Hoang Vinh (s3978216)
 - Azman Istiaq Asfi (s4076788)
 
+## Notes:
+- All documentation is in docs/Milestone2, including test execution evidence, which is under docs/Milestone2/CoverageReport.
+- Scrum planning is under the 'Planning' tab.
+
 ## Records
 
 - Github repository: https://github.com/cosc2299-2025/team-project-group-p04-09
