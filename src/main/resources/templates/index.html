@@ -1,10 +1,36 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Event Form</title>
+    <link rel="stylesheet" th:href="@{/style.css}">
 </head>
 <body>
-<div th:replace="fragments/navbar"></div>
+    <div th:replace="~{fragments/navbar-common :: navbar-common}"></div>
+    <section class="hero">
+        <img src="/image/melbourne.jpg" alt="Melbourne Picture">
+<!--        Photo by <a href="https://unsplash.com/@pemacallan?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash">Paul Macallan</a> on <a href="https://unsplash.com/photos/a-green-and-yellow-train-traveling-past-a-tall-building-wN3Pk6yJL-A?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash">Unsplash</a>-->
+        <div class="hero-text">
+        <h2>Best Events In</h2>
+        <h1>MELBOURNE</h1>
+        </div>
+    </section>
+
+    <section class="event-section">
+        <h2>Upcoming Events</h2>
+        <div class="event-grid">
+            <a class="event-card-link"
+               th:each="event : ${events}"
+               th:href="@{'/events/student/public/detail/' + ${event.id}}">
+                <div class="event-card">
+                    <h3 th:text="${event.title}"></h3>
+                    <p class="event-date">
+                        <span th:text="${#temporals.format(event.dateTime, 'yyyy-MM-dd HH:mm')}"></span> @
+                        <span th:text="${event.location}"></span>
+                    </p>
+                    <p th:text="${event.description}"></p>
+                </div>
+            </a>
+        </div>
+    </section>
 
 </body>
 </html>

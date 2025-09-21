@@ -2,8 +2,9 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
   <title>Admin - Event Details</title>
+    <link rel="stylesheet" th:href="@{/style.css}">
   <style>
-    body { font-family: Arial, sans-serif; margin: 20px; background-color: #f8f9fa; }
+    body { margin: 20px; background-color: #f8f9fa; }
     .admin-header { background-color: #dc3545; color: white; padding: 15px; margin-bottom: 20px; border-radius: 5px; }
     .card { background: white; padding: 20px; margin-bottom: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
     .btn { padding: 10px 20px; margin: 5px; border: none; border-radius: 4px; cursor: pointer; text-decoration: none; display: inline-block; }
@@ -26,7 +27,7 @@
   </style>
 </head>
 <body>
-<div th:replace="fragments/navbar"></div>
+<div th:replace="fragments/navbar-common"></div>
 
 <div class="admin-header">
   <h1>📋 Event Details - Admin View</h1>
