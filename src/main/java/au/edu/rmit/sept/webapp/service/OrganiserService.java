@@ -19,10 +19,6 @@ public class OrganiserService {
         return repo.save(organiser);
     }
 
-    public Optional<User> findById(long id) {
-        return repo.findById(id);
-    }
-
     public List<User> findAll() {
         return repo.findAll();
     }

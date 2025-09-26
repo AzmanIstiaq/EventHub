@@ -5,6 +5,7 @@ import au.edu.rmit.sept.webapp.model.Registration;
 import au.edu.rmit.sept.webapp.model.User;
 import au.edu.rmit.sept.webapp.repository.RegistrationRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -18,10 +19,9 @@ public class RegistrationService {
     }
 
     // Register a user for an event
+    @Transactional
     public Registration registerUserForEvent(User user, Event event) {
-        // Prevent duplicate registration
-        boolean alreadyRegistered = registrationRepository.existsByUserAndEvent(user, event);
-        if (alreadyRegistered) {
+        if (registrationRepository.existsByUserAndEvent(user, event)) {
             throw new IllegalStateException("User already registered for this event");
         }
 
@@ -32,18 +32,34 @@ public class RegistrationService {
         return registrationRepository.save(registration);
     }
 
-    // Get all registrations for a user
+    // Find registrations by user ID
+    public List<Registration> findByUserId(long id) {
+        return registrationRepository.findByUser_UserId(id);
+    }
+
     public List<Registration> getRegistrationsForUser(User user) {
         return registrationRepository.findByUser(user);
     }
 
-    // Get all registrations for an event
     public List<Registration> getRegistrationsForEvent(Event event) {
         return registrationRepository.findByEvent(event);
     }
 
+    // Delete a registration for a user and event
+    @Transactional
     public void deleteRegistrationForEvent(Long userId, Long eventId) {
-        registrationRepository.deleteByUser_UserIdAndEvent_EventId(userId, eventId);
+        int deleted = registrationRepository.deleteRegistration(userId, eventId);
+        if (deleted == 0) {
+            throw new IllegalArgumentException(
+                    "No registration found for userId=" + userId + " and eventId=" + eventId
+            );
+        }
+        // Clear persistence context to ensure entity is removed immediately
+        registrationRepository.flush();
+    }
+
+    // Check if a user is registered for an event
+    public boolean isUserRegistered(Long eventId, Long userId) {
+        return registrationRepository.existsByEvent_EventIdAndUser_UserId(eventId, userId);
     }
 }
-

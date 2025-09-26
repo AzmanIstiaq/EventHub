@@ -5,14 +5,12 @@ import au.edu.rmit.sept.webapp.model.Category;
 import au.edu.rmit.sept.webapp.model.Event;
 import au.edu.rmit.sept.webapp.model.Keyword;
 import au.edu.rmit.sept.webapp.model.User;
-import au.edu.rmit.sept.webapp.service.CategoryService;
-import au.edu.rmit.sept.webapp.service.EventService;
-import au.edu.rmit.sept.webapp.service.KeywordService;
-import au.edu.rmit.sept.webapp.service.OrganiserService;
+import au.edu.rmit.sept.webapp.service.*;
 import au.edu.rmit.sept.webapp.security.CustomUserDetails;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Mockito;
 import org.springframework.ui.ExtendedModelMap;
 import org.springframework.ui.Model;
 
@@ -27,10 +25,10 @@ import static org.mockito.Mockito.when;
 
 class EventCreateUserStoryTest {
     EventService eventService = org.mockito.Mockito.mock(EventService.class);
-    OrganiserService organiserService = org.mockito.Mockito.mock(OrganiserService.class);
+    UserService userService = org.mockito.Mockito.mock(UserService.class);
     CategoryService categoryService = org.mockito.Mockito.mock(CategoryService.class);
     KeywordService keywordService = org.mockito.Mockito.mock(KeywordService.class);
-    OrganiserController controller = new OrganiserController(eventService, organiserService, categoryService, keywordService);
+    OrganiserController controller = new OrganiserController(eventService, userService, categoryService, keywordService);
 
     @Test
     @DisplayName("AC1: organizer sees Create Event form on organiser dashboard")
@@ -38,11 +36,11 @@ class EventCreateUserStoryTest {
         long organiserId = 42L;
         User organiser = new User();
         organiser.setUserId(organiserId);
-        when(organiserService.findById(organiserId)).thenReturn(Optional.of(organiser));
+        when(userService.findById(organiserId)).thenReturn(Optional.of(organiser));
         when(eventService.getUpcomingEventsForOrganiser(organiser)).thenReturn(List.of());
         when(eventService.getPastEventsForOrganiser(organiser)).thenReturn(List.of());
         when(categoryService.findAll()).thenReturn(List.of(new Category("CAT1"), new Category("CAT2")));
-        CustomUserDetails cud = org.mockito.Mockito.mock(CustomUserDetails.class);
+        CustomUserDetails cud = Mockito.mock(CustomUserDetails.class);
         when(cud.getId()).thenReturn(organiserId);
         Model model = new ExtendedModelMap();
         String view = controller.listOrganisersEvents(cud, model);
@@ -64,7 +62,7 @@ class EventCreateUserStoryTest {
         Category cat = new Category("CAT1");
         cat.setId(7L);
 
-        when(organiserService.findById(organiserId)).thenReturn(Optional.of(organiser));
+        when(userService.findById(organiserId)).thenReturn(Optional.of(organiser));
         when(categoryService.findAll()).thenReturn(List.of(cat));
         Keyword kwWelcome = new Keyword();
         kwWelcome.setKeyword("welcome");   // adjust setter if your field isn’t "name"
@@ -106,7 +104,7 @@ class EventCreateUserStoryTest {
     void submitMissingFieldsShowsValidationErrors() throws Exception {
         long organiserId = 42L;
         User organiser = new User(); organiser.setUserId(organiserId);
-        when(organiserService.findById(organiserId)).thenReturn(Optional.of(organiser));
+        when(userService.findById(organiserId)).thenReturn(Optional.of(organiser));
         CustomUserDetails cud = org.mockito.Mockito.mock(CustomUserDetails.class);
         when(cud.getId()).thenReturn(organiserId);
         Event ev = new Event();

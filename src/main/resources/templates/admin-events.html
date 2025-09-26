@@ -94,7 +94,7 @@
         </td>
         <td class="event-actions">
             <!-- View Event Details -->
-            <a th:href="@{'/admin/events/' + ${event.eventId}}"
+            <a th:href="@{'/events/detail/' + ${event.eventId}}"
                class="btn btn-info"
                style="font-size: 0.8em;">👁️ View</a>
 
@@ -104,7 +104,7 @@
                style="font-size: 0.8em;">✏️ Edit</a>
 
             <!-- Delete Event -->
-            <form th:action="@{'/admin/events/' + ${event.eventId} + '/delete'}"
+            <form th:action="@{'/events/' + ${event.eventId} + '/delete'}"
                   method="post"
                   style="display: inline;"
                   onsubmit="return confirm('Are you sure you want to delete this event? This action cannot be undone.');">

@@ -35,8 +35,8 @@
 
 <!-- Navigation Links -->
 <div style="margin-bottom: 20px;">
-    <a href="/admin/dashboard" class="btn btn-primary">📊 Dashboard</a>
-    <a href="/admin/events" class="btn btn-info">📅 Manage Events</a>
+    <a href="/dashboard" class="btn btn-primary">📊 Dashboard</a>
+    <a href="/events" class="btn btn-info">📅 Manage Events</a>
 </div>
 
 <!-- User Statistics -->
@@ -66,7 +66,8 @@
     <h3>👥 No Users Found</h3>
     <p>There are currently no users in the system.</p>
 </div>
-
+<div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
+<div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}"></div>
 <table th:unless="${users == null || #lists.isEmpty(users)}">
     <thead>
     <tr>
@@ -107,7 +108,7 @@
         </td>
         <td>
             <!-- View User Details -->
-            <a th:href="@{'/users/' + ${user.userId}}"
+            <a th:href="@{'/admin/users/' + ${user.userId}}"
                class="btn btn-info"
                style="font-size: 0.8em;">👁️ View</a>
 
@@ -121,6 +122,7 @@
                   method="post"
                   style="display: inline;"
                   onsubmit="return confirm('Are you sure you want to deactivate this user? This will prevent them from logging in.');">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                 <button type="submit"
                         class="btn btn-danger"
                         style="font-size: 0.8em;"

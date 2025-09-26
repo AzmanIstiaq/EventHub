@@ -26,36 +26,37 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http
+        http.csrf(csrf -> csrf
+                .ignoringRequestMatchers("/h2-console/**")
+        )
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/","/login", "/css/**", "/js/**", "/image/**").permitAll()
-                        .requestMatchers("/events/**").permitAll()
+                        .requestMatchers("/", "/login", "/css/**", "/js/**", "/image/**").permitAll()
+                        .requestMatchers("/events/public/**").permitAll()
+                        .requestMatchers("/h2-console/**").permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/organiser/**").hasRole("ORGANISER")
-                        .requestMatchers("/student/events/**").hasRole("STUDENT")
+                        .requestMatchers("/events/**").authenticated()
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
                         .loginPage("/login")
                         .successHandler((request, response, authentication) -> {
                             var auth = authentication.getAuthorities().iterator().next().getAuthority();
-                            if (auth.equals("ROLE_ADMIN")) {
-                                response.sendRedirect("/admin/events");
-                            } else if (auth.equals("ROLE_ORGANISER")) {
-                                response.sendRedirect("/organiser/events");
-                            } else if (auth.equals("ROLE_STUDENT")) {
-                                response.sendRedirect("/student/events");
-                            } else {
+                            if (auth.equals("ROLE_ADMIN") ||  auth.equals("ROLE_ORGANISER") || auth.equals("ROLE_STUDENT")) {
                                 response.sendRedirect("/events");
+                            } else {
+                                response.sendRedirect("/");
                             }
                         })
                         .failureUrl("/login?error=true")
                         .permitAll()
                 )
-                .logout(logout -> logout.permitAll());
+                .logout(logout -> logout.permitAll())
+                .headers(headers -> headers.frameOptions().sameOrigin());  // <- Allow H2 console frames
+
 
         return http.build();
     }
+
 
     @Bean
     public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {

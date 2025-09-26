@@ -48,6 +48,6 @@ public class CustomUserDetails implements UserDetails {
     @Override
     public boolean isEnabled() { return true; }
 
-    public long getId() { return user.getUserId(); } // custom getter
+    public Long getId() { return user.getUserId(); } // custom getter
 
 }

@@ -1,6 +1,5 @@
 package au.edu.rmit.sept.webapp;
 
-import au.edu.rmit.sept.webapp.controller.PublicEventController;
 import au.edu.rmit.sept.webapp.controller.StudentController;
 import au.edu.rmit.sept.webapp.model.Event;
 import au.edu.rmit.sept.webapp.model.User;

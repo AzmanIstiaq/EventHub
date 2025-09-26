@@ -1,13 +1,11 @@
 package au.edu.rmit.sept.webapp;
 
-import au.edu.rmit.sept.webapp.controller.PublicEventController;
+import au.edu.rmit.sept.webapp.controller.EventController;
 import au.edu.rmit.sept.webapp.model.Event;
-import au.edu.rmit.sept.webapp.model.User;
 import au.edu.rmit.sept.webapp.service.CategoryService;
 import au.edu.rmit.sept.webapp.service.EventService;
 import au.edu.rmit.sept.webapp.service.RegistrationService;
 import au.edu.rmit.sept.webapp.service.UserService;
-import au.edu.rmit.sept.webapp.security.CustomUserDetails;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.ui.ExtendedModelMap;
@@ -22,13 +20,13 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
-class PublicEventControllerTest {
+class EventControllerTest {
 
     EventService eventService = mock(EventService.class);
     RegistrationService registrationService = mock(RegistrationService.class);
     UserService userService = mock(UserService.class);
     CategoryService categoryService = mock(CategoryService.class);
-    PublicEventController controller = new PublicEventController(eventService, registrationService, userService, categoryService);
+    EventController controller = new EventController(eventService, registrationService, userService, categoryService);
 
 
 

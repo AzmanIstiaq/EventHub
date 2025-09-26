@@ -8,6 +8,7 @@ import au.edu.rmit.sept.webapp.service.RegistrationService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.transaction.annotation.Transactional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -27,7 +28,7 @@ public class RegistrationServiceTest {
     @Test
     @DisplayName("registerUserForEvent(): prevents duplicate registrations (negative)")
     void preventDuplicateRegistration() {
-        User user = new User(); user.setUserId(1);
+        User user = new User(); user.setUserId(1L);
         Event event = new Event(); event.setEventId(10L);
         when(registrationRepository.existsByUserAndEvent(user, event)).thenReturn(true);
 
@@ -38,7 +39,7 @@ public class RegistrationServiceTest {
     @Test
     @DisplayName("registerUserForEvent(): registers successfully (positive)")
     void registersSuccessfully() {
-        User user = new User(); user.setUserId(2);
+        User user = new User(); user.setUserId(2L);
         Event event = new Event(); event.setEventId(20L);
 
         when(registrationRepository.existsByUserAndEvent(user, event)).thenReturn(false);
@@ -50,4 +51,25 @@ public class RegistrationServiceTest {
         assertThat(r.getEvent()).isEqualTo(event);
         verify(registrationRepository).save(any(Registration.class));
     }
+
+    @Test
+    @Transactional
+    public void testDeleteRegistration() {
+        // Create user and event
+        User user = new User();
+        user.setUserId(1L); // set manually for test
+        Event event = new Event();
+        event.setEventId(1L);
+
+        // Register user
+        Registration reg = registrationService.registerUserForEvent(user, event);
+        assertThat(registrationRepository.existsById(reg.getRegistrationId())).isTrue();
+
+        // Delete registration
+        registrationService.deleteRegistrationForEvent(user.getUserId(), event.getEventId());
+
+        // Check deletion
+        assertThat(registrationRepository.existsById(reg.getRegistrationId())).isFalse();
+    }
+
 }

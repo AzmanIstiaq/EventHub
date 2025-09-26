@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -87,11 +88,9 @@ public class Event {
 
     public Set<Feedback> getFeedbacks() { return feedbacks; }
 
-    public Boolean checkUserRegistered(Long userId) {
-        for (Registration registration : registrations) {
-            if (registration.getUser().getUserId() == (userId)) {
-                return true;
-            }
+    public Boolean checkUserRegistered(List<Registration> userRegistrations) {
+        for (Registration registration : userRegistrations) {
+            if (registration.getEvent().eventId.equals(eventId)) return true;
         }
         return false;
     }

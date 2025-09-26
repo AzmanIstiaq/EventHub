@@ -19,7 +19,7 @@
         <div class="event-grid">
             <a class="event-card-link"
                th:each="event : ${events}"
-               th:href="@{'/events/detail/' + ${event.eventId}}">
+               th:href="@{'/events/public/detail/' + ${event.eventId}}">
                 <div class="event-card">
                     <h3 th:text="${event.title}"></h3>
                     <p class="event-date">

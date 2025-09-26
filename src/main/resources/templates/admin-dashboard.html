@@ -57,8 +57,8 @@
 <div class="card">
   <h3>⚡ Quick Actions</h3>
   <div class="quick-actions">
-    <a href="/admin/events" class="btn btn-primary">📅 View All Events</a>
-    <a href="/admin/users" class="btn btn-info">👥 Manage Users</a>
+    <a href="/events" class="btn btn-primary">📅 View All Events</a>
+    <a href="/users" class="btn btn-info">👥 Manage Users</a>
     <a href="/" class="btn btn-success">🌍 Public Events</a>
     <a href="/organiser/1/events/new" class="btn btn-success">➕ Create Event</a>
   </div>
@@ -80,7 +80,7 @@
           <small th:text="${event.organiser.name}" style="color: #6c757d;">Organizer</small>
         </div>
         <div>
-          <a th:href="@{'/admin/events/' + ${event.eventId}}" class="btn btn-info" style="font-size: 0.8em;">View</a>
+          <a th:href="@{'/events/detail/' + ${event.eventId}}" class="btn btn-info" style="font-size: 0.8em;">View</a>
         </div>
       </div>
     </div>

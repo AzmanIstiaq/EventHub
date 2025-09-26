@@ -17,30 +17,30 @@
         <!-- Action buttons -->
         <div th:if="${currentUser != null}">
             <form th:if="${event.checkUserRegistered(currentUser)}"
-                  th:action="@{'/events/student/cancel/' + ${event.id}}"
+                  th:action="@{'/events/cancel/' + ${event.id}}"
                   method="post" style="display:inline;">
                 <input type="hidden" name="userId" th:value="${currentUser.getId()}"/>
                 <button type="submit" class="btn btn-cancel">Cancel Registration</button>
             </form>
 
             <form th:if="${!event.checkUserRegistered(currentUser)}"
-                  th:action="@{'/events/student/register/' + ${event.id}}"
+                  th:action="@{'/events/register/' + ${event.id}}"
                   method="post" style="display:inline;">
                 <input type="hidden" name="userId" th:value="${currentUser.getId()}"/>
                 <button type="submit" class="btn btn-register">Register</button>
             </form>
 
-            <a th:href="@{'/events/student/detail/' + ${event.id}}" class="btn btn-grey">Event Detail</a>
+            <a th:href="@{'/events/detail/' + ${event.id}}" class="btn btn-grey">Event Detail</a>
         </div>
 
         <div th:if="${currentUser == null}">
-            <a th:href="@{'/events/student/public/detail/' + ${event.id}}" class="btn btn-grey">Event Detail</a>
+            <a th:href="@{'/events/public/detail/' + ${event.id}}" class="btn btn-grey">Event Detail</a>
         </div>
 
         <!-- Share section -->
         <div class="share-section" style="margin-top: 0.5rem;">
             <strong>Share:</strong>
-            <div th:with="eventUrl=@{/events/student/public/detail/{id}(id=${event.id})}">
+            <div th:with="eventUrl=@{/events/public/detail/{id}(id=${event.id})}">
 
                 <a th:href="'https://www.facebook.com/sharer/sharer.php?u=' + ${eventUrl}"
                    target="_blank" rel="noopener noreferrer" class="btn btn-grey">Facebook</a>

@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Optional;
 
 @Controller
-@RequestMapping("/student/events")
+@RequestMapping("/events")
 public class FeedbackController {
 
     @Autowired
@@ -28,7 +28,7 @@ public class FeedbackController {
     }
 
 
-    @PostMapping("/{eventId}/feedback")
+    @PostMapping("/feedback/{eventId}")
     public String submitFeedback(@PathVariable Long eventId,
                                  @RequestParam int rating,
                                  @RequestParam String comment,
@@ -38,6 +38,6 @@ public class FeedbackController {
         User currentUser = userService.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid event ID"));
         feedbackService.submitFeedback(currentUser, event, rating, comment);
-        return "redirect:/student/events";
+        return "redirect:/events";
     }
 }
