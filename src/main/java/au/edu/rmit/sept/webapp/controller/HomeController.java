@@ -1,22 +1,45 @@
 package au.edu.rmit.sept.webapp.controller;
 
+import au.edu.rmit.sept.webapp.model.Event;
+import au.edu.rmit.sept.webapp.model.User;
 import au.edu.rmit.sept.webapp.repository.EventRepository;
+import au.edu.rmit.sept.webapp.service.EventService;
+import au.edu.rmit.sept.webapp.service.UserService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+
+import java.util.List;
 
 @Controller
 public class HomeController {
 
     private final EventRepository eventRepo;
+    private final EventService eventService;
+    private final UserService userService;
 
-    public HomeController(EventRepository eventRepo) {
+    public HomeController(EventRepository eventRepo, EventService eventService, UserService userService) {
         this.eventRepo = eventRepo;
+        this.eventService = eventService;
+        this.userService = userService;
     }
 
     @GetMapping("/")
     public String home(Model model) {
         model.addAttribute("events", eventRepo.findAll()); // Pass events to the view
         return "index"; // Loads templates/index.html
+    }
+
+    @GetMapping("/admin/dashboard")
+    public String adminDashboard(Model model) {
+        // Get summary statistics
+        List<Event> allEvents = eventService.getAllEvents();
+        List<User> allUsers = userService.getAllUsers();
+
+        model.addAttribute("totalEvents", allEvents.size());
+        model.addAttribute("totalUsers", allUsers.size());
+        model.addAttribute("recentEvents", allEvents.stream().limit(5).toList());
+
+        return "admin-dashboard";
     }
 }

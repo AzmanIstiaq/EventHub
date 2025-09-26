@@ -342,6 +342,7 @@ public class EventController {
         Event event = eventService.findById(eventId)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid event ID"));
 
+        model.addAttribute("registrations", registrationService.getRegistrationsForUser(user));
         model.addAttribute("event", event);
         model.addAttribute("currentUser", user);
 
@@ -374,6 +375,7 @@ public class EventController {
 
             model.addAttribute("events", eventService.getAllUpcomingEvents());
             model.addAttribute("currentUser", user);
+            model.addAttribute("registrations", registrationService.getRegistrationsForUser(user));
             model.addAttribute("activeTab", "upcoming");
             model.addAttribute("categories", categoryService.findAll());
             model.addAttribute("pastEvents", eventService.getPastEvents());

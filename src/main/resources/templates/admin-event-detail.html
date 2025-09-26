@@ -125,7 +125,7 @@
     </thead>
     <tbody>
     <tr th:each="registration : ${registrations}">
-      <td th:text="${registration.registrationIdId}">1</td>
+      <td th:text="${registration.registrationId}">1</td>
       <td th:text="${registration.user.name}">User Name</td>
       <td th:text="${registration.user.email}">user@email.com</td>
       <td th:text="${registration.registrationDate != null ? #temporals.format(registration.registrationDate, 'yyyy-MM-dd HH:mm') : 'N/A'}">
