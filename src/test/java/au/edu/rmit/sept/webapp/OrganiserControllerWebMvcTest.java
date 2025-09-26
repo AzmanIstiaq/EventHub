@@ -1,6 +1,6 @@
 package au.edu.rmit.sept.webapp;
 
-import au.edu.rmit.sept.webapp.controller.EventController;
+import au.edu.rmit.sept.webapp.controller.OrganiserController;
 import au.edu.rmit.sept.webapp.model.Category;
 import au.edu.rmit.sept.webapp.model.Event;
 import au.edu.rmit.sept.webapp.model.User;
@@ -22,13 +22,13 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
-class EventControllerWebMvcTest {
+class OrganiserControllerWebMvcTest {
 
     EventService eventService = mock(EventService.class);
     OrganiserService organiserService = mock(OrganiserService.class);
     CategoryService categoryService = mock(CategoryService.class);
     KeywordService keywordService = mock(KeywordService.class);
-    EventController controller = new EventController(eventService, organiserService, categoryService, keywordService);
+    OrganiserController controller = new OrganiserController(eventService, organiserService, categoryService, keywordService);
 
     @Test
     @DisplayName("Organiser list events view OK with model")

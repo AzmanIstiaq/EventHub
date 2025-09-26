@@ -1,6 +1,7 @@
 package au.edu.rmit.sept.webapp;
 
 import au.edu.rmit.sept.webapp.controller.PublicEventController;
+import au.edu.rmit.sept.webapp.controller.StudentController;
 import au.edu.rmit.sept.webapp.controller.UserController;
 import au.edu.rmit.sept.webapp.model.Event;
 import au.edu.rmit.sept.webapp.model.Registration;
@@ -41,7 +42,9 @@ class RsvpUserStoryTest {
     CategoryService categoryService = mock(CategoryService.class);
     RegistrationRepository registrationRepository = mock(RegistrationRepository.class);
     UserRepository userRepository = mock(UserRepository.class);
-    PublicEventController publicController = new PublicEventController(eventService, registrationService, userService, categoryService);
+    StudentController studentController = new StudentController(eventService, registrationService, userService, categoryService);
+    PublicEventController publicEventController = new PublicEventController(eventService, registrationService, userService, categoryService);
+
     UserController userController = new UserController();
 
     @Test
@@ -53,7 +56,7 @@ class RsvpUserStoryTest {
         when(eventService.getPastEvents()).thenReturn(List.of());
 
         Model model = new ExtendedModelMap();
-        String view = publicController.listEvents(null, model);
+        String view = publicEventController.listEvents(null, model);
         assertThat(view).isEqualTo("public-events");
         assertThat(model.containsAttribute("events")).isTrue();
     }
@@ -74,7 +77,7 @@ class RsvpUserStoryTest {
         CustomUserDetails cud = mock(CustomUserDetails.class);
         when(cud.getId()).thenReturn(userId);
         Model model = new ExtendedModelMap();
-        String view = publicController.registerForEvent(cud, model, eventId);
+        String view = studentController.registerForEvent(cud, model, eventId);
         assertThat(view).isEqualTo("redirect:/student/events");
         verify(registrationService).registerUserForEvent(u, e);
     }
@@ -107,7 +110,7 @@ class RsvpUserStoryTest {
     void notLoggedInRsvpReturnsBadRequest() {
         long eventId = 10L;
         Model model = new ExtendedModelMap();
-        assertThrows(NullPointerException.class, () -> publicController.registerForEvent(null, model, eventId));
+        assertThrows(NullPointerException.class, () -> studentController.registerForEvent(null, model, eventId));
         verify(registrationService, never()).registerUserForEvent(any(), any());
     }
 
@@ -123,7 +126,7 @@ class RsvpUserStoryTest {
         CustomUserDetails cud = mock(CustomUserDetails.class);
         when(cud.getId()).thenReturn(userId);
         Model model = new ExtendedModelMap();
-        assertThrows(IllegalArgumentException.class, () -> publicController.registerForEvent(cud, model, eventId));
+        assertThrows(IllegalArgumentException.class, () -> studentController.registerForEvent(cud, model, eventId));
     }
 
     @Test
@@ -138,7 +141,7 @@ class RsvpUserStoryTest {
         CustomUserDetails cud = mock(CustomUserDetails.class);
         when(cud.getId()).thenReturn(userId);
         Model model = new ExtendedModelMap();
-        assertThrows(IllegalArgumentException.class, () -> publicController.registerForEvent(cud, model, eventId));
+        assertThrows(IllegalArgumentException.class, () -> studentController.registerForEvent(cud, model, eventId));
     }
 
     @Test
@@ -156,7 +159,7 @@ class RsvpUserStoryTest {
         CustomUserDetails cud = mock(CustomUserDetails.class);
         when(cud.getId()).thenReturn(userId);
         Model model = new ExtendedModelMap();
-        assertThrows(IllegalStateException.class, () -> publicController.registerForEvent(cud, model, eventId));
+        assertThrows(IllegalStateException.class, () -> studentController.registerForEvent(cud, model, eventId));
     }
 
     @Test
@@ -167,7 +170,7 @@ class RsvpUserStoryTest {
         when(eventService.searchEvents(any(), any(), any(), any())).thenReturn(List.of());
 
         Model model = new ExtendedModelMap();
-        String view = publicController.searchEvents(null, "", null, null, null, model);
+        String view = publicEventController.searchEvents(null, "", null, null, null, model);
         assertThat(view).isEqualTo("public-events");
         assertThat(model.containsAttribute("searchResults")).isTrue();
     }
@@ -180,7 +183,7 @@ class RsvpUserStoryTest {
         when(eventService.searchEvents(any(), any(), any(), any())).thenReturn(List.of());
 
         Model model = new ExtendedModelMap();
-        String view = publicController.searchEvents(null, "q", LocalDate.now().plusDays(10), LocalDate.now().plusDays(5), null, model);
+        String view = publicEventController.searchEvents(null, "q", LocalDate.now().plusDays(10), LocalDate.now().plusDays(5), null, model);
         assertThat(view).isEqualTo("public-events");
         assertThat(model.containsAttribute("searchResults")).isTrue();
         verify(eventService).searchEvents(any(), any(), any(), any());
@@ -194,7 +197,7 @@ class RsvpUserStoryTest {
         when(eventService.searchEvents(any(), any(), any(), any())).thenReturn(List.of());
 
         Model model = new ExtendedModelMap();
-        String view = publicController.searchEvents(null, "q", null, LocalDate.now().plusDays(1), null, model);
+        String view = publicEventController.searchEvents(null, "q", null, LocalDate.now().plusDays(1), null, model);
         assertThat(view).isEqualTo("public-events");
         assertThat(model.containsAttribute("searchResults")).isTrue();
         verify(eventService).searchEvents(any(), any(), any(), any());

@@ -1,6 +1,6 @@
 package au.edu.rmit.sept.webapp;
 
-import au.edu.rmit.sept.webapp.controller.EventController;
+import au.edu.rmit.sept.webapp.controller.OrganiserController;
 import au.edu.rmit.sept.webapp.model.Category;
 import au.edu.rmit.sept.webapp.model.Event;
 import au.edu.rmit.sept.webapp.model.Keyword;
@@ -30,7 +30,7 @@ class EventCreateUserStoryTest {
     OrganiserService organiserService = org.mockito.Mockito.mock(OrganiserService.class);
     CategoryService categoryService = org.mockito.Mockito.mock(CategoryService.class);
     KeywordService keywordService = org.mockito.Mockito.mock(KeywordService.class);
-    EventController controller = new EventController(eventService, organiserService, categoryService, keywordService);
+    OrganiserController controller = new OrganiserController(eventService, organiserService, categoryService, keywordService);
 
     @Test
     @DisplayName("AC1: organizer sees Create Event form on organiser dashboard")

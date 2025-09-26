@@ -51,64 +51,7 @@ public class PublicEventController {
         return "public-events";  // Thymeleaf template
     }
 
-    @GetMapping("/student/events")
-    public String listEventsLoggedIn(@AuthenticationPrincipal CustomUserDetails currentUser,
-                                     Model model) {
-        User user = userService.findById(currentUser.getId())
-                .orElseThrow(() -> new IllegalArgumentException("Invalid user ID"));
 
-        model.addAttribute("events", eventService.getAllUpcomingEvents());
-        model.addAttribute("currentUser", user);
-        model.addAttribute("activeTab", "upcoming");
-        model.addAttribute("categories", categoryService.findAll());
-        model.addAttribute("pastEvents", eventService.getPastEvents());
-        return "public-events";  // Thymeleaf template
-    }
-
-    // 2. Register for an event
-    @PostMapping("/student/events/register/{eventId}")
-    public String registerForEvent(@AuthenticationPrincipal CustomUserDetails currentUser,
-                                   Model model,
-                                   @PathVariable Long eventId) {
-        User user = userService.findById(currentUser.getId())
-                .orElseThrow(() -> new IllegalArgumentException("Invalid user ID"));
-
-        Event event = eventService.findById(eventId)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid event ID"));
-
-        registrationService.registerUserForEvent(user, event);
-
-        model.addAttribute("activeTab", "upcoming");
-
-        return "redirect:/student/events";
-    }
-
-    // 2. Register for an event
-    @PostMapping("/student/events/cancel/{eventId}")
-    public String cancelEventRegistration(@AuthenticationPrincipal CustomUserDetails currentUser,
-                                          Model model,
-                                          @PathVariable Long eventId) {
-        registrationService.deleteRegistrationForEvent(currentUser.getId(), eventId);
-
-        model.addAttribute("activeTab", "upcoming");
-
-        return "redirect:/student/events";  // back to event list
-    }
-
-    @GetMapping("/student/events/detail/{eventId}")
-    public String getEventDetailLoggedIn(@AuthenticationPrincipal CustomUserDetails currentUser,
-                                         Model model, @PathVariable Long eventId) {
-        User user = userService.findById(currentUser.getId())
-                .orElseThrow(() -> new IllegalArgumentException("Invalid user ID"));
-
-        Event event = eventService.findById(eventId)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid event ID"));
-
-        model.addAttribute("event", event);
-        model.addAttribute("currentUser", user);
-
-        return "event-detail";
-    }
 
     @GetMapping("/events/detail/{eventId}")
     public String getEventDetail(Model model, @PathVariable Long eventId) {
@@ -122,39 +65,6 @@ public class PublicEventController {
         model.addAttribute("currentUser", currentUser);
 
         return "event-detail";
-    }
-
-    @GetMapping("/student/events/search")
-    public String searchEventsLoggedIn(@AuthenticationPrincipal CustomUserDetails currentUser,
-                               @RequestParam(required = false) String query,
-                               @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
-                               @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
-                               @RequestParam(required = false) Long categoryId,
-                               Model model) {
-
-        User user = userService.findById(currentUser.getId())
-                .orElseThrow(() -> new IllegalArgumentException("Invalid user ID"));
-
-        model.addAttribute("events", eventService.getAllUpcomingEvents());
-        model.addAttribute("currentUser", user);
-        model.addAttribute("activeTab", "upcoming");
-        model.addAttribute("categories", categoryService.findAll());
-        model.addAttribute("pastEvents", eventService.getPastEvents());
-
-        LocalDateTime from = (startDate != null ? startDate.atStartOfDay() : LocalDate.now().atStartOfDay());
-        LocalDateTime to = (endDate != null ? endDate.atTime(23, 59) : null);
-
-        List<Event> searchResults = eventService.searchEvents(query, from, to, categoryId);
-        model.addAttribute("searchResults", searchResults);
-
-        // add categories for dropdown
-        model.addAttribute("show-search", true);
-
-        model.addAttribute("activeTab", "search");
-
-        model.addAttribute("currentUser", user);
-
-        return "public-events";
     }
 
     @GetMapping("/events/search")

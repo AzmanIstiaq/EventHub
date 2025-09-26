@@ -23,23 +23,36 @@ import java.util.stream.Collectors;
 /// type users.
 @Controller
 @RequestMapping("/organiser")
-public class EventController {
+public class OrganiserController {
     private final EventService eventService;
     private final OrganiserService organiserService;
     // inject services
     private final CategoryService categoryService;
     private final KeywordService keywordService;
 
-    public EventController(EventService eventService,
-                           OrganiserService organiserService,
-                           CategoryService categoryService,
-                           KeywordService keywordService) {
+    public OrganiserController(EventService eventService,
+                               OrganiserService organiserService,
+                               CategoryService categoryService,
+                               KeywordService keywordService) {
         this.eventService = eventService;
         this.organiserService = organiserService;
         this.categoryService = categoryService;
         this.keywordService = keywordService;
     }
 
+    @GetMapping("/profile")
+    public String profile(@AuthenticationPrincipal CustomUserDetails currentUser, Model model) {
+        User organiser = organiserService.findById(currentUser.getId())
+                .orElseThrow(() -> new IllegalArgumentException("Invalid organiser ID"));
+        model.addAttribute("organiser", organiser);
+
+        return "manage-profile";
+    }
+
+    @PostMapping("/profile")
+    public String UpdateProfile(@AuthenticationPrincipal CustomUserDetails currentUser, Model model) {
+        return "manage-profile";
+    }
 
     // List events for given organiser ID
     @GetMapping("/events")

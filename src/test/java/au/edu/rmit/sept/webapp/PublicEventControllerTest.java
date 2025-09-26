@@ -30,41 +30,7 @@ class PublicEventControllerTest {
     CategoryService categoryService = mock(CategoryService.class);
     PublicEventController controller = new PublicEventController(eventService, registrationService, userService, categoryService);
 
-    @Test
-    @DisplayName("Cancel RSVP: redirects and calls delete")
-    void cancelRsvpRedirects() {
-        long eventId = 10L;
-        long userId = 5L;
 
-        Model model = new ExtendedModelMap();
-        CustomUserDetails cud = mock(CustomUserDetails.class);
-        when(cud.getId()).thenReturn(userId);
-
-        String view = controller.cancelEventRegistration(cud, model, eventId);
-        assertThat(view).isEqualTo("redirect:/student/events");
-        verify(registrationService).deleteRegistrationForEvent(userId, eventId);
-    }
-
-    @Test
-    @DisplayName("Event detail (logged-in): OK with view and model")
-    void eventDetailLoggedInOk() {
-        long eventId = 11L;
-        long userId = 7L;
-
-        Event e = new Event(); e.setEventId(eventId); e.setTitle("Tech Talk"); e.setDateTime(LocalDateTime.now().plusDays(4));
-        User u = new User(); u.setUserId(userId); u.setName("Pat");
-        when(eventService.findById(eventId)).thenReturn(Optional.of(e));
-        when(userService.findById(userId)).thenReturn(Optional.of(u));
-
-        CustomUserDetails cud = mock(CustomUserDetails.class);
-        when(cud.getId()).thenReturn(userId);
-
-        Model model = new ExtendedModelMap();
-        String view = controller.getEventDetailLoggedIn(cud, model, eventId);
-        assertThat(view).isEqualTo("event-detail");
-        assertThat(model.containsAttribute("event")).isTrue();
-        assertThat(model.containsAttribute("currentUser")).isTrue();
-    }
 
     @Test
     @DisplayName("Event detail (public): OK with view")
@@ -93,25 +59,5 @@ class PublicEventControllerTest {
         verify(eventService).searchEvents(any(), any(), any(), any());
     }
 
-    @Test
-    @DisplayName("List events for logged-in user -> OK with model")
-    void listEventsLoggedInOk() {
-        long userId = 9L;
-        Event e = new Event(); e.setEventId(30L); e.setTitle("Seminar"); e.setDateTime(LocalDateTime.now().plusDays(1));
-        User u = new User(); u.setUserId(userId); u.setName("Taylor");
-        when(eventService.getAllUpcomingEvents()).thenReturn(List.of(e));
-        when(eventService.getPastEvents()).thenReturn(List.of());
-        when(userService.findById(userId)).thenReturn(Optional.of(u));
-        when(categoryService.findAll()).thenReturn(List.of());
 
-        CustomUserDetails cud = mock(CustomUserDetails.class);
-        when(cud.getId()).thenReturn(userId);
-
-        Model model = new ExtendedModelMap();
-        String view = controller.listEventsLoggedIn(cud, model);
-        assertThat(view).isEqualTo("public-events");
-        assertThat(model.containsAttribute("events")).isTrue();
-        assertThat(model.containsAttribute("categories")).isTrue();
-        assertThat(model.containsAttribute("pastEvents")).isTrue();
-    }
 }
