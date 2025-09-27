@@ -108,17 +108,17 @@
         </td>
         <td>
             <!-- View User Details -->
-            <a th:href="@{'/admin/users/' + ${user.userId}}"
+            <a th:href="@{'/users/' + ${user.userId}}"
                class="btn btn-info"
                style="font-size: 0.8em;">👁️ View</a>
 
             <!-- Edit User (if needed) -->
-            <a th:href="@{'/admin/users/' + ${user.userId} + '/edit'}"
+            <a th:href="@{'/users/' + ${user.userId} + '/edit'}"
                class="btn btn-warning"
                style="font-size: 0.8em;">✏️ Edit</a>
 
             <!-- Deactivate User -->
-            <form th:action="@{'/admin/users/' + ${user.userId} + '/deactivate'}"
+            <form th:action="@{'/users/' + ${user.userId} + '/deactivate'}"
                   method="post"
                   style="display: inline;"
                   onsubmit="return confirm('Are you sure you want to deactivate this user? This will prevent them from logging in.');">

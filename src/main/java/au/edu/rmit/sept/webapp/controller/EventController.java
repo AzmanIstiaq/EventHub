@@ -3,12 +3,12 @@ package au.edu.rmit.sept.webapp.controller;
 import au.edu.rmit.sept.webapp.model.*;
 import au.edu.rmit.sept.webapp.security.CustomUserDetails;
 import au.edu.rmit.sept.webapp.service.*;
+import jakarta.validation.Valid;
 import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
@@ -51,7 +51,7 @@ public class EventController {
                 .next()
                 .getAuthority();
         User user = userService.findById(currentUser.getId())
-                    .orElseThrow(() -> new IllegalArgumentException("Invalid organiser ID"));
+                    .orElseThrow(() -> new IllegalArgumentException("Invalid user ID"));
 
         return switch (role) {
             case "ROLE_ADMIN" -> listAdminEvents(model);
@@ -64,7 +64,7 @@ public class EventController {
     @GetMapping("/public")
     public String listPublicEvents(@AuthenticationPrincipal CustomUserDetails currentUser, Model model) {
          User user = userService.findById(currentUser.getId())
-                    .orElseThrow(() -> new IllegalArgumentException("Invalid organiser ID"));
+                    .orElseThrow(() -> new IllegalArgumentException("Invalid user ID"));
 
         return listEvents(user, model);
     }
@@ -97,7 +97,10 @@ public class EventController {
                                 @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
                                 @RequestParam(required = false) Long categoryId,
                                 Model model) {
-        return searchEventsGlobal(currentUser, query, startDate, endDate, categoryId, model);
+        User user = userService.findById(currentUser.getUser().getUserId())
+                    .orElseThrow(() -> new IllegalArgumentException("Invalid user ID"));
+                                    
+        return searchEventsGlobal(user, query, startDate, endDate, categoryId, model);
     }
 
     @GetMapping("/public/search")
@@ -107,7 +110,8 @@ public class EventController {
                                 @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
                                 @RequestParam(required = false) Long categoryId,
                                 Model model) {
-        return searchEventsGlobal(currentUser, query, startDate, endDate, categoryId, model);
+        User user = null;
+        return searchEventsGlobal(user, query, startDate, endDate, categoryId, model);
     }
 
     // Student only regsiter
@@ -115,26 +119,31 @@ public class EventController {
     public String registerForEvent(@AuthenticationPrincipal CustomUserDetails currentUser,
                                    Model model,
                                    @PathVariable Long eventId) {
-        String role = currentUser.getAuthorities()
-                .iterator()
-                .next()
-                .getAuthority();
+        String role = currentUser.getAuthorities().iterator().next().getAuthority();
 
         if (Objects.equals(role, "ROLE_STUDENT")) {
-            User user = userService.findById(currentUser.getUser().getUserId())
-                    .orElseThrow(() -> new IllegalArgumentException("Invalid user ID"));
+            try {
+                User user = userService.findById(currentUser.getUser().getUserId())
+                        .orElseThrow(() -> new IllegalArgumentException("Invalid user ID"));
+                Event event = eventService.findById(eventId)
+                        .orElseThrow(() -> new IllegalArgumentException("Invalid event ID"));
 
-            Event event = eventService.findById(eventId)
-                    .orElseThrow(() -> new IllegalArgumentException("Invalid event ID"));
+                registrationService.registerUserForEvent(user, event);
+            } catch (IllegalArgumentException ex) {
+                model.addAttribute("error", ex.getMessage());
+                return "public-events";
+            } catch (IllegalStateException ex) {
+                model.addAttribute("error", "You are already registered for this event");
+                return "public-events";
+            }
 
-            registrationService.registerUserForEvent(user, event);
 
             model.addAttribute("activeTab", "upcoming");
-
             return "redirect:/events";
         }
         return "redirect:/events/" + eventId;
     }
+
 
     @PostMapping("/deleteRegistration")
     public String deleteRegistration(@RequestParam Long userId, @RequestParam Long eventId) {
@@ -146,20 +155,39 @@ public class EventController {
     // Create new event for given organiser
     @PostMapping("/create")
     public String createEvent(@AuthenticationPrincipal CustomUserDetails currentUser,
-                              @ModelAttribute Event event,
-                              @RequestParam(required = false) String keywordsText) {
+                              @Valid @ModelAttribute Event event,
+                              BindingResult bindingResult,
+                              @RequestParam(required = false) String keywordsText,
+                              Model model) {
+        if (bindingResult.hasErrors()) {
+            model.addAttribute("categories", categoryService.findAll());
+            User organiser = userService.findById(currentUser.getId())
+                    .orElseThrow(() -> new IllegalArgumentException("Invalid organiser ID"));
 
-        String role = currentUser.getAuthorities()
-                .iterator()
-                .next()
-                .getAuthority();
+            List<Event> upcomingEvents = eventService.getUpcomingEventsForOrganiser(organiser);
+            List<Event> pastEvents = eventService.getPastEventsForOrganiser(organiser);
 
-        if (Objects.equals(role, "ROLE_ORGANISER") || Objects.equals(role, "ROLE_ADMIN")) {
+            // Add categories for form dropdown
+            List<Category> categories = categoryService.findAll();
+
+            System.out.println("DEBUG: Upcoming Events: " + upcomingEvents);
+            System.out.println("DEBUG: Past Events: " + pastEvents);
+            System.out.println("DEBUG: Categorey1: " + categories.get(0).getCategory());
+            System.out.println("DEBUG: Organiser: " + organiser.getName());
+
+            model.addAttribute("upcomingEvents", upcomingEvents);
+            model.addAttribute("pastEvents", pastEvents);
+            model.addAttribute("organiser", organiser);
+            model.addAttribute("categories", categories);
+            return "organiser-dashboard"; // show form again with errors
+        }
+
+        String role = currentUser.getAuthorities().iterator().next().getAuthority();
+        if (role.equals("ROLE_ORGANISER") || role.equals("ROLE_ADMIN")) {
             User organiser = userService.findById(currentUser.getId())
                     .orElseThrow(() -> new IllegalArgumentException("Invalid organiser ID"));
             event.setOrganiser(organiser);
 
-            // Convert comma-separated keywords to Set<Keyword>
             if (keywordsText != null && !keywordsText.isBlank()) {
                 Set<Keyword> keywordSet = Arrays.stream(keywordsText.split(","))
                         .map(String::trim)
@@ -192,8 +220,8 @@ public class EventController {
                     .orElseThrow(() -> new IllegalArgumentException("Invalid event ID"));
 
             // check that organiser is in fact owner of event, admin can edit any event
-            if (Objects.equals(role, "ROLE_ORGANISER") && currentUser.getId() != event.getOrganiser().getUserId()) {
-                return "redirect:events";
+            if (Objects.equals(role, "ROLE_ORGANISER") && !currentUser.getId().equals(event.getOrganiser().getUserId())) {
+                return "redirect:/events";
             }
 
             // Copy form fields
@@ -236,7 +264,7 @@ public class EventController {
                 Event event = eventService.findById(eventId)
                         .orElseThrow(() -> new IllegalArgumentException("Invalid event ID"));
 
-                if (Objects.equals(role, "ROLE_ORGANISER") && currentUser.getId() != event.getOrganiser().getUserId()) {
+                if (Objects.equals(role, "ROLE_ORGANISER") && !currentUser.getId().equals(event.getOrganiser().getUserId())) {
                     return "redirect:/events";
                 }
 
@@ -363,15 +391,13 @@ public class EventController {
     }
 
 
-    private String searchEventsGlobal(@AuthenticationPrincipal CustomUserDetails currentUser,
+    private String searchEventsGlobal(User user,
         @RequestParam(required = false) String query,
         @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
         @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
         @RequestParam(required = false) Long categoryId,
         Model model) {
 
-            User user = userService.findById(currentUser.getId())
-                    .orElseThrow(() -> new IllegalArgumentException("Invalid user ID"));
 
             model.addAttribute("events", eventService.getAllUpcomingEvents());
             model.addAttribute("currentUser", user);

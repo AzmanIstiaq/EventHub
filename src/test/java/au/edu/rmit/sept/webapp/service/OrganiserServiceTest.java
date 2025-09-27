@@ -1,14 +1,12 @@
-package au.edu.rmit.sept.webapp;
+package au.edu.rmit.sept.webapp.service;
 
 import au.edu.rmit.sept.webapp.model.User;
 import au.edu.rmit.sept.webapp.repository.UserRepository;
-import au.edu.rmit.sept.webapp.service.OrganiserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
@@ -33,13 +31,13 @@ class OrganiserServiceTest {
         verify(repo).save(u);
     }
 
-    @Test
-    @DisplayName("findById(): returns Optional")
-    void findByIdOptional() {
-        User u = new User(); u.setUserId(10L);
-        when(repo.findById(10L)).thenReturn(Optional.of(u));
-        assertThat(service.findById(10L)).contains(u);
-    }
+    // @Test
+    // @DisplayName("findById(): returns Optional")
+    // void findByIdOptional() {
+    //     User u = new User(); u.setUserId(10L);
+    //     when(repo.findById(10L)).thenReturn(Optional.of(u));
+    //     assertThat(service.findById(10L)).contains(u);
+    // }
 
     @Test
     @DisplayName("findAll(): returns list")

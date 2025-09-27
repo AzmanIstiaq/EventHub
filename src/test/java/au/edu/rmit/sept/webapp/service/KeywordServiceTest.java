@@ -1,8 +1,7 @@
-package au.edu.rmit.sept.webapp;
+package au.edu.rmit.sept.webapp.service;
 
 import au.edu.rmit.sept.webapp.model.Keyword;
 import au.edu.rmit.sept.webapp.repository.KeywordRepository;
-import au.edu.rmit.sept.webapp.service.KeywordService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

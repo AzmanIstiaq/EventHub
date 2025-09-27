@@ -3,10 +3,12 @@ package au.edu.rmit.sept.webapp.controller;
 
 import au.edu.rmit.sept.webapp.model.Event;
 import au.edu.rmit.sept.webapp.model.User;
+import au.edu.rmit.sept.webapp.security.CustomUserDetails;
 import au.edu.rmit.sept.webapp.service.EventService;
 import au.edu.rmit.sept.webapp.service.FeedbackService;
 import au.edu.rmit.sept.webapp.service.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.*;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -32,12 +34,15 @@ public class FeedbackController {
     public String submitFeedback(@PathVariable Long eventId,
                                  @RequestParam int rating,
                                  @RequestParam String comment,
-                                 @RequestParam Long userId) {
+                                 @AuthenticationPrincipal CustomUserDetails currentUser) {
         Event event = eventService.findById(eventId)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid event ID"));
-        User currentUser = userService.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid event ID"));
-        feedbackService.submitFeedback(currentUser, event, rating, comment);
+
+        User user = userService.findById(currentUser.getId())
+                .orElseThrow(() -> new IllegalArgumentException("Invalid user ID"));
+
+        feedbackService.submitFeedback(user, event, rating, comment);
+
         return "redirect:/events";
     }
 }

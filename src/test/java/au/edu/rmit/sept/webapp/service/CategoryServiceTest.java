@@ -1,8 +1,7 @@
-package au.edu.rmit.sept.webapp;
+package au.edu.rmit.sept.webapp.service;
 
 import au.edu.rmit.sept.webapp.model.Category;
 import au.edu.rmit.sept.webapp.repository.CategoryRepository;
-import au.edu.rmit.sept.webapp.service.CategoryService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

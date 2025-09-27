@@ -1,7 +1,5 @@
-package au.edu.rmit.sept.webapp;
+package au.edu.rmit.sept.webapp.model;
 
-import au.edu.rmit.sept.webapp.model.User;
-import au.edu.rmit.sept.webapp.model.UserType;
 import au.edu.rmit.sept.webapp.security.CustomUserDetails;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

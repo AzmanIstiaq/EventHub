@@ -4,8 +4,6 @@ import au.edu.rmit.sept.webapp.model.Event;
 import au.edu.rmit.sept.webapp.model.Registration;
 import au.edu.rmit.sept.webapp.model.User;
 import au.edu.rmit.sept.webapp.model.UserType;
-import au.edu.rmit.sept.webapp.repository.RegistrationRepository;
-import au.edu.rmit.sept.webapp.repository.UserRepository;
 import au.edu.rmit.sept.webapp.security.CustomUserDetails;
 import au.edu.rmit.sept.webapp.service.RegistrationService;
 import au.edu.rmit.sept.webapp.service.UserService;
@@ -23,7 +21,7 @@ import java.util.stream.Collectors;
 /// Used to perform user based operations and analytics when needed.
 /// CRUD operations for users
 @Controller
-@RequestMapping("")
+@RequestMapping("/users")
 public class UserController {
     private final UserService userService;
     private final RegistrationService registrationService;
@@ -35,8 +33,8 @@ public class UserController {
     }
 
     // View all users (for user management) with statistics
-    @GetMapping("/admin/users")
-    public String viewAllUsers(Model model) {
+    @GetMapping
+    public String viewAllUsers(@AuthenticationPrincipal CustomUserDetails currentUser, Model model) {
         List<User> allUsers = userService.getAllUsers();
         model.addAttribute("users", allUsers);
 
@@ -59,8 +57,8 @@ public class UserController {
     }
 
     // Deactivate/ban user accounts
-    @PostMapping("/admin/users/{userId}/deactivate")
-    public String deactivateUser(@PathVariable int userId,
+    @PostMapping("/{userId}/deactivate")
+    public String deactivateUser(@AuthenticationPrincipal CustomUserDetails currentUser, @PathVariable int userId,
                                  RedirectAttributes redirectAttributes) {
         try {
             User user = userService.findById(userId)
@@ -75,18 +73,12 @@ public class UserController {
                     "Error deactivating user: " + e.getMessage());
         }
 
-        return "redirect:/admin/users";
-    }
-
-    // Get all users
-    @GetMapping
-    public List<User> getAllUsers() {
-        return userService.getAllUsers();
+        return "redirect:/users";
     }
 
     // Get a single user by ID
-    @GetMapping("/users/{id}")
-    public ResponseEntity<User> getUserById(@PathVariable long id) {
+    @GetMapping("/{id}")
+    public ResponseEntity<User> getUserById(@AuthenticationPrincipal CustomUserDetails currentUser, @PathVariable long id) {
         return userService.findById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
@@ -94,22 +86,25 @@ public class UserController {
 
     // Get events this user is attending
     @GetMapping("/{id}/attendingEvents")
-    public List<Event> getAttendingEvents(@PathVariable long id) {
-        return registrationService.findByUserId(id)
+    public ResponseEntity<List<Event>> getAttendingEvents(@PathVariable long id) {
+        var events = registrationService.findByUserId(id)
                 .stream()
                 .map(Registration::getEvent)
                 .collect(Collectors.toList());
+
+        return ResponseEntity.ok(events);
     }
 
+
     // Get events this user has organized
-    @GetMapping("/users/{id}/organizedEvents")
-    public ResponseEntity<Set<Event>> getOrganizedEvents(@PathVariable long id) {
+    @GetMapping("/{id}/organizedEvents")
+    public ResponseEntity<Set<Event>> getOrganizedEvents(@AuthenticationPrincipal CustomUserDetails currentUser, @PathVariable long id) {
         return userService.findById(id)
                 .map(user -> ResponseEntity.ok(user.getOrganisedEvents()))
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @GetMapping("/users/profile")
+    @GetMapping("/profile")
     public String profile(@AuthenticationPrincipal CustomUserDetails currentUser, Model model) {
         User user = userService.findById(currentUser.getId())
                 .orElseThrow(() -> new IllegalArgumentException("Invalid organiser ID"));
@@ -118,7 +113,7 @@ public class UserController {
         return "manage-profile";
     }
 
-    @PostMapping("/users/profile")
+    @PostMapping("/profile")
     public String UpdateProfile(@AuthenticationPrincipal CustomUserDetails currentUser, Model model) {
         return "manage-profile";
     }

@@ -1,5 +1,7 @@
 package au.edu.rmit.sept.webapp.model;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
@@ -16,15 +18,19 @@ public class Event {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "event_id")
     private Long eventId;
+    @NotBlank(message = "Title is required")
     private String title;
 
     @Column(length = 1000)
+    @NotBlank(message = "Description is required")
     private String description;
 
     @Column(nullable = false)
+    @NotNull(message = "Date/Time is required")
     private LocalDateTime dateTime;
 
     @Column(nullable = false)
+    @NotBlank(message = "Location is required")
     private String location;
 
     @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
