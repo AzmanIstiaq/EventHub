@@ -43,4 +43,8 @@ public interface EventRepository extends JpaRepository<Event, Long> {
                                     @Param("from") LocalDateTime from,
                                     @Param("to") LocalDateTime to,
                                     @Param("categoryId") Long categoryId);
+
+    // Fetch all events a user is registered for
+    @Query("SELECT r.event FROM Registration r WHERE r.user.userId = :userId")
+    List<Event> findEventsByUserId(@Param("userId") Long userId);
 }

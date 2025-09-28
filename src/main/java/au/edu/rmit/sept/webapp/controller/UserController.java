@@ -10,11 +10,14 @@ import au.edu.rmit.sept.webapp.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -25,6 +28,7 @@ import java.util.stream.Collectors;
 public class UserController {
     private final UserService userService;
     private final RegistrationService registrationService;
+    PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     public UserController(UserService userService, RegistrationService registrationService) {
         this.userService = userService;
@@ -108,13 +112,65 @@ public class UserController {
     public String profile(@AuthenticationPrincipal CustomUserDetails currentUser, Model model) {
         User user = userService.findById(currentUser.getId())
                 .orElseThrow(() -> new IllegalArgumentException("Invalid organiser ID"));
+        model.addAttribute("formAction", "/users/profile/save");
         model.addAttribute("currentUser", user);
 
         return "manage-profile";
     }
 
-    @PostMapping("/profile")
-    public String UpdateProfile(@AuthenticationPrincipal CustomUserDetails currentUser, Model model) {
+    @GetMapping("/profile/create")
+    public String createProfile(@AuthenticationPrincipal CustomUserDetails currentUser, Model model) {
+        List<UserType> userTypes = Arrays.stream(UserType.values())
+                .filter(type -> type == UserType.STUDENT || type == UserType.ORGANISER)
+                .toList();
+        model.addAttribute("formAction", "/users/profile/create");
+        model.addAttribute("currentUser", currentUser);
+        model.addAttribute("userTypes", userTypes);
         return "manage-profile";
     }
+
+    @PostMapping("/profile/create")
+    public String createProfileSave(@RequestParam String name,
+                                    @RequestParam String email,
+                                    @RequestParam String password,
+                                    @RequestParam String role,
+                                    Model model) {
+        if (userService.findByEmail(email).isPresent()) {
+            model.addAttribute("error", "Email already in use");
+            model.addAttribute("userTypes", List.of(UserType.STUDENT, UserType.ORGANISER));
+            return "manage-profile";
+        }
+
+        UserType selectedRole = UserType.valueOf(role);
+        if (selectedRole == UserType.ADMIN) {
+            throw new IllegalArgumentException("Invalid role selection");
+        }
+
+        User newUser = new User(name, email, passwordEncoder.encode(password), selectedRole);
+        userService.save(newUser);
+
+        return "redirect:/login?createSuccess";
+    }
+
+
+    @PostMapping("/profile/save")
+    public String saveProfile(@AuthenticationPrincipal CustomUserDetails currentUser,
+                              @RequestParam String name,
+                              @RequestParam String email,
+                              @RequestParam(required = false) String password) {
+        User user = userService.findById(currentUser.getId())
+                .orElseThrow(() -> new IllegalArgumentException("Invalid user ID"));
+
+        user.setName(name);
+        user.setEmail(email);
+
+        if (password != null && !password.isBlank()) {
+            // You probably have a PasswordEncoder bean already
+            user.setPassword(passwordEncoder.encode(password));
+        }
+
+        userService.save(user); // Persist the updated user
+        return "redirect:/users/profile?success";
+    }
+
 }

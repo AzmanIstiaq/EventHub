@@ -82,7 +82,7 @@
     <!-- Actions shown only if user is logged in -->
     <div th:if="${currentUser != null}">
         <!-- Cancel if registered -->
-        <form th:if="${event.checkUserRegistered(registrations)}"
+        <form th:if="${registered}"
               style="display:inline;" th:action="@{/events/deleteRegistration}" method="post">
             <input type="hidden" name="userId" th:value="${currentUser.getUserId()}" />
             <input type="hidden" name="eventId" th:value="${event.getEventId()}" />
@@ -90,7 +90,7 @@
         </form>
 
         <!-- Register if not registered -->
-        <form th:if="${!event.checkUserRegistered(registrations)}"
+        <form th:if="${!registered}"
               th:action="@{'/events/register/' + ${event.eventId}}"
               method="post" style="display:inline;">
             <input type="hidden" name="userId" th:value="${currentUser.userId}"/>

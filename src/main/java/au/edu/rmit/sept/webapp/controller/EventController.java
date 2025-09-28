@@ -297,12 +297,22 @@ public class EventController {
     // student list events endpoint
     private String listStudentEvents(User user,
                                      Model model) {
+        List<Event> events = eventService.getEventsUserRegisteredTo(user.getUserId());
+
+        LocalDateTime now = LocalDateTime.now();
+        List<Event> pastEvents = events.stream()
+                .filter(e -> e.getDateTime().isBefore(now))
+                .toList();
+        List<Event> futureEvents = events.stream()
+                .filter(e -> e.getDateTime().isAfter(now))
+                .toList();
+
+        model.addAttribute("pastEvents", pastEvents);
+        model.addAttribute("futureEvents", futureEvents);
         model.addAttribute("events", eventService.getAllUpcomingEvents());
         model.addAttribute("currentUser", user);
-        model.addAttribute("registrations", registrationService.getRegistrationsForUser(user));
         model.addAttribute("activeTab", "upcoming");
         model.addAttribute("categories", categoryService.findAll());
-        model.addAttribute("pastEvents", eventService.getPastEvents());
         return "public-events";  // Thymeleaf template
     }
 
@@ -370,7 +380,7 @@ public class EventController {
         Event event = eventService.findById(eventId)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid event ID"));
 
-        model.addAttribute("registrations", registrationService.getRegistrationsForUser(user));
+        model.addAttribute("registered", event.checkUserRegistered(user.getRegistrations()));
         model.addAttribute("event", event);
         model.addAttribute("currentUser", user);
 
@@ -397,14 +407,22 @@ public class EventController {
         @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
         @RequestParam(required = false) Long categoryId,
         Model model) {
+            List<Event> events = eventService.getEventsUserRegisteredTo(user.getUserId());
 
+            LocalDateTime now = LocalDateTime.now();
+            List<Event> pastEvents = events.stream()
+                    .filter(e -> e.getDateTime().isBefore(now))
+                    .toList();
+            List<Event> futureEvents = events.stream()
+                    .filter(e -> e.getDateTime().isAfter(now))
+                    .toList();
 
+            model.addAttribute("pastEvents", pastEvents);
+            model.addAttribute("futureEvents", futureEvents);
             model.addAttribute("events", eventService.getAllUpcomingEvents());
             model.addAttribute("currentUser", user);
-            model.addAttribute("registrations", registrationService.getRegistrationsForUser(user));
             model.addAttribute("activeTab", "upcoming");
             model.addAttribute("categories", categoryService.findAll());
-            model.addAttribute("pastEvents", eventService.getPastEvents());
 
             LocalDateTime from = (startDate != null ? startDate.atStartOfDay() : LocalDate.now().atStartOfDay());
             LocalDateTime to = (endDate != null ? endDate.atTime(23, 59) : null);

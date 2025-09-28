@@ -15,6 +15,8 @@
             <!-- If user is NOT logged in -->
             <a th:if="${#authorization.expression('!isAuthenticated()')}"
                th:href="@{/login}">Login</a>
+            <a th:if="${#authorization.expression('!isAuthenticated()')}"
+               th:href="@{/users/profile/create}">Create Profile</a>
 
             <!-- If user IS logged in -->
             <div th:if="${#authorization.expression('isAuthenticated()')}" style="display:flex; align-items:center; gap:1rem;">
@@ -29,6 +31,9 @@
                 <!-- Logout button styled with existing .btn-grey -->
                 <form th:action="@{/logout}" method="post" style="margin:0;">
                     <button type="submit" class="btn-grey">Logout</button>
+                </form>
+                <form th:action="@{/users/profile}" method="get" style="margin:0;">
+                    <button type="submit" class="btn-grey">Profile</button>
                 </form>
             </div>
         </nav>

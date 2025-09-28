@@ -37,13 +37,13 @@
 
         <!-- Action buttons -->
         <div th:if="${currentUser != null}">
-          <form th:if="${event.checkUserRegistered(registrations)}"
+          <form th:if="${futureEvents.contains(event)}"
                 style="display:inline;" th:action="@{/events/deleteRegistration}" method="post">
             <input type="hidden" name="userId" th:value="${currentUser.getUserId()}" />
             <input type="hidden" name="eventId" th:value="${event.getEventId()}" />
             <button type="submit" class="btn btn-cancel">Cancel Registration</button>
           </form>
-          <form th:if="${!event.checkUserRegistered(registrations)}"
+          <form th:if="${!futureEvents.contains(event)}"
                 th:action="@{'/events/register/' + ${event.eventId}}"
                 method="post" style="display:inline;">
             <input type="hidden" name="userId" th:value="${currentUser.getUserId()}"/>
@@ -94,41 +94,41 @@
   <!-- Registered Events Tab -->
   <div id="registered" class="tab-content" th:if="${currentUser != null}">
     <h2>Your Registered Events</h2>
-    <div th:if="${#lists.isEmpty(currentUser.registrations)}" class="empty-message">
+    <div th:if="${#lists.isEmpty(futureEvents)}" class="empty-message">
       You have not registered for any events.
     </div>
-    <div class="events-grid" th:unless="${#lists.isEmpty(registrations)}">
-      <div class="event-card" th:each="registration : ${registrations}">
+    <div class="events-grid" th:unless="${#lists.isEmpty(futureEvents)}">
+      <div class="event-card" th:each="event : ${futureEvents}">
         <div class="event-header">
-          <h2 th:text="${registration.getEvent().title}"></h2>
+          <h2 th:text="${event.title}"></h2>
         </div>
         <p class="event-meta">
-          <span th:text="${#temporals.format(registration.getEvent().getDateTime(), 'yyyy-MM-dd HH:mm')}"></span> @
-          <span th:text="${registration.getEvent().getLocation()}"></span>
+          <span th:text="${#temporals.format(event.getDateTime(), 'yyyy-MM-dd HH:mm')}"></span> @
+          <span th:text="${event.getLocation()}"></span>
         </p>
-        <p th:text="${registration.getEvent().getDescription()}"></p>
+        <p th:text="${event.getDescription()}"></p>
 
-        <form th:if="${registration.getEvent().checkUserRegistered(registrations)}"
+        <form 
               style="display:inline;" th:action="@{/events/deleteRegistration}" method="post">
           <input type="hidden" name="userId" th:value="${currentUser.getUserId()}" />
-          <input type="hidden" name="eventId" th:value="${registration.getEvent().getEventId()}" />
+          <input type="hidden" name="eventId" th:value="${event.getEventId()}" />
           <button type="submit" class="btn btn-cancel">Cancel Registration</button>
         </form>
-        <form th:action="@{'/events/detail/' + ${registration.event.eventId}}"
+        <form th:action="@{'/events/detail/' + ${event.eventId}}"
               method="get" style="display:inline;">
           <input type="hidden" name="userId" th:value="${currentUser.getUserId()}"/>
           <button type="submit" class="btn btn-grey">Event Detail</button>
         </form>
         <div class="share-section" style="margin-top: 0.5rem;">
           <strong>Share:</strong>
-          <div th:with="eventUrl=@{/events/public/detail/{id}(id=${registration.event.eventId})}">
+          <div th:with="eventUrl=@{/events/public/detail/{id}(id=${event.eventId})}">
 
             <!-- Facebook -->
             <a th:href="'https://www.facebook.com/sharer/sharer.php?u=' + ${eventUrl}"
                target="_blank" rel="noopener noreferrer" class="btn btn-grey">Facebook</a>
 
             <!-- Twitter (basic text param) -->
-            <a th:href="'https://twitter.com/intent/tweet?url=' + ${eventUrl} + '&text=' + ${registration.getEvent().getTitle()}"
+            <a th:href="'https://twitter.com/intent/tweet?url=' + ${eventUrl} + '&text=' + ${event.getTitle()}"
                target="_blank" rel="noopener noreferrer" class="btn btn-grey">Twitter</a>
 
             <!-- LinkedIn -->
@@ -136,14 +136,14 @@
                target="_blank" rel="noopener noreferrer" class="btn btn-grey">LinkedIn</a>
 
             <!-- Email -->
-            <a th:href="'mailto:?subject=' + ${registration.getEvent().getTitle()} + '&body=Check%20out%20this%20event:%20' + ${eventUrl}"
+            <a th:href="'mailto:?subject=' + ${event.getTitle()} + '&body=Check%20out%20this%20event:%20' + ${eventUrl}"
                class="btn btn-grey">Email</a>
 
             <!-- Copy link button: use data attribute so JS can read it safely -->
             <button type="button" class="btn btn-grey" th:attr="data-url=${eventUrl}" onclick="copyLink(this)">Copy Link</button>
 
             <!-- Native share button (will fallback to copyLink) -->
-            <button type="button" class="btn btn-grey" onclick="shareEvent(this)" th:attr="data-url=${eventUrl}, data-title=${registration.getEvent().getTitle()}">
+            <button type="button" class="btn btn-grey" onclick="shareEvent(this)" th:attr="data-url=${eventUrl}, data-title=${event.getTitle()}">
               Share
             </button>
           </div>
@@ -185,7 +185,9 @@
         </form>
         </div>
       </div>
-    </div>
+  </div>
+
+  <!-- Search Tab -->
   <div id="search" class="tab-content" th:classappend="${activeTab == 'search'} ? ' active'">
     <h2>Search Events</h2>
     <form th:if="${currentUser != null}" th:action="@{/events/search}" method="get">
@@ -195,8 +197,8 @@
       <!-- Date range -->
       <label>From:</label>
       <input type="date" name="startDate"
-             th:value="${#dates.format(#dates.createNow(), 'yyyy-MM-dd')}"
-             min="${#dates.format(#dates.createNow(), 'yyyy-MM-dd')}"/>
+            th:value="${#dates.format(#dates.createNow(), 'yyyy-MM-dd')}"
+            min="${#dates.format(#dates.createNow(), 'yyyy-MM-dd')}"/>
       <label>To:</label>
       <input type="date" name="endDate" min="${#dates.format(#dates.createNow(), 'yyyy-MM-dd')}"/>
 
@@ -212,16 +214,16 @@
       <button type="submit" class="btn btn-grey">Search</button>
       <!-- Clear Filters Button -->
       <a th:if="${currentUser != null}"
-         th:href="@{/events/search(userId=${currentUser.getUserId()})}"
-         class="btn btn-grey"
-         style="margin-left:0.5rem;">
+        th:href="@{/events/search(userId=${currentUser.getUserId()})}"
+        class="btn btn-grey"
+        style="margin-left:0.5rem;">
         Clear All Filters
       </a>
 
       <a th:unless="${currentUser != null}"
-         th:href="@{/events/search}"
-         class="btn btn-grey"
-         style="margin-left:0.5rem;">
+        th:href="@{/events/search}"
+        class="btn btn-grey"
+        style="margin-left:0.5rem;">
         Clear All Filters
       </a>
     </form>
@@ -232,8 +234,8 @@
       <!-- Date range -->
       <label>From:</label>
       <input type="date" name="startDate"
-             th:value="${#dates.format(#dates.createNow(), 'yyyy-MM-dd')}"
-             min="${#dates.format(#dates.createNow(), 'yyyy-MM-dd')}"/>
+            th:value="${#dates.format(#dates.createNow(), 'yyyy-MM-dd')}"
+            min="${#dates.format(#dates.createNow(), 'yyyy-MM-dd')}"/>
       <label>To:</label>
       <input type="date" name="endDate" min="${#dates.format(#dates.createNow(), 'yyyy-MM-dd')}"/>
 
@@ -249,9 +251,9 @@
       <button type="submit" class="btn btn-grey">Search</button>
       <!-- Clear Filters Button -->
       <a th:unless="${currentUser != null}"
-         th:href="@{/events/public/search}"
-         class="btn btn-grey"
-         style="margin-left:0.5rem;">
+        th:href="@{/events/public/search}"
+        class="btn btn-grey"
+        style="margin-left:0.5rem;">
         Clear All Filters
       </a>
     </form>
@@ -272,13 +274,13 @@
           </p>
           <p th:text="${event.description}"></p>
           <div th:if="${currentUser != null}">
-            <form th:if="${event.checkUserRegistered(registrations)}"
+            <form th:if="${futureEvents.contains(event)}"
                   style="display:inline;" th:action="@{/events/deleteRegistration}" method="post">
               <input type="hidden" name="userId" th:value="${currentUser.getUserId()}" />
               <input type="hidden" name="eventId" th:value="${event.getEventId()}" />
               <button type="submit" class="btn btn-cancel">Cancel Registration</button>
             </form>
-            <form th:if="${!event.checkUserRegistered(registrations)}"
+            <form th:if="${!futureEvents.contains(event)}"
                   th:action="@{'/events/register/' + ${event.eventId}}"
                   method="post" style="display:inline;">
               <input type="hidden" name="userId" th:value="${currentUser.getUserId()}"/>
@@ -303,19 +305,19 @@
 
               <!-- Facebook -->
               <a th:href="'https://www.facebook.com/sharer/sharer.php?u=' + ${eventUrl}"
-                 target="_blank" rel="noopener noreferrer" class="btn btn-grey">Facebook</a>
+                target="_blank" rel="noopener noreferrer" class="btn btn-grey">Facebook</a>
 
               <!-- Twitter (basic text param) -->
               <a th:href="'https://twitter.com/intent/tweet?url=' + ${eventUrl} + '&text=' + ${event.title}"
-                 target="_blank" rel="noopener noreferrer" class="btn btn-grey">Twitter</a>
+                target="_blank" rel="noopener noreferrer" class="btn btn-grey">Twitter</a>
 
               <!-- LinkedIn -->
               <a th:href="'https://www.linkedin.com/sharing/share-offsite/?url=' + ${eventUrl}"
-                 target="_blank" rel="noopener noreferrer" class="btn btn-grey">LinkedIn</a>
+                target="_blank" rel="noopener noreferrer" class="btn btn-grey">LinkedIn</a>
 
               <!-- Email -->
               <a th:href="'mailto:?subject=' + ${event.title} + '&body=Check%20out%20this%20event:%20' + ${eventUrl}"
-                 class="btn btn-grey">Email</a>
+                class="btn btn-grey">Email</a>
 
               <!-- Copy link button: use data attribute so JS can read it safely -->
               <button type="button" class="btn btn-grey" th:attr="data-url=${eventUrl}" onclick="copyLink(this)">Copy Link</button>
@@ -330,12 +332,7 @@
       </div>
     </div>
   </div>
-
-</div>
-
-  <!-- Search Tab -->
-
-
+  </div>
 <script>
   function openTab(tabId) {
     document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));

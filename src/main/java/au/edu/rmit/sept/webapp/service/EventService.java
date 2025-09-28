@@ -54,6 +54,9 @@ public class EventService {
     }
 
 
+    public List<Event> getEventsUserRegisteredTo(Long userId) {
+        return eventRepository.findEventsByUserId(userId);
+    }
 
     // NEW: Get ALL events (for admin view)
     public List<Event> getAllEvents() {

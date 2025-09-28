@@ -7,6 +7,7 @@ import au.edu.rmit.sept.webapp.repository.RegistrationRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -37,9 +38,6 @@ public class RegistrationService {
         return registrationRepository.findByUser_UserId(id);
     }
 
-    public List<Registration> getRegistrationsForUser(User user) {
-        return registrationRepository.findByUser(user);
-    }
 
     public List<Registration> getRegistrationsForEvent(Event event) {
         return registrationRepository.findByEvent(event);

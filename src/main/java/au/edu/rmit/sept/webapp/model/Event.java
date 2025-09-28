@@ -94,7 +94,7 @@ public class Event {
 
     public Set<Feedback> getFeedbacks() { return feedbacks; }
 
-    public Boolean checkUserRegistered(List<Registration> userRegistrations) {
+    public Boolean checkUserRegistered(Set<Registration> userRegistrations) {
         for (Registration registration : userRegistrations) {
             if (registration.getEvent().eventId.equals(eventId)) return true;
         }
