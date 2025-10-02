@@ -6,6 +6,11 @@
     <link rel="stylesheet" href="/css/styles.css"> <!-- Optional styling -->
 </head>
 <body>
+<div th:if="${error}"
+     class="alert alert-danger alert-dismissible fade show" role="alert">
+    <span th:text="${error}"></span>
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
 <div class="container">
     <h1 th:text="${currentUser != null} ? 'Edit Profile' : 'Create Profile'"></h1>
 

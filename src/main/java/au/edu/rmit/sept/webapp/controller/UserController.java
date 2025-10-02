@@ -9,7 +9,9 @@ import au.edu.rmit.sept.webapp.service.RegistrationService;
 import au.edu.rmit.sept.webapp.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
@@ -134,21 +136,22 @@ public class UserController {
                                     @RequestParam String email,
                                     @RequestParam String password,
                                     @RequestParam String role,
-                                    Model model) {
+                                    RedirectAttributes redirectAttrs) {
         if (userService.findByEmail(email).isPresent()) {
-            model.addAttribute("error", "Email already in use");
-            model.addAttribute("userTypes", List.of(UserType.STUDENT, UserType.ORGANISER));
-            return "manage-profile";
+            redirectAttrs.addFlashAttribute("error", "Email already in use");
+
+            return "redirect:/users/profile/create";
         }
 
         UserType selectedRole = UserType.valueOf(role);
         if (selectedRole == UserType.ADMIN) {
-            throw new IllegalArgumentException("Invalid role selection");
+            redirectAttrs.addFlashAttribute("error","Invalid role selection");
+            return "redirect:/users/profile/create";
         }
 
         User newUser = new User(name, email, passwordEncoder.encode(password), selectedRole);
         userService.save(newUser);
-
+        redirectAttrs.addFlashAttribute("profileSuccess", "User '" + newUser.getName() + "' has been created, loging below.");
         return "redirect:/login?createSuccess";
     }
 
@@ -157,7 +160,8 @@ public class UserController {
     public String saveProfile(@AuthenticationPrincipal CustomUserDetails currentUser,
                               @RequestParam String name,
                               @RequestParam String email,
-                              @RequestParam(required = false) String password) {
+                              @RequestParam(required = false) String password,
+                              RedirectAttributes redirectAttributes) {
         User user = userService.findById(currentUser.getId())
                 .orElseThrow(() -> new IllegalArgumentException("Invalid user ID"));
 
@@ -165,12 +169,19 @@ public class UserController {
         user.setEmail(email);
 
         if (password != null && !password.isBlank()) {
-            // You probably have a PasswordEncoder bean already
             user.setPassword(passwordEncoder.encode(password));
         }
 
-        userService.save(user); // Persist the updated user
-        return "redirect:/users/profile?success";
+        User updatedUser = userService.save(user);
+
+        // 🔑 Update Authentication in SecurityContext with new details
+        CustomUserDetails updatedDetails = new CustomUserDetails(updatedUser);
+        UsernamePasswordAuthenticationToken newAuth =
+                new UsernamePasswordAuthenticationToken(updatedDetails, updatedDetails.getPassword(), updatedDetails.getAuthorities());
+
+        SecurityContextHolder.getContext().setAuthentication(newAuth);
+        redirectAttributes.addFlashAttribute("profileSuccess", "Updated profile successfully");
+        return "redirect:/events";
     }
 
 }

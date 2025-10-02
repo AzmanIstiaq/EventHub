@@ -1,0 +1,35 @@
+<div th:fragment="event-card(event, currentUser, futureEvents)" class="event-card">
+    <div class="event-header">
+        <h2 th:text="${event.title}"></h2>
+    </div>
+    <p class="event-meta">
+        <span th:text="${#temporals.format(event.dateTime, 'yyyy-MM-dd HH:mm')}"></span> @
+        <span th:text="${event.location}"></span>
+    </p>
+    <p th:text="${event.description}"></p>
+
+    <!-- Action buttons -->
+    <div th:if="${currentUser != null}">
+        <form th:if="${futureEvents.contains(event)}" th:action="@{/events/deleteRegistration}" method="post"
+            style="display:inline;">
+            <input type="hidden" name="userId" th:value="${currentUser.getUserId()}" />
+            <input type="hidden" name="eventId" th:value="${event.getEventId()}" />
+            <button type="submit" class="btn btn-cancel">Cancel Registration</button>
+        </form>
+        <form th:if="${!futureEvents.contains(event)}" th:action="@{'/events/register/' + ${event.eventId}}"
+            method="post" style="display:inline;">
+            <input type="hidden" name="userId" th:value="${currentUser.getUserId()}" />
+            <button type="submit" class="btn btn-register">Register</button>
+        </form>
+        <form th:action="@{'/events/detail/' + ${event.getEventId()}}" method="get" style="display:inline;">
+            <input type="hidden" name="userId" th:value="${currentUser.getUserId()}" />
+            <button type="submit" class="btn btn-grey">Event Detail</button>
+        </form>
+    </div>
+    <div th:if="${currentUser == null}">
+        <a th:href="@{'/events/public/detail/' + ${event.getEventId()}}" class="btn btn-grey">Event Detail</a>
+    </div>
+
+    <!-- Include share buttons -->
+    <div th:replace="~{fragments/event-share :: event-share(${event})}"></div>
+</div>

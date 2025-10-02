@@ -664,10 +664,9 @@ class EventControllerTest {
         student.setName("Taylor");
 
         when(eventService.getAllUpcomingEvents()).thenReturn(List.of(e));
-        when(eventService.getPastEvents()).thenReturn(List.of());
+        when(eventService.getEventsUserRegisteredTo(studentId)).thenReturn(List.of());
         when(userService.findById(studentId)).thenReturn(Optional.of(student));
         when(categoryService.findAll()).thenReturn(List.of());
-        when(registrationService.getRegistrationsForUser(student)).thenReturn(List.of());
 
         mvc.perform(get("/events")
                         .with(csrf()))

@@ -20,8 +20,8 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-/// This controller is to be used for public facing event operations (performed by student users)
-/// such as listing all events and registering for events.
+/// This controller is to be used for all event operations
+/// such as listing all events and registering for events, creating and deleting events.
 @Controller
 @RequestMapping("/events")
 public class EventController {
