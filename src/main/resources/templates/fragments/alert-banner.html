@@ -1,0 +1,22 @@
+<div th:fragment="alert-banner(success, error)">
+   <div th:if="${success}" class="alert alert-success">
+    <span th:text="${success}"></span>
+    <button type="button" class="alert-close" onclick="this.parentElement.remove()">×</button>
+   </div>
+   
+   <div th:if="${error}" class="alert alert-error">
+    <span th:text="${error}"></span>
+    <button type="button" class="alert-close" onclick="this.parentElement.remove()">×</button>
+   </div>
+   <script>
+    document.addEventListener("DOMContentLoaded", () => {
+     document.querySelectorAll(".alert").forEach(alert => {
+      const timeout = alert.getAttribute("data-timeout") || 5000;
+      setTimeout(() => {
+       alert.classList.add("fade-out");
+       setTimeout(() => alert.remove(), 500);
+      }, timeout);
+     });
+    });
+   </script>
+</div>

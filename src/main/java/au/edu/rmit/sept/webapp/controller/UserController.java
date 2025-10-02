@@ -21,6 +21,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 /// Used to perform user based operations and analytics when needed.
@@ -151,7 +152,7 @@ public class UserController {
 
         User newUser = new User(name, email, passwordEncoder.encode(password), selectedRole);
         userService.save(newUser);
-        redirectAttrs.addFlashAttribute("profileSuccess", "User '" + newUser.getName() + "' has been created, loging below.");
+        redirectAttrs.addFlashAttribute("success", "User '" + newUser.getName() + "' has been created, login below.");
         return "redirect:/login?createSuccess";
     }
 
@@ -165,6 +166,12 @@ public class UserController {
         User user = userService.findById(currentUser.getId())
                 .orElseThrow(() -> new IllegalArgumentException("Invalid user ID"));
 
+        Optional<User> userEmail = userService.findByEmail(email);
+        if (userEmail.isPresent() && userEmail.get().getUserId() != currentUser.getId()) {
+            redirectAttributes.addFlashAttribute("error", "Email already in use, please choose another.");
+
+            return "redirect:/users/profile";
+        }
         user.setName(name);
         user.setEmail(email);
 
@@ -180,7 +187,7 @@ public class UserController {
                 new UsernamePasswordAuthenticationToken(updatedDetails, updatedDetails.getPassword(), updatedDetails.getAuthorities());
 
         SecurityContextHolder.getContext().setAuthentication(newAuth);
-        redirectAttributes.addFlashAttribute("profileSuccess", "Updated profile successfully");
+        redirectAttributes.addFlashAttribute("success", "Updated profile successfully");
         return "redirect:/events";
     }
 

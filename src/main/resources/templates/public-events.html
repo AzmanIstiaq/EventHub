@@ -2,23 +2,13 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
   <title>Events</title>
-    <link rel="stylesheet" th:href="@{/css/style.css}">
+  <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
 <body>
 <div th:replace="~{fragments/navbar-common}"></div>
 
 <div class="container">
-  <div th:if="${profileSuccess}"
-       class="alert alert-success alert-dismissible fade show" role="alert">
-    <span th:text="${profileSuccess}"></span>
-    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-  </div>
-
-  <div th:if="${error}"
-       class="alert alert-danger alert-dismissible fade show" role="alert">
-    <span th:text="${error}"></span>
-    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-  </div>
+  <div th:replace="~{fragments/alert-banner :: alert-banner(${success}, ${error})}"></div>
   <h1>Events</h1>
 
   <!-- Tab headers -->
@@ -61,117 +51,15 @@
       You have no past events.
     </div>
     <div class="events-grid" th:unless="${#lists.isEmpty(pastEvents)}">
-      <div class="event-card" th:each="event : ${pastEvents}">
-        <div class="event-header">
-          <h2 th:text="${event.title}"></h2>
-        </div>
-        <p class="event-meta">
-          <span th:text="${#temporals.format(event.getDateTime(), 'yyyy-MM-dd HH:mm')}"></span> @
-          <span th:text="${event.getLocation()}"></span>
-        </p>
-        <p th:text="${event.getDescription()}"></p>
-
-
-        <form th:action="@{'/events/detail/' + ${event.getEventId()}}"
-              method="get" style="display:inline;">
-          <input type="hidden" name="userId" th:value="${currentUser.getUserId()}"/>
-          <button type="submit" class="btn btn-grey">Event Detail</button>
-        </form>
-        <form th:action="@{'/events/feedback/' + ${event.getEventId()}}" method="post">
-          <label>Rating (1-5):</label>
-          <input type="number" name="rating" min="1" max="5" required />
-
-          <label>Comment:</label>
-          <textarea name="comment" rows="4" cols="50"></textarea>
-          <input type="hidden" name="userId" th:value="${currentUser.getUserId()}"/>
-          <button type="submit">Submit Feedback</button>
-        </form>
-        </div>
+      <div th:each="event : ${pastEvents}">
+        <div th:replace="~{fragments/event-card :: event-card(${event}, ${currentUser}, ${futureEvents})}"></div>
       </div>
+    </div>
   </div>
 
   <!-- Search Tab -->
   <div id="search" class="tab-content" th:classappend="${activeTab == 'search'} ? ' active'">
-    <h2>Search Events</h2>
-    <form th:if="${currentUser != null}" th:action="@{/events/search}" method="get">
-      <!-- Text search -->
-      <input type="text" name="query" placeholder="Search by title, location, or keyword"/>
-
-      <!-- Date range -->
-      <label>From:</label>
-      <input type="date" name="startDate"
-            th:value="${#dates.format(#dates.createNow(), 'yyyy-MM-dd')}"
-            min="${#dates.format(#dates.createNow(), 'yyyy-MM-dd')}"/>
-      <label>To:</label>
-      <input type="date" name="endDate" min="${#dates.format(#dates.createNow(), 'yyyy-MM-dd')}"/>
-
-      <!-- Category dropdown -->
-      <select name="categoryId">
-        <option value="">All Categories</option>
-        <option th:each="cat : ${categories}" th:value="${cat.id}" th:text="${cat.category}"></option>
-      </select>
-
-      <!-- Include userId if logged in -->
-      <input th:if="${currentUser}" type="hidden" name="userId" th:value="${currentUser.getUserId()}"/>
-
-      <button type="submit" class="btn btn-grey">Search</button>
-      <!-- Clear Filters Button -->
-      <a th:if="${currentUser != null}"
-        th:href="@{/events/search(userId=${currentUser.getUserId()})}"
-        class="btn btn-grey"
-        style="margin-left:0.5rem;">
-        Clear All Filters
-      </a>
-
-      <a th:unless="${currentUser != null}"
-        th:href="@{/events/search}"
-        class="btn btn-grey"
-        style="margin-left:0.5rem;">
-        Clear All Filters
-      </a>
-    </form>
-    <form th:unless="${currentUser != null}" th:action="@{/events/public/search}" method="get">
-      <!-- Text search -->
-      <input type="text" name="query" placeholder="Search by title, location, or keyword"/>
-
-      <!-- Date range -->
-      <label>From:</label>
-      <input type="date" name="startDate"
-            th:value="${#dates.format(#dates.createNow(), 'yyyy-MM-dd')}"
-            min="${#dates.format(#dates.createNow(), 'yyyy-MM-dd')}"/>
-      <label>To:</label>
-      <input type="date" name="endDate" min="${#dates.format(#dates.createNow(), 'yyyy-MM-dd')}"/>
-
-      <!-- Category dropdown -->
-      <select name="categoryId">
-        <option value="">All Categories</option>
-        <option th:each="cat : ${categories}" th:value="${cat.id}" th:text="${cat.category}"></option>
-      </select>
-
-      <!-- Include userId if logged in -->
-      <input th:if="${currentUser}" type="hidden" name="userId" th:value="${currentUser.getUserId()}"/>
-
-      <button type="submit" class="btn btn-grey">Search</button>
-      <!-- Clear Filters Button -->
-      <a th:unless="${currentUser != null}"
-        th:href="@{/events/public/search}"
-        class="btn btn-grey"
-        style="margin-left:0.5rem;">
-        Clear All Filters
-      </a>
-    </form>
-
-
-
-    <!-- Results -->
-    <div th:if="${searchResults != null}">
-      <h3 th:if="${#lists.isEmpty(searchResults)}" class="empty-message">No events found.</h3>
-      <div class="events-grid" th:unless="${#lists.isEmpty(searchResults)}">
-          <div th:each="event : ${searchResults}">
-            <div th:replace="~{fragments/event-card :: event-card(${event}, ${currentUser}, ${futureEvents})}"></div>
-          </div>
-        </div>
-    </div>
+    <div th:replace="~{fragments/event-search :: event-search(${currentUser}, ${searchResults})}"></div>
   </div>
   </div>
 <script>
@@ -184,8 +72,8 @@
   }
 
   function copyLink(el) {
-    const relUrl = el.getAttribute('data-url');            // e.g. "/events/public/detail/123"
-    const fullUrl = window.location.origin + relUrl;       // e.g. "https://yourhost.com/events/..."
+    const relUrl = el.getAttribute('data-url');           
+    const fullUrl = window.location.origin + relUrl;       
     navigator.clipboard.writeText(fullUrl).then(() => {
       // small non-blocking feedback; replace with nicer toast if you wantb
       alert('Link copied to clipboard!');
