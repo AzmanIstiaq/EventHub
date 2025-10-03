@@ -10,13 +10,13 @@
 
     <!-- Action buttons -->
     <div th:if="${currentUser != null && currentUser.getRole().name() == 'STUDENT'}">
-        <form th:if="${futureEvents.contains(event)}" th:action="@{/events/deleteRegistration}" method="post"
+        <form th:if="${futureEvents.contains(event) && !event.isInPast()}" th:action="@{/events/deleteRegistration}" method="post"
             style="display:inline;">
             <input type="hidden" name="userId" th:value="${currentUser.getUserId()}" />
             <input type="hidden" name="eventId" th:value="${event.getEventId()}" />
             <button type="submit" class="btn btn-cancel">Cancel Registration</button>
         </form>
-        <form th:if="${!futureEvents.contains(event)}" th:action="@{'/events/register/' + ${event.eventId}}"
+        <form th:if="${!futureEvents.contains(event) && !event.isInPast()}" th:action="@{'/events/register/' + ${event.eventId}}"
             method="post" style="display:inline;">
             <input type="hidden" name="userId" th:value="${currentUser.getUserId()}" />
             <button type="submit" class="btn btn-register">Register</button>
