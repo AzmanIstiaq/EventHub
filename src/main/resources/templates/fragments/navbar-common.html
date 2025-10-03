@@ -3,7 +3,7 @@
       xmlns:th="http://www.thymeleaf.org"
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <body>
-<div th:fragment="navbar-common">
+<div th:fragment="navbar-common(currentUser)">
     <header class="main-header">
         <!-- Brand -->
         <div class="logo">
@@ -13,6 +13,10 @@
         <!-- Right side links -->
         <nav class="nav-links">
             <!-- If user is NOT logged in -->
+            <a th:if="${#authorization.expression('!isAuthenticated()')}" 
+               th:href="@{/}">Home</a>
+            <a th:if="${#authorization.expression('!isAuthenticated()')}" 
+               th:href="@{/events/public}">Events</a>
             <a th:if="${#authorization.expression('!isAuthenticated()')}"
                th:href="@{/login}">Login</a>
             <a th:if="${#authorization.expression('!isAuthenticated()')}"
@@ -29,6 +33,15 @@
                 </div>
 
                 <!-- Logout button styled with existing .btn-grey -->
+                <form th:if="${currentUser.getRole().name() == 'ADMIN'}" th:action="@{/admin/dashboard}" method="get" style="margin:0;">
+                    <button type="submit" class="btn-grey">Dashboard</button>
+                </form>
+                <form th:if="${currentUser.getRole().name() == 'ORGANISER' || currentUser.getRole().name() == 'STUDENT'}" th:action="@{/events}" method="get" style="margin:0;">
+                    <button type="submit" class="btn-grey">Dashboard</button>
+                </form>
+                <form th:unless="${currentUser.getRole().name() == 'STUDENT'}" th:action="@{/events/public}" method="get" style="margin:0;">
+                    <button type="submit" class="btn-grey">Public Events</button>
+                </form>
                 <form th:action="@{/logout}" method="post" style="margin:0;">
                     <button type="submit" class="btn-grey">Logout</button>
                 </form>

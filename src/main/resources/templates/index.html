@@ -4,7 +4,7 @@
     <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
 <body>
-    <div th:replace="~{fragments/navbar-common :: navbar-common}"></div>
+    <div th:replace="~{fragments/navbar-common :: navbar-common(${currentUser})}"></div>
     <section class="hero">
         <img src="/image/melbourne.jpg" alt="Melbourne Picture">
 <!--        Photo by <a href="https://unsplash.com/@pemacallan?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash">Paul Macallan</a> on <a href="https://unsplash.com/photos/a-green-and-yellow-train-traveling-past-a-tall-building-wN3Pk6yJL-A?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash">Unsplash</a>-->

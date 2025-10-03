@@ -5,7 +5,7 @@
   <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
 <body>
-<div th:replace="~{fragments/navbar-common}"></div>
+<div th:replace="~{fragments/navbar-common :: navbar-common(${currentUser})}"></div>
 
 <div class="container">
   <div th:replace="~{fragments/alert-banner :: alert-banner(${success}, ${error})}"></div>
@@ -14,8 +14,8 @@
   <!-- Tab headers -->
   <div class="tabs">
     <div class="tab" th:classappend="${activeTab == 'upcoming' or activeTab == null} ? ' active'" onclick="openTab('upcoming')">Upcoming Events</div>
-    <div class="tab" th:if="${currentUser != null}" th:classappend="${activeTab == 'registered'} ? ' active'" onclick="openTab('registered')">Registered Events</div>
-    <div class="tab" th:if="${currentUser != null}" onclick="openTab('past')">Past Events</div>
+    <div class="tab" th:if="${currentUser != null && currentUser.getRole().name() == 'STUDENT'}" th:classappend="${activeTab == 'registered'} ? ' active'" onclick="openTab('registered')">Registered Events</div>
+    <div class="tab" th:if="${currentUser != null && currentUser.getRole().name() == 'STUDENT'}" onclick="openTab('past')">Past Events</div>
     <div class="tab" th:classappend="${activeTab == 'search'} ? ' active'" onclick="openTab('search')">Search</div>
   </div>
 
@@ -33,7 +33,7 @@
   </div>
 
   <!-- Registered Events Tab -->
-  <div id="registered" class="tab-content" th:if="${currentUser != null}">
+  <div id="registered" class="tab-content" th:if="${currentUser != null && currentUser.getRole().name() == 'STUDENT'}">
     <h2>Your Registered Events</h2>
     <div th:if="${#lists.isEmpty(futureEvents)}" class="empty-message">
       You have not registered for any events.
@@ -45,7 +45,7 @@
     </div>
   </div>
   <!-- Past registered events -->
-  <div id="past" class="tab-content" th:if="${currentUser != null}">
+  <div id="past" class="tab-content" th:if="${currentUser != null && currentUser.getRole().name() == 'STUDENT'}">
     <h2>Your Past Events</h2>
     <div th:if="${#lists.isEmpty(pastEvents)}" class="empty-message">
       You have no past events.

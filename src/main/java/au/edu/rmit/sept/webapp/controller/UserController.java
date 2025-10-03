@@ -45,6 +45,9 @@ public class UserController {
         List<User> allUsers = userService.getAllUsers();
         model.addAttribute("users", allUsers);
 
+        User adminUser = userService.findById(currentUser.getId())
+                .orElseThrow(() -> new IllegalArgumentException("Invalid user ID"));
+
         // Calculate user type statistics
         int adminCount = (int) allUsers.stream()
                 .filter(user -> user.getRole() == UserType.ADMIN)
@@ -55,7 +58,8 @@ public class UserController {
         int studentCount = (int) allUsers.stream()
                 .filter(user -> user.getRole() == UserType.STUDENT)
                 .count();
-
+                
+        model.addAttribute("currentUser", adminUser);
         model.addAttribute("adminCount", adminCount);
         model.addAttribute("organiserCount", organiserCount);
         model.addAttribute("studentCount", studentCount);

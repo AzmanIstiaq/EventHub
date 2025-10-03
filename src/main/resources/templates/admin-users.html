@@ -26,7 +26,7 @@
     </style>
 </head>
 <body>
-<div th:replace="~{fragments/navbar-common}"></div>
+<div th:replace="~{fragments/navbar-common :: navbar-common(${currentUser})}"></div>
 
 <div class="admin-header">
     <h1>👥 Admin Panel - User Management</h1>
@@ -35,7 +35,7 @@
 
 <!-- Navigation Links -->
 <div style="margin-bottom: 20px;">
-    <a href="/dashboard" class="btn btn-primary">📊 Dashboard</a>
+    <a href="/admin/dashboard" class="btn btn-primary">📊 Dashboard</a>
     <a href="/events" class="btn btn-info">📅 Manage Events</a>
 </div>
 

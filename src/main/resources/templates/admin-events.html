@@ -23,7 +23,7 @@
     </style>
 </head>
 <body>
-<div th:replace="~{fragments/navbar-common}"></div>
+<div th:replace="~{fragments/navbar-common :: navbar-common(${currentUser})}"></div>
 
 <div class="admin-header">
     <h1>🛡️ Admin Panel - Event Management</h1>

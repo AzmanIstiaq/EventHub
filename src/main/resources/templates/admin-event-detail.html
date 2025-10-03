@@ -27,7 +27,7 @@
   </style>
 </head>
 <body>
-<div th:replace="fragments/navbar-common"></div>
+<div th:replace="~{fragments/navbar-common :: navbar-common(${currentUser})}"></div>
 
 <div class="admin-header">
   <h1>📋 Event Details - Admin View</h1>
@@ -37,7 +37,7 @@
 <!-- Back Navigation -->
 <div style="margin-bottom: 20px;">
   <a href="/events" class="btn btn-secondary">← Back to All Events</a>
-  <a href="/dashboard" class="btn btn-primary">📊 Dashboard</a>
+  <a href="/admin/dashboard" class="btn btn-primary">📊 Dashboard</a>
 </div>
 
 <!-- Event Information -->

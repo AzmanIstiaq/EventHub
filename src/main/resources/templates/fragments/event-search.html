@@ -26,10 +26,6 @@
    style="margin-left:0.5rem;">
    Clear All Filters
   </a>
- 
-  <a th:unless="${currentUser != null}" th:href="@{/events/search}" class="btn btn-grey" style="margin-left:0.5rem;">
-   Clear All Filters
-  </a>
  </form>
  <form th:unless="${currentUser != null}" th:action="@{/events/public/search}" method="get">
   <!-- Text search -->

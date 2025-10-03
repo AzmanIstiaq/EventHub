@@ -14,6 +14,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -50,11 +51,15 @@ public class EventController {
                 .iterator()
                 .next()
                 .getAuthority();
-        User user = userService.findById(currentUser.getId())
+        User user = null;
+        if (currentUser != null) {
+            user = userService.findById(currentUser.getId())
                     .orElseThrow(() -> new IllegalArgumentException("Invalid user ID"));
+        }
+
 
         return switch (role) {
-            case "ROLE_ADMIN" -> listAdminEvents(model);
+            case "ROLE_ADMIN" -> listAdminEvents(user, model);
             case "ROLE_ORGANISER" -> listOrganiserEvents(user, model);
             case "ROLE_STUDENT" -> listStudentEvents(user, model);
             default -> listEvents(user, model);
@@ -63,8 +68,11 @@ public class EventController {
 
     @GetMapping("/public")
     public String listPublicEvents(@AuthenticationPrincipal CustomUserDetails currentUser, Model model) {
-         User user = userService.findById(currentUser.getId())
+        User user = null;
+        if (currentUser != null) {
+            user = userService.findById(currentUser.getId())
                     .orElseThrow(() -> new IllegalArgumentException("Invalid user ID"));
+        }
 
         return listEvents(user, model);
     }
@@ -76,18 +84,28 @@ public class EventController {
                 .iterator()
                 .next()
                 .getAuthority();
+        User user = null;
+        if (currentUser != null) {
+            user = userService.findById(currentUser.getId())
+                    .orElseThrow(() -> new IllegalArgumentException("Invalid user ID"));
+        }
 
         // organiser dos not have a user specific detail page
         return switch (role) {
-            case "ROLE_ADMIN" -> getAdminEventDetail(eventId, model);
-            case "ROLE_STUDENT" -> getStudentEventDetail(currentUser, model, eventId);
-            default -> getPublicEventDetail(model, eventId);
+            case "ROLE_ADMIN" -> getAdminEventDetail(user, eventId, model);
+            case "ROLE_STUDENT" -> getStudentEventDetail(user, model, eventId);
+            default -> getPublicEventDetail(user, model, eventId);
         };
     }
 
     @GetMapping("/public/detail/{eventId}")
-    public String getEventPublicDetails(Model model, @PathVariable Long eventId) {
-        return getPublicEventDetail(model, eventId);
+    public String getEventPublicDetails(@AuthenticationPrincipal CustomUserDetails currentUser,Model model, @PathVariable Long eventId) {
+        User user = null;
+        if (currentUser != null) {
+            user = userService.findById(currentUser.getId())
+                    .orElseThrow(() -> new IllegalArgumentException("Invalid user ID"));
+        }
+        return getPublicEventDetail(user, model, eventId);
     }
 
     @GetMapping("/search")
@@ -286,11 +304,12 @@ public class EventController {
 
     // public list all events return.
     private String listEvents(User currentUser, Model model) {
+        List<Event> futurEvents = new ArrayList<>();
         model.addAttribute("events", eventService.getAllUpcomingEvents());
         model.addAttribute("currentUser", currentUser);
         model.addAttribute("activeTab", "upcoming");
         model.addAttribute("categories", categoryService.findAll());
-        model.addAttribute("pastEvents", eventService.getPastEvents());
+        model.addAttribute("futureEvents", futurEvents );
         return "public-events";  // Thymeleaf template
     }
 
@@ -317,7 +336,7 @@ public class EventController {
     }
 
     // admin list all events endpoint
-    private String listAdminEvents(Model model) {
+    private String listAdminEvents(User user, Model model) {
         List<Event> allEvents = eventService.getAllEvents();
         model.addAttribute("events", allEvents);
 
@@ -329,7 +348,7 @@ public class EventController {
         int pastEventsCount = (int) allEvents.stream()
                 .filter(event -> event.getDateTime().isBefore(now))
                 .count();
-
+        model.addAttribute("currentUser", user);
         model.addAttribute("upcomingEventsCount", upcomingEventsCount);
         model.addAttribute("pastEventsCount", pastEventsCount);
 
@@ -345,26 +364,24 @@ public class EventController {
         // Add categories for form dropdown
         List<Category> categories = categoryService.findAll();
 
-        System.out.println("DEBUG: Upcoming Events: " + upcomingEvents);
-        System.out.println("DEBUG: Past Events: " + pastEvents);
-        System.out.println("DEBUG: Categorey1: " + categories.get(0).getCategory());
-        System.out.println("DEBUG: Organiser: " + organiser.getName());
-
         model.addAttribute("upcomingEvents", upcomingEvents);
         model.addAttribute("pastEvents", pastEvents);
         model.addAttribute("organiser", organiser);
+        model.addAttribute("currentUser", organiser);
         model.addAttribute("categories", categories);
 
         return "organiser-dashboard";
     }
 
-    private String getAdminEventDetail(@PathVariable Long eventId, Model model) {
+    private String getAdminEventDetail(User user, @PathVariable Long eventId, Model model) {
+
         Event event = eventService.findById(eventId)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid event ID"));
 
         // Get registrations for this event
         List<Registration> registrations = registrationService.getRegistrationsForEvent(event);
-
+        
+        model.addAttribute("currentUser", user);
         model.addAttribute("event", event);
         model.addAttribute("registrations", registrations);
         model.addAttribute("registrationCount", registrations.size());
@@ -372,11 +389,7 @@ public class EventController {
         return "admin-event-detail";
     }
 
-    private String getStudentEventDetail(@AuthenticationPrincipal CustomUserDetails currentUser,
-                                         Model model, @PathVariable Long eventId) {
-        User user = userService.findById(currentUser.getId())
-                .orElseThrow(() -> new IllegalArgumentException("Invalid user ID"));
-
+    private String getStudentEventDetail(User user, Model model, @PathVariable Long eventId) {
         Event event = eventService.findById(eventId)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid event ID"));
 
@@ -387,15 +400,13 @@ public class EventController {
         return "event-detail";
     }
 
-    private String getPublicEventDetail(Model model, @PathVariable Long eventId) {
+    private String getPublicEventDetail(User user, Model model, @PathVariable Long eventId) {
 
         Event event = eventService.findById(eventId)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid event ID"));
-
-        User currentUser = null;
-
+        
         model.addAttribute("event", event);
-        model.addAttribute("currentUser", currentUser);
+        model.addAttribute("currentUser", user);
 
         return "event-detail";
     }
@@ -407,15 +418,21 @@ public class EventController {
         @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
         @RequestParam(required = false) Long categoryId,
         Model model) {
-            List<Event> events = eventService.getEventsUserRegisteredTo(user.getUserId());
+            List<Event> futureEvents = new ArrayList<>();
+            List<Event> pastEvents = new ArrayList<>();
 
-            LocalDateTime now = LocalDateTime.now();
-            List<Event> pastEvents = events.stream()
-                    .filter(e -> e.getDateTime().isBefore(now))
-                    .toList();
-            List<Event> futureEvents = events.stream()
-                    .filter(e -> e.getDateTime().isAfter(now))
-                    .toList();
+            if (user != null) {
+                List<Event> events = eventService.getEventsUserRegisteredTo(user.getUserId());
+
+                LocalDateTime now = LocalDateTime.now();
+                pastEvents = events.stream()
+                        .filter(e -> e.getDateTime().isBefore(now))
+                        .toList();
+                futureEvents = events.stream()
+                        .filter(e -> e.getDateTime().isAfter(now))
+                        .toList();
+            }
+            
 
             model.addAttribute("pastEvents", pastEvents);
             model.addAttribute("futureEvents", futureEvents);

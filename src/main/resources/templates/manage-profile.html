@@ -6,6 +6,7 @@
     <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
 <body>
+<div th:replace="~{fragments/navbar-common :: navbar-common(${currentUser})}"></div>
 <div class="container">
     <div th:replace="~{fragments/alert-banner :: alert-banner(${success}, ${error})}"></div>
     <div class="form-card">

@@ -52,7 +52,7 @@
     </style>
 </head>
 <body>
-<div th:replace="~{fragments/navbar-common}"></div>
+<div th:replace="~{fragments/navbar-common :: navbar-common(${currentUser})}"></div>
 
 <div class="details">
     <h1>Event Details:</h1>
@@ -80,7 +80,7 @@
     <p th:text="${event.description}"></p>
 
     <!-- Actions shown only if user is logged in -->
-    <div th:if="${currentUser != null}">
+    <div th:if="${currentUser != null && currentUser.getRole().name() == 'STUDENT'}">
         <!-- Cancel if registered -->
         <form th:if="${registered}"
               style="display:inline;" th:action="@{/events/deleteRegistration}" method="post">
@@ -104,8 +104,8 @@
     </div>
 
     <!-- If no logged-in user, show a different back button -->
-    <div th:if="${currentUser == null}">
-        <a href="/" class="btn btn-back">← Back to Events</a>
+    <div th:unless="${currentUser != null && currentUser.getRole().name() == 'STUDENT'}">
+        <a href="/events/public" class="btn btn-back">← Back to Events</a>
     </div>
 </div>
 </body>
