@@ -86,6 +86,10 @@ public class Event {
     public LocalDateTime getDateTime() { return dateTime; }
     public void setDateTime(LocalDateTime dateTime) { this.dateTime = dateTime; }
 
+    public boolean isInPast() {
+        return this.dateTime.isBefore(LocalDateTime.now());
+    }
+
     public String getLocation() { return location; }
     public void setLocation(String location) { this.location = location; }
 
