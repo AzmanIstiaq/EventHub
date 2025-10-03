@@ -16,6 +16,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.List;
 import java.util.Optional;
 
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -50,6 +51,13 @@ class UserControllerTest {
         users.get(0).setRole(UserType.ORGANISER);
         users.get(1).setRole(UserType.STUDENT);
         when(userService.getAllUsers()).thenReturn(users);
+        User u = new User();
+        u.setUserId(1L);
+        u.setName("X");
+        u.setRole(UserType.ADMIN);
+
+        when(userService.findById(anyLong())).thenReturn(Optional.of(u));
+
 
         mvc.perform(get("/users"))
                 .andExpect(status().isOk())
@@ -65,12 +73,14 @@ class UserControllerTest {
     @DisplayName("Admin deactivate user success redirects")
     void adminDeactivateUser() throws Exception {
         User u = new User();
-        u.setUserId(44L);
+        u.setUserId(1L);
         u.setName("X");
+        u.setRole(UserType.ADMIN);
 
-        when(userService.findById(44L)).thenReturn(Optional.of(u));
 
-        mvc.perform(post("/users/{userId}/deactivate", 44L).with(csrf()))
+        when(userService.findById(1L)).thenReturn(Optional.of(u));
+
+        mvc.perform(post("/users/{userId}/deactivate", 1L).with(csrf()))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/users"));
     }
@@ -84,6 +94,7 @@ class UserControllerTest {
         User u = new User();
         u.setUserId(100L);
         u.setName("Taylor");
+        u.setRole(UserType.STUDENT);
 
         when(userService.findById(100L)).thenReturn(Optional.of(u));
 
@@ -100,11 +111,44 @@ class UserControllerTest {
         User u = new User();
         u.setUserId(200L);
         u.setName("Jordan");
+        u.setPassword("password");
+        u.setRole(UserType.ORGANISER);
 
-        when(userService.findById(200L)).thenReturn(Optional.of(u));
+        when(userService.findById(anyLong())).thenReturn(Optional.of(u));
+        when(userService.findByEmail("taken@example.com")).thenReturn(null);
+        when(userService.save(u)).thenReturn(u);
 
-        mvc.perform(post("/users/profile").with(csrf()))
-                .andExpect(status().isOk())
-                .andExpect(view().name("manage-profile"));
+        mvc.perform(post("/users/profile/save")
+                        .with(csrf())
+                        .param("name", "Jordan Updated")
+                        .param("email", "jordan@example.com"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/events"))
+                .andExpect(flash().attribute("success", "Updated profile successfully"));
+
     }
+
+    @Test
+    @WithMockCustomUser(username = "organiser", role = UserType.ORGANISER)
+    void updateProfile_duplicateEmail_redirectsBack() throws Exception {
+        User u = new User();
+        u.setUserId(200L);
+        u.setName("Jordan");
+
+        when(userService.findById(anyLong())).thenReturn(Optional.of(u));
+
+        User other = new User();
+        other.setUserId(201L);
+        other.setEmail("taken@example.com");
+        when(userService.findByEmail("taken@example.com")).thenReturn(Optional.of(other));
+
+        mvc.perform(post("/users/profile/save")
+                        .with(csrf())
+                        .param("name", "Jordan Updated")
+                        .param("email", "taken@example.com"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/users/profile"))
+                .andExpect(flash().attribute("error", "Email already in use, please choose another."));
+    }
+
 }

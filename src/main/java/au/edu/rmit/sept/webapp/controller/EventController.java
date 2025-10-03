@@ -129,13 +129,17 @@ public class EventController {
                                 @RequestParam(required = false) Long categoryId,
                                 Model model) {
         User user = null;
+        if (currentUser != null) {
+            user = userService.findById(currentUser.getId())
+                    .orElseThrow(() -> new IllegalArgumentException("Invalid user ID"));
+        }
         return searchEventsGlobal(user, query, startDate, endDate, categoryId, model);
     }
 
     // Student only regsiter
     @PostMapping("/register/{eventId}")
     public String registerForEvent(@AuthenticationPrincipal CustomUserDetails currentUser,
-                                   Model model,
+                                   RedirectAttributes redirectAttributes,
                                    @PathVariable Long eventId) {
         String role = currentUser.getAuthorities().iterator().next().getAuthority();
 
@@ -148,15 +152,15 @@ public class EventController {
 
                 registrationService.registerUserForEvent(user, event);
             } catch (IllegalArgumentException ex) {
-                model.addAttribute("error", ex.getMessage());
-                return "public-events";
+                redirectAttributes.addFlashAttribute("error", ex.getMessage());
+                return "redirect:/events";
             } catch (IllegalStateException ex) {
-                model.addAttribute("error", "You are already registered for this event");
-                return "public-events";
+                redirectAttributes.addFlashAttribute("error", "You are already registered for this event");
+                return "redirect:/events";
             }
 
 
-            model.addAttribute("activeTab", "upcoming");
+            redirectAttributes.addFlashAttribute("activeTab", "upcoming");
             return "redirect:/events";
         }
         return "redirect:/events/" + eventId;
@@ -188,15 +192,11 @@ public class EventController {
             // Add categories for form dropdown
             List<Category> categories = categoryService.findAll();
 
-            System.out.println("DEBUG: Upcoming Events: " + upcomingEvents);
-            System.out.println("DEBUG: Past Events: " + pastEvents);
-            System.out.println("DEBUG: Categorey1: " + categories.get(0).getCategory());
-            System.out.println("DEBUG: Organiser: " + organiser.getName());
-
             model.addAttribute("upcomingEvents", upcomingEvents);
             model.addAttribute("pastEvents", pastEvents);
             model.addAttribute("organiser", organiser);
             model.addAttribute("categories", categories);
+            model.addAttribute("currentUser", organiser);
             return "organiser-dashboard"; // show form again with errors
         }
 

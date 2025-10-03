@@ -11,6 +11,5 @@ import java.lang.annotation.*;
 @WithSecurityContext(factory = WithMockCustomUserSecurityContextFactory.class)
 public @interface WithMockCustomUser {
  String username() default "admin";
-
  UserType role() default UserType.ADMIN;
 }

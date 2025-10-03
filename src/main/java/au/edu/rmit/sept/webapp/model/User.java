@@ -81,7 +81,7 @@ public class User {
     public void setPassword(String password) { this.password = password; }
 
     public Set<Registration> getRegistrations() { return registrations; }
-    public void getRegistrations(Set<Registration> registrations) { this.registrations = registrations; }
+    public void setRegistrations(Set<Registration> registrations) { this.registrations = registrations; }
 
     public Set<Event> getOrganisedEvents() { return events; }
     public void setOrganisedEvents(Set<Event> events) { this.events = events; }

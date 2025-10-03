@@ -27,6 +27,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -62,6 +63,15 @@ class EventControllerTest {
     @WithMockCustomUser(username = "admin", role = UserType.ADMIN)
     @DisplayName("Event detail (public): OK with view")
     void eventDetailPublicOk() throws Exception {
+        // Logged-in admin user
+        User loggedIn = new User();
+        loggedIn.setUserId(1L); // must match currentUser.getId() from @WithMockCustomUser
+        loggedIn.setName("Admin User");
+        loggedIn.setRole(UserType.ADMIN);
+
+        when(userService.findById(100L)).thenReturn(Optional.of(loggedIn));
+
+        // Event organiser
         User org = new User();
         org.setUserId(100L);
         org.setName("CSIT Club");
@@ -77,15 +87,23 @@ class EventControllerTest {
         when(eventService.findById(eventId)).thenReturn(Optional.of(e));
 
         mvc.perform(get("/events/public/detail/" + eventId))
-            .andExpect(status().isOk())
-            .andExpect(view().name("event-detail"))
-            .andExpect(model().attributeExists("event"));
+                .andExpect(status().isOk())
+                .andExpect(view().name("event-detail"))
+                .andExpect(model().attributeExists("event"))
+                .andExpect(model().attributeExists("currentUser"));
     }
+
 
     @Test
     @DisplayName("Search with category and dates -> OK")
     @WithMockCustomUser(username = "admin", role = UserType.ADMIN)
     void searchWithCategoryAndDatesOk() throws Exception {
+        User loggedIn = new User();
+        loggedIn.setUserId(100L); // must match currentUser.getId() from @WithMockCustomUser
+        loggedIn.setName("Admin User");
+        loggedIn.setRole(UserType.ADMIN);
+
+        when(userService.findById(100L)).thenReturn(Optional.of(loggedIn));
         when(categoryService.findAll()).thenReturn(List.of());
         when(eventService.getAllUpcomingEvents()).thenReturn(List.of());
         when(eventService.searchEvents(any(), any(), any(), any())).thenReturn(List.of());
@@ -126,6 +144,7 @@ class EventControllerTest {
         long adminId = 100L;
         User admin = new User();
         admin.setUserId(adminId);
+        admin.setRole(UserType.ADMIN);
 
         // Mock userService to return this admin user
         when(userService.findById(adminId)).thenReturn(Optional.of(admin));
@@ -156,6 +175,7 @@ class EventControllerTest {
         long adminId = 100L;
         User admin = new User();
         admin.setUserId(adminId);
+        admin.setRole(UserType.ADMIN);
 
         // Mock userService to return this admin user
         when(userService.findById(adminId)).thenReturn(Optional.of(admin));
@@ -201,6 +221,15 @@ class EventControllerTest {
 
         when(eventService.findById(2L)).thenReturn(Optional.of(e));
 
+        // Set up your mock user ID
+        long adminId = 100L;
+        User admin = new User();
+        admin.setUserId(adminId);
+        admin.setRole(UserType.ADMIN);
+
+        // Mock userService to return this admin user
+        when(userService.findById(adminId)).thenReturn(Optional.of(admin));
+        when(registrationService.getRegistrationsForEvent(e)).thenReturn(List.of());
         mvc.perform(get("/events/detail/2"))
                 .andExpect(status().isOk())
                 .andExpect(model().attributeExists("event"))
@@ -247,6 +276,7 @@ class EventControllerTest {
         long organiserId = 100L;
         User organiser = new User();
         organiser.setUserId(organiserId);
+        organiser.setRole(UserType.ORGANISER);
 
         Event up = new Event(); 
         up.setDateTime(LocalDateTime.now().plusDays(1));
@@ -357,6 +387,7 @@ class EventControllerTest {
         User organiser = new User();
         organiser.setUserId(organiserId);
         organiser.setName("bob");
+        organiser.setRole(UserType.ORGANISER);
 
         when(userService.findById(organiserId)).thenReturn(Optional.of(organiser));
         when(categoryService.findAll()).thenReturn(List.of(new Category("CAT1")));
@@ -384,6 +415,7 @@ class EventControllerTest {
         long organiserId = 100L;
         User organiser = new User();
         organiser.setUserId(organiserId);
+        organiser.setRole(UserType.ORGANISER);
 
         when(userService.findById(organiserId)).thenReturn(Optional.of(organiser));
         when(eventService.getUpcomingEventsForOrganiser(organiser)).thenReturn(List.of());
@@ -406,6 +438,7 @@ class EventControllerTest {
         long organiserId = 100L;
         User organiser = new User();
         organiser.setUserId(organiserId);
+        organiser.setRole(UserType.ORGANISER);
 
         when(userService.findById(organiserId)).thenReturn(Optional.of(organiser));
         when(eventService.save(any(Event.class))).thenAnswer(inv -> inv.getArgument(0));
@@ -432,6 +465,7 @@ class EventControllerTest {
         long organiserId = 100L;
         User organiser = new User();
         organiser.setUserId(organiserId);
+        organiser.setRole(UserType.ORGANISER);
 
         when(userService.findById(organiserId)).thenReturn(Optional.of(organiser));
         when(categoryService.findAll()).thenReturn(List.of(new Category("CAT1")));
@@ -500,7 +534,7 @@ class EventControllerTest {
     @WithMockCustomUser(username = "student", role = UserType.STUDENT)
     @DisplayName("Edge: RSVP by non-existent user -> shows error")
     void userNotFoundRsvp() throws Exception {
-        long studentId = 404L;
+        long studentId = 100; // match the ID in CustomUserDetails
         long eventId = 10L;
 
         Event event = new Event();
@@ -508,14 +542,14 @@ class EventControllerTest {
         event.setTitle("Welcome Week");
         event.setDateTime(LocalDateTime.now().plusDays(2));
 
-        when(eventService.findById(eventId)).thenReturn(Optional.of(event));
+        // current user ID will be studentId, but userService returns empty
         when(userService.findById(studentId)).thenReturn(Optional.empty());
+        when(eventService.findById(eventId)).thenReturn(Optional.of(event));
 
-        mvc.perform(post("/events/register/{eventId}", eventId)
-                .with(csrf()))
-                .andExpect(status().isOk())
-                .andExpect(view().name("public-events"))
-                .andExpect(model().attributeExists("error"));
+        mvc.perform(post("/events/register/{eventId}", eventId).with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/events"))
+                .andExpect(flash().attributeExists("error"));
     }
 
     @Test
@@ -528,15 +562,15 @@ class EventControllerTest {
         User student = new User();
         student.setUserId(studentId);
         student.setName("Sam");
+        student.setRole(UserType.STUDENT);
 
         when(userService.findById(studentId)).thenReturn(Optional.of(student));
         when(eventService.findById(eventId)).thenReturn(Optional.empty());
 
-        mvc.perform(post("/events/register/{eventId}", eventId)
-                .with(csrf()))
-                .andExpect(status().isOk())
-                .andExpect(view().name("public-events"))
-                .andExpect(model().attributeExists("error"));
+        mvc.perform(post("/events/register/{eventId}", eventId).with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/events"))
+                .andExpect(flash().attributeExists("error"));
     }
 
     @Test
@@ -560,12 +594,12 @@ class EventControllerTest {
         doThrow(new IllegalStateException("duplicate"))
                 .when(registrationService).registerUserForEvent(student, event);
 
-        mvc.perform(post("/events/register/{eventId}", eventId)
-                .with(csrf()))
-                .andExpect(status().isOk())
-                .andExpect(view().name("public-events"))
-                .andExpect(model().attributeExists("error"));
+        mvc.perform(post("/events/register/{eventId}", eventId).with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/events"))
+                .andExpect(flash().attributeExists("error"));
     }
+
 
     @Test
     @WithMockCustomUser(username = "student", role = UserType.STUDENT)
@@ -576,6 +610,7 @@ class EventControllerTest {
         User student = new User();
         student.setUserId(studentId);
         student.setName("Sam");
+        student.setRole(UserType.STUDENT);
 
         when(categoryService.findAll()).thenReturn(List.of());
         when(userService.findById(studentId)).thenReturn(Optional.of(student));
@@ -600,6 +635,7 @@ class EventControllerTest {
         User student = new User();
         student.setUserId(studentId);
         student.setName("Sam");
+        student.setRole(UserType.STUDENT);
 
         when(categoryService.findAll()).thenReturn(List.of());
         when(userService.findById(studentId)).thenReturn(Optional.of(student));
@@ -627,6 +663,7 @@ class EventControllerTest {
         organiser.setUserId(organiserId);
         organiser.setName("Bob");
 
+
         Event e = new Event();
         e.setEventId(eventId);
         e.setTitle("Tech Talk");
@@ -636,6 +673,8 @@ class EventControllerTest {
         User student = new User();
         student.setUserId(studentId);
         student.setName("Pat");
+        student.setRole(UserType.STUDENT);
+        student.setRegistrations(Set.of());
 
         when(eventService.findById(eventId)).thenReturn(Optional.of(e));
         when(userService.findById(studentId)).thenReturn(Optional.of(student));
@@ -662,6 +701,8 @@ class EventControllerTest {
         User student = new User();
         student.setUserId(studentId);
         student.setName("Taylor");
+        student.setRole(UserType.STUDENT);
+
 
         when(eventService.getAllUpcomingEvents()).thenReturn(List.of(e));
         when(eventService.getEventsUserRegisteredTo(studentId)).thenReturn(List.of());
@@ -674,9 +715,9 @@ class EventControllerTest {
                 .andExpect(view().name("public-events"))
                 .andExpect(model().attributeExists("events"))
                 .andExpect(model().attributeExists("currentUser"))
-                .andExpect(model().attributeExists("registrations"))
                 .andExpect(model().attributeExists("categories"))
-                .andExpect(model().attributeExists("pastEvents"));
+                .andExpect(model().attributeExists("pastEvents"))
+                .andExpect(model().attributeExists("futureEvents"));
     }
 
 }
