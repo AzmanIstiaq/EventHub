@@ -1,10 +1,8 @@
 package au.edu.rmit.sept.webapp.controller;
 
-import au.edu.rmit.sept.webapp.model.Event;
-import au.edu.rmit.sept.webapp.model.Registration;
-import au.edu.rmit.sept.webapp.model.User;
-import au.edu.rmit.sept.webapp.model.UserType;
+import au.edu.rmit.sept.webapp.model.*;
 import au.edu.rmit.sept.webapp.security.CustomUserDetails;
+import au.edu.rmit.sept.webapp.service.BanService;
 import au.edu.rmit.sept.webapp.service.RegistrationService;
 import au.edu.rmit.sept.webapp.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,12 +29,13 @@ import java.util.stream.Collectors;
 public class UserController {
     private final UserService userService;
     private final RegistrationService registrationService;
+    private final BanService banService;
     PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
-    public UserController(UserService userService, RegistrationService registrationService) {
+    public UserController(UserService userService, RegistrationService registrationService, BanService banService) {
         this.userService = userService;
         this.registrationService = registrationService;
-
+        this.banService = banService;
     }
 
     // View all users (for user management) with statistics
@@ -75,13 +74,37 @@ public class UserController {
             User user = userService.findById(userId)
                     .orElseThrow(() -> new IllegalArgumentException("Invalid user ID"));
 
-            // Add a status field to User model or implement soft delete
+            // Create a ban in the ban table (backend)
+            Ban ban = new Ban(user, "Deactivated by admin");
+            banService.banUser(ban);
             // For now, we'll just show a message
             redirectAttributes.addFlashAttribute("successMessage",
                     "User '" + user.getName() + "' has been deactivated. Backend has not been updated yet.");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage",
                     "Error deactivating user: " + e.getMessage());
+        }
+
+        return "redirect:/users";
+    }
+
+    // Reactivate/ban user accounts
+    @PostMapping("/{userId}/reactivate")
+    public String reactivateUser(@AuthenticationPrincipal CustomUserDetails currentUser, @PathVariable int userId,
+                                 RedirectAttributes redirectAttributes) {
+        try {
+            User user = userService.findById(userId)
+                    .orElseThrow(() -> new IllegalArgumentException("Invalid user ID"));
+
+
+            // Delete the ban on the user
+            banService.removeBan(user);
+            // For now, we'll just show a message
+            redirectAttributes.addFlashAttribute("successMessage",
+                    "User '" + user.getName() + "' has been reactivated. Backend should be updated.");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage",
+                    "Error reactivating user: " + e.getMessage());
         }
 
         return "redirect:/users";
