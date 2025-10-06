@@ -32,17 +32,20 @@ public class EventController {
     private final UserService userService;
     private final CategoryService categoryService;
     private final KeywordService keywordService;
+    private final EventGalleryService eventGalleryService;
 
     public EventController(EventService eventService,
                            RegistrationService registrationService,
                            UserService userService,
                            CategoryService categoryService,
-                           KeywordService keywordService) {
+                           KeywordService keywordService,
+                           EventGalleryService eventGalleryService) {
         this.eventService = eventService;
         this.registrationService = registrationService;
         this.userService = userService;
         this.categoryService = categoryService;
         this.keywordService = keywordService;
+        this.eventGalleryService = eventGalleryService;
     }
 
     @GetMapping
@@ -380,11 +383,13 @@ public class EventController {
 
         // Get registrations for this event
         List<Registration> registrations = registrationService.getRegistrationsForEvent(event);
+        List<EventGallery> photos = eventGalleryService.getPhotosByEvent(event);
         
         model.addAttribute("currentUser", user);
         model.addAttribute("event", event);
         model.addAttribute("registrations", registrations);
         model.addAttribute("registrationCount", registrations.size());
+        model.addAttribute("photos", photos);
 
         return "admin-event-detail";
     }
@@ -393,9 +398,18 @@ public class EventController {
         Event event = eventService.findById(eventId)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid event ID"));
 
+        List<EventGallery> photos = eventGalleryService.getPhotosByEvent(event);
+
+        boolean isOrganiser = false;
+        if (user != null && event.getOrganiser() != null) {
+            isOrganiser = event.getOrganiser().getUserId().equals(user.getUserId());
+        }
+
         model.addAttribute("registered", event.checkUserRegistered(user.getRegistrations()));
         model.addAttribute("event", event);
         model.addAttribute("currentUser", user);
+        model.addAttribute("photos", photos);
+        model.addAttribute("isOrganiser", isOrganiser);
 
         return "event-detail";
     }
@@ -404,9 +418,19 @@ public class EventController {
 
         Event event = eventService.findById(eventId)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid event ID"));
+
+        List<EventGallery> photos = eventGalleryService.getPhotosByEvent(event);
+
+        // Check if the logged-in user is the event organiser
+        boolean isOrganiser = false;
+        if (user != null && event.getOrganiser() != null) {
+            isOrganiser = event.getOrganiser().getUserId().equals(user.getUserId());
+        }
         
         model.addAttribute("event", event);
         model.addAttribute("currentUser", user);
+        model.addAttribute("photos", photos);
+        model.addAttribute("isOrganiser", isOrganiser);
 
         return "event-detail";
     }

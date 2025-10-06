@@ -35,6 +35,8 @@ public class SecurityConfig {
                         .requestMatchers("/events/public/**").permitAll()
                         .requestMatchers("/users/profile/**").permitAll()
                         .requestMatchers("/h2-console/**").permitAll()
+                        .requestMatchers("/events/*/gallery/upload").hasRole("ORGANISER")
+                        .requestMatchers("/events/*/gallery/**").permitAll()
                         .requestMatchers("/users/**").hasRole("ADMIN")
                         .requestMatchers("/events/**").authenticated()
                         .anyRequest().authenticated()

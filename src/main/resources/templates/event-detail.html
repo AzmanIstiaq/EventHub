@@ -103,6 +103,44 @@
         </div>
     </div>
 
+    <!-- Event Gallery Section -->
+    <hr>
+    <section class="event-gallery" style="margin-top: 2rem;">
+        <h3>Event Gallery</h3>
+
+        <!-- Upload form visible only to organisers -->
+        <div th:if="${isOrganiser}">
+            <form th:action="@{'/events/' + ${event.eventId} + '/gallery/upload'}"
+                  method="post" enctype="multipart/form-data"
+                  style="margin-bottom: 1rem;">
+                <input type="file" name="file" accept="image/*" required>
+                <button type="submit" class="btn btn-register">Upload Photo</button>
+            </form>
+        </div>
+
+        <!-- Display gallery -->
+        <div class="gallery-grid" style="display:flex; flex-wrap:wrap; gap:12px;">
+            <div th:each="photo : ${photos}" class="gallery-item"
+                 style="display:inline-block; text-align:center;">
+                <img th:src="@{/uploads/{filename}(filename=${photo.photo})}"
+                     alt="Event Photo"
+                     style="width:200px; height:200px; object-fit:cover; border-radius:8px;">
+                <div>
+                    <a th:href="@{/uploads/{filename}(filename=${photo.photo})}" download>
+                        Download
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Message if no photos -->
+        <p th:if="${#lists.isEmpty(photos)}"
+           style="color:#777; font-style:italic; margin-top:1rem;">
+            No photos have been uploaded yet for this event.
+        </p>
+    </section>
+
+
     <!-- If no logged-in user, show a different back button -->
     <div th:unless="${currentUser != null && currentUser.getRole().name() == 'STUDENT'}">
         <a href="/events/public" class="btn btn-back">← Back to Events</a>
