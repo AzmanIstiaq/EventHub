@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Edit Event - Admin</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        body { margin: 20px; background-color: #f8f9fa; }
+        .admin-header { background-color: #007bff; color: white; padding: 15px; border-radius: 5px; margin-bottom: 20px; }
+        .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); max-width: 700px; margin: auto; }
+        label { display: block; font-weight: bold; margin-top: 15px; }
+        input[type="text"], input[type="datetime-local"], select, textarea {
+            width: 100%; padding: 10px; margin-top: 5px;
+            border: 1px solid #ccc; border-radius: 6px; font-size: 1em;
+        }
+        textarea { resize: vertical; height: 120px; }
+        .btn { padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; text-decoration: none; display: inline-block; margin-top: 20px; }
+        .btn-primary { background-color: #007bff; color: white; }
+        .btn-secondary { background-color: #6c757d; color: white; margin-left: 10px; }
+        .btn:hover { opacity: 0.85; }
+    </style>
+</head>
+<body>
+<div th:replace="~{fragments/navbar-common :: navbar-common(${currentUser})}"></div>
+
+<div class="admin-header">
+    <h1>✏️ Edit Event (Admin)</h1>
+    <p th:text="'Editing event: ' + ${event.title}">Editing event</p>
+</div>
+
+<div class="card">
+    <form th:action="@{'/admin/events/' + ${event.eventId} + '/edit'}" method="post">
+
+        <label>Title:</label>
+        <input type="text" name="title" th:value="${event.title}" required>
+
+        <label>Description:</label>
+        <textarea name="description" required th:text="${event.description}"></textarea>
+
+        <label>Date & Time:</label>
+        <input type="datetime-local" name="dateTime"
+               th:value="${#temporals.format(event.dateTime, 'yyyy-MM-dd''T''HH:mm')}" required>
+
+        <label>Location:</label>
+        <input type="text" name="location" th:value="${event.location}" required>
+
+        <label>Category:</label>
+        <select name="category.id" required>
+            <option value="">Select category</option>
+            <option th:each="cat : ${categories}"
+                    th:value="${cat.id}"
+                    th:text="${cat.category}"
+                    th:selected="${event.category != null and cat.id == event.category.id}">
+            </option>
+        </select>
+
+        <label>Keywords (comma-separated):</label>
+        <input type="text" name="keywordsText"
+               th:value="${event.keywords != null ? #strings.listJoin(event.keywords.^[#this.keyword], ', ') : ''}"
+               placeholder="e.g. Tech, Workshop, Seminar">
+
+        <div style="margin-top: 25px;">
+            <button type="submit" class="btn btn-primary">💾 Save Changes</button>
+            <a th:href="@{'/events/detail/' + ${event.eventId}}" class="btn btn-secondary">↩️ Cancel</a>
+        </div>
+    </form>
+</div>
+
+</body>
+</html>

@@ -98,10 +98,9 @@
                class="btn btn-info"
                style="font-size: 0.8em;">👁️ View</a>
 
-            <!-- Edit Event (redirect to organizer edit) -->
-            <a th:href="@{'/organiser/' + ${event.organiser.userId} + '/events/' + ${event.eventId} + '/edit'}"
-               class="btn btn-primary"
-               style="font-size: 0.8em;">✏️ Edit</a>
+            <!-- Edit Event (redirect to admin edit) -->
+            <a th:href="@{'/admin/events/' + ${event.eventId} + '/edit'}"
+               class="btn btn-primary">✏️ Edit Event</a>
 
             <!-- Delete Event -->
             <form th:action="@{'/events/' + ${event.eventId} + '/delete'}"
