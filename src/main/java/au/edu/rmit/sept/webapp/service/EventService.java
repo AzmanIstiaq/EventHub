@@ -13,9 +13,12 @@ import java.util.Optional;
 public class EventService {
 
     private final EventRepository eventRepository;
+    private final RegistrationService registrationService;
 
-    public EventService(EventRepository eventRepository) {
+    public EventService(EventRepository eventRepository,
+                        RegistrationService registrationService) {
         this.eventRepository = eventRepository;
+        this.registrationService = registrationService;
     }
 
     // Find a single event
@@ -28,7 +31,12 @@ public class EventService {
         return eventRepository.save(event);
     }
 
-    // Delete an event
+    // Delete an event (controller uses this name)
+    public void deleteById(Long id) {
+        eventRepository.deleteById(id);
+    }
+
+    // (Keeps your original name too, in case other code calls it)
     public void delete(long id) {
         eventRepository.deleteById(id);
     }
@@ -53,7 +61,6 @@ public class EventService {
         return eventRepository.findByDateTimeAfterOrderByDateTimeAsc(LocalDateTime.now());
     }
 
-
     public List<Event> getEventsUserRegisteredTo(Long userId) {
         return eventRepository.findEventsByUserId(userId);
     }
@@ -63,10 +70,18 @@ public class EventService {
         return eventRepository.findAll();
     }
 
-    public List<Event> searchEvents(String query, LocalDateTime from, LocalDateTime to, Long categoryId) {
+    public List<Event> searchEvents(String query,
+                                    LocalDateTime from,
+                                    LocalDateTime to,
+                                    Long categoryId) {
         if (to == null) {
             return eventRepository.searchEvents(query, from, categoryId);
         }
         return eventRepository.searchEventsWithEnd(query, from, to, categoryId);
+    }
+
+    // Helper used by Admin view for counts
+    public int countRegistrationsForEvent(Event event) {
+        return registrationService.getRegistrationsForEvent(event).size();
     }
 }
