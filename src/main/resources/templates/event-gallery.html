@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${event.name} + ' Gallery'"></title>
+</head>
+<body>
+<h2 th:text="${event.name} + ' Gallery'"></h2>
+
+<!-- Only visible if user is authenticated AND is an organiser -->
+<div th:if="${#authorization.expression('isAuthenticated()')
+             and #authorization.expression('hasRole(''ORGANISER'')')}">
+
+    <form th:action="@{'/events/' + ${event.eventId} + '/gallery/upload'}"
+          method="post" enctype="multipart/form-data"
+          style="margin-top: 1rem;">
+        <input type="file" name="file" accept="image/*" required>
+        <button type="submit">Upload Photo</button>
+    </form>
+</div>
+
+<!-- Gallery view (visible for everyone) -->
+<div class="gallery">
+    <div th:each="photo : ${photos}">
+        <img th:src="@{/uploads/{filename}(filename=${photo.photo})}"
+             alt="Event photo" style="width:200px; height:200px; object-fit:cover;">
+        <a th:href="@{/uploads/{filename}(filename=${photo.photo})}" download>Download</a>
+    </div>
+</div>
+</body>
+</html>
