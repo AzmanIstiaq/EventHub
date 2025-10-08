@@ -33,6 +33,9 @@ public class Event {
     @NotBlank(message = "Location is required")
     private String location;
 
+    @Column(nullable = false)
+    private boolean hidden = false;
+
     @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     @JsonManagedReference
     private Set<Registration> registrations = new HashSet<>();
@@ -162,4 +165,7 @@ public class Event {
                 ", category=" + (category != null ? category.getCategory() : null) +
                 '}';
     }
+
+    public boolean isHidden() { return hidden; }
+    public void setHidden(boolean hidden) { this.hidden = hidden; }
 }
