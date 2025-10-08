@@ -74,8 +74,18 @@ public class UserController {
             User user = userService.findById(userId)
                     .orElseThrow(() -> new IllegalArgumentException("Invalid user ID"));
 
+            // Get the current admin user performing the ban
+            User adminUser = userService.findById(currentUser.getId())
+                    .orElseThrow(() -> new IllegalArgumentException("Invalid admin user ID"));
+
+            // Verify the current user is an admin
+            if (!adminUser.isAdmin()) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Only admins can deactivate users.");
+                return "redirect:/login";
+            }
+
             // Create a ban in the ban table (backend)
-            Ban ban = new Ban(user, "Deactivated by admin");
+            Ban ban = new Ban(user, adminUser, BanType.PERMANENT, "Deactivated by admin");
             banService.banUser(ban);
             // For now, we'll just show a message
             redirectAttributes.addFlashAttribute("successMessage",

@@ -2,6 +2,8 @@ package au.edu.rmit.sept.webapp.model;
 
 import jakarta.persistence.*;
 
+import java.time.LocalDateTime;
+
 @Entity()
 @Table(name = "bans")
 public class Ban {
@@ -17,19 +19,35 @@ public class Ban {
     @Column(name = "ban_reason", nullable = false)
     private String banReason;
 
+    @Column(name = "ban_type", nullable = false)
+    private BanType banType;
+
+    @Column(name = "ban_end_date", nullable = true)
+    private LocalDateTime banEndDate;
+
+    @ManyToOne
+    @JoinColumn(name = "admin_id", referencedColumnName = "user_id", nullable = false)
+    private User admin;
+
     // -- Constructor --
     public Ban() {}
 
-    // Ban with reason
-    public Ban(User user, String banReason) {
+    // Ban with all details
+    public Ban(User user, User admin, BanType banType, String banReason, LocalDateTime banEndDate) {
         this.user = user;
         this.banReason = banReason;
+        this.banType = banType;
+        this.banEndDate = banEndDate;
+        this.admin = admin;
     }
 
-    // Ban without reason
-    public Ban(User user) {
+    // Permananent ban (i.e. no end date)
+    public Ban(User user, User admin, BanType banType, String banReason) {
         this.user = user;
-        this.banReason = " --- No reason provided --- ";
+        this.banReason = banReason;
+        this.banType = banType;
+        this.banEndDate = null;
+        this.admin = admin;
     }
 
     // -- Getters and Setters --
@@ -40,4 +58,13 @@ public class Ban {
     public void setBanReason(String banReason) { this.banReason = banReason; }
 
     public Long getBanId() { return banId; }
+
+    public void setBanType(BanType banType) { this.banType = banType; }
+    public BanType getBanType() { return banType; }
+
+    public void setBanEndDate(LocalDateTime banEndDate) { this.banEndDate = banEndDate; }
+    public LocalDateTime getBanEndDate() { return banEndDate; }
+
+    public void setAdmin(User admin) { this.admin = admin; }
+    public User getAdmin() { return admin; }
 }
