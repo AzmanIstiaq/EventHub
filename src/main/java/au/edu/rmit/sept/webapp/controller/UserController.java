@@ -6,6 +6,7 @@ import au.edu.rmit.sept.webapp.service.BanService;
 import au.edu.rmit.sept.webapp.service.RegistrationService;
 import au.edu.rmit.sept.webapp.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -17,6 +18,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -69,6 +71,11 @@ public class UserController {
     // Deactivate/ban user accounts
     @PostMapping("/{userId}/deactivate")
     public String deactivateUser(@AuthenticationPrincipal CustomUserDetails currentUser, @PathVariable int userId,
+                                 @RequestParam BanType banType,
+                                 @RequestParam(required = false)
+                                     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+                                     LocalDateTime banEndDate,
+                                 @RequestParam String reason,
                                  RedirectAttributes redirectAttributes) {
         try {
             User user = userService.findById(userId)
@@ -84,12 +91,22 @@ public class UserController {
                 return "redirect:/login";
             }
 
+            // Ensure that if the ban type is TEMPORARY, a ban end date is provided
+            if (banType == BanType.TEMPORARY && banEndDate == null) {
+                redirectAttributes.addFlashAttribute("errorMessage", "If ban type is temporary, a ban end date must be provided.");
+                return "redirect:/users";
+            }
+
+
             // Create a ban in the ban table (backend)
-            Ban ban = new Ban(user, adminUser, BanType.PERMANENT, "Deactivated by admin");
+            Ban ban = new Ban(user, adminUser, banType, reason);
+            if (banType == BanType.TEMPORARY) {
+                ban.setBanEndDate(banEndDate);
+            }
             banService.banUser(ban);
             // For now, we'll just show a message
             redirectAttributes.addFlashAttribute("successMessage",
-                    "User '" + user.getName() + "' has been deactivated. Backend has not been updated yet.");
+                    "User '" + user.getName() + "' has been deactivated. Backend has been updated.");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage",
                     "Error deactivating user: " + e.getMessage());
