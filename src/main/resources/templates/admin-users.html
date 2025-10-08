@@ -153,7 +153,8 @@
                             style="font-size: 0.8em;"
                             th:disabled="${user.role.toString() == 'ADMIN'}"
                             th:hidden="${user.role.toString() == 'ADMIN'}"
-                            th:onclick="'openBanModal(' + ${user.userId} + ')'">
+                            th:attr="data-userid=${user.userId}, data-email=${user.email}"
+                            onclick="openBanModal(this)">
                         🚫 Deactivate
                     </button>
                 </th:block>
@@ -202,6 +203,7 @@
      style="display:none;">
     <div class="modal-dialog" role="document" onclick="event.stopPropagation()">
         <h2 id="deactivate-title">🚫 Deactivate User: </h2>
+        <p id="ban-user-email">User email here</p>
         <form id="deactivate-user-form" method="post">
             <!-- Correct CSRF name -->
             <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
@@ -249,13 +251,19 @@
         }
     });
 
-    function openBanModal(userId) {
+    function openBanModal(button) {
+        const userId = button.getAttribute('data-userid');
+        const email = button.getAttribute('data-email');
+
         const form = document.getElementById('deactivate-user-form');
         const modal = document.getElementById('deactivate-user');
+        const emailElement = document.getElementById('ban-user-email');
+
         form.action = `/users/${userId}/deactivate`;
-        modal.style.display = 'flex';              // center via flexbox
-        document.body.classList.add('modal-open'); // lock background scroll
-        document.body.classList.add('modal-open'); // lock background scroll
+        emailElement.textContent = email;
+
+        modal.style.display = 'flex';
+        document.body.classList.add('modal-open');
         setTimeout(() => document.getElementById('banType')?.focus(), 0);
     }
 

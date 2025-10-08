@@ -75,7 +75,7 @@ public class UserController {
                                  @RequestParam(required = false)
                                      @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
                                      LocalDateTime banEndDate,
-                                 @RequestParam String reason,
+                                 @RequestParam String banReason,
                                  RedirectAttributes redirectAttributes) {
         try {
             User user = userService.findById(userId)
@@ -99,7 +99,7 @@ public class UserController {
 
 
             // Create a ban in the ban table (backend)
-            Ban ban = new Ban(user, adminUser, banType, reason);
+            Ban ban = new Ban(user, adminUser, banType, banReason);
             if (banType == BanType.TEMPORARY) {
                 ban.setBanEndDate(banEndDate);
             }
