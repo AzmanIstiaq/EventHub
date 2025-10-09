@@ -13,6 +13,7 @@
             .btn { padding: 8px 16px; margin: 2px; border: none; border-radius: 4px; cursor: pointer; text-decoration: none; display: inline-block; }
             .btn-danger { background-color: #dc3545; color: white; }
             .btn-green { background-color: #4CAF50; color: white; }
+            .btn-blue { background-color: #1e4ed8; color: white; }
             .btn-info { background-color: #17a2b8; color: white; }
             .btn-primary { background-color: #007bff; color: white; }
             .btn-warning { background-color: #ffc107; color: #212529; }
@@ -53,6 +54,23 @@
             }
             /* Modal content container */
             #unban-user .modal-dialog {
+                background: #fff;
+                width: 100%;
+                max-width: 540px;
+                border-radius: 8px;
+                box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+                padding: 18px 20px;
+            }
+            #edit-ban.modal-overlay {
+                position: fixed;
+                inset: 0;
+                display: none;            /* toggled to flex in JS */
+                align-items: center;
+                justify-content: center;
+                background: rgba(0,0,0,0.6);
+                z-index: 9999;            /* above everything */
+            }
+            #edit-ban .modal-dialog {
                 background: #fff;
                 width: 100%;
                 max-width: 540px;
@@ -197,6 +215,27 @@
                         ✅ Reactivate
                     </button>
                 </form>
+                <!-- Edit ban (if user IS banned) -->
+                <form th:if="${user.ban != null}"
+                      th:action="@{'/users/' + ${user.userId} + '/editban'}"
+                      method="post"
+                      style="display: inline;"
+                      onsubmit="return confirm('Are you sure you want to reactivate this user? This will no longer prevent them from logging in.');">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                    <button type="button"
+                            class="btn btn-blue"
+                            style="font-size: 0.8em;"
+                            th:attr="data-editban-userid=${user.userId},
+                            data-editban-email=${user.email},
+                            data-editban-bantype=${user.ban != null ? user.ban.banType : ''},
+                            data-editban-banreason=${user.ban != null ? user.ban.banReason : ''},
+                            data-editban-banenddate=${user.ban != null and user.ban.banType.toString() == 'TEMPORARY'
+                                ? #temporals.format(user.ban.banEndDate, 'yyyy-MM-dd''T''HH:mm') : ''}"
+                            onclick="openEditBanModal(this)"
+                            th:disabled="${user.role.toString() == 'ADMIN'}">
+                        ✏️ Edit Ban
+                    </button>
+                </form>
             </td>
         </tr>
         </tbody>
@@ -279,6 +318,49 @@
             </form>
         </div>
     </div>
+    <div id="edit-ban"
+         class="modal-overlay"
+         role="dialog"
+         aria-modal="true"
+         aria-labelledby="edit-title"
+         style="display:none;">
+        <div class="modal-dialog" role="document" onclick="event.stopPropagation()">
+            <h2 id="edit-title">✅ Edit Ban</h2>
+
+            <form id="data-editban-user-form" method="post">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                <input type="hidden" id="data-editban-ban-id" name="banId" />
+
+                <div class="form-group">
+                    <label for="data-editban-user-email"><strong>Email:</strong></label>
+                    <input type="text" id="data-editban-user-email" name="email" readonly />
+                </div>
+
+                <div class="form-group">
+                    <label for="data-editban-ban-type"><strong>Ban Type:</strong></label>
+                    <select id="data-editban-ban-type" name="banType">
+                        <option value="TEMPORARY">Temporary</option>
+                        <option value="PERMANENT">Permanent</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="data-editban-ban-reason"><strong>Reason:</strong></label>
+                    <textarea id="data-editban-ban-reason" name="banReason" rows="3"></textarea>
+                </div>
+
+                <div class="form-group" id="data-editban-ban-enddate-container">
+                    <label for="data-editban-ban-enddate"><strong>Ban End Date:</strong></label>
+                    <input type="datetime-local" id="data-editban-ban-enddate" name="banEndDate" />
+                </div>
+
+                <div style="text-align:right; margin-top:10px;">
+                    <button type="button" class="btn btn-secondary" onclick="closeEditBanModal()">Cancel</button>
+                    <button type="submit" class="btn btn-green">Confirm Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const banType = document.getElementById('banType');
@@ -357,10 +439,47 @@
             document.body.classList.remove('modal-open');
         }
 
+        function openEditBanModal(button) {
+            const userId    = button.getAttribute('data-editban-userid');
+            const email     = button.getAttribute('data-editban-email');
+            const banType   = button.getAttribute('data-editban-bantype');
+            const banReason = button.getAttribute('data-editban-banreason');
+            const banEndDate= button.getAttribute('data-editban-banenddate');
+
+            const form  = document.getElementById('data-editban-user-form');
+            const modal = document.getElementById('edit-ban');
+
+            document.getElementById('data-editban-user-email').value = email || '';
+            document.getElementById('data-editban-ban-type').value   = banType || 'TEMPORARY';
+            document.getElementById('data-editban-ban-reason').value = banReason || '';
+
+            const endDateContainer = document.getElementById('data-editban-ban-enddate-container');
+            const endDateElement   = document.getElementById('data-editban-ban-enddate');
+
+            if (banType === 'TEMPORARY') {
+                endDateContainer.style.display = 'block';
+                endDateElement.value = banEndDate || '';
+            } else {
+                endDateContainer.style.display = 'none';
+                endDateElement.value = '';
+            }
+
+            form.action = `/users/${userId}/editban`;
+            modal.style.display = 'flex';
+            document.body.classList.add('modal-open');
+        }
+
+        function closeEditBanModal() {
+            const modal = document.getElementById('edit-ban');
+            modal.style.display = 'none';
+            document.body.classList.remove('modal-open');
+        }
+
         // Optional: close on Escape only (no click-outside close)
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') closeBanModal();
             if (e.key === 'Escape') closeUnbanModal();
+            if (e.key === 'Escape') closeEditBanModal();
         });
 
         // Block clicks on the overlay from interacting with the page
