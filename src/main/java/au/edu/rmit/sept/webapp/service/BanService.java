@@ -8,6 +8,8 @@
     import jakarta.transaction.Transactional;
     import org.springframework.stereotype.Service;
 
+    import java.time.LocalDateTime;
+
     @Service
     public class BanService {
 
@@ -50,6 +52,9 @@
             }
             if (ban.getBanType() == BanType.TEMPORARY && ban.getBanEndDate() == null) {
                 throw new IllegalArgumentException("Ban length cannot be null when ban type is temporary.");
+            }
+            if (ban.getBanType() == BanType.TEMPORARY && ban.getBanEndDate().isBefore(LocalDateTime.now().plusHours(1L))) {
+                throw new IllegalArgumentException("Ban end date must be at least 1 hour in the future for temporary bans.");
             }
 
             user.setBan(ban);

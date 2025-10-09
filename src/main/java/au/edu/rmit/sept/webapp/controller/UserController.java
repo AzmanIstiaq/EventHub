@@ -97,6 +97,11 @@ public class UserController {
                 return "redirect:/users";
             }
 
+            if (banType == BanType.TEMPORARY && banEndDate.isBefore(LocalDateTime.now().plusHours(1L))) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Ban end date must be at least 1 hour in the future for temporary bans.");
+                return "redirect:/users";
+            }
+
 
             // Create a ban in the ban table (backend)
             Ban ban = new Ban(user, adminUser, banType, banReason);
