@@ -1,288 +1,373 @@
-<!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="en">
-<head>
-    <title>Admin - Manage Users</title>
-    <link rel="stylesheet" th:href="@{/css/style.css}">
-    <style>
-        body { margin: 20px; }
-        .admin-header { background-color: #dc3545; color: white; padding: 15px; margin-bottom: 20px; border-radius: 5px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
-        th { background-color: #f8f9fa; font-weight: bold; }
-        tr:nth-child(even) { background-color: #f8f9fa; }
-        .btn { padding: 8px 16px; margin: 2px; border: none; border-radius: 4px; cursor: pointer; text-decoration: none; display: inline-block; }
-        .btn-danger { background-color: #dc3545; color: white; }
-        .btn-green { background-color: #4CAF50; color: white; }
-        .btn-info { background-color: #17a2b8; color: white; }
-        .btn-primary { background-color: #007bff; color: white; }
-        .btn-warning { background-color: #ffc107; color: #212529; }
-        .btn:hover { opacity: 0.8; }
-        .user-type { padding: 4px 8px; border-radius: 12px; font-size: 0.8em; font-weight: bold; }
-        .type-admin { background-color: #dc3545; color: white; }
-        .type-organiser { background-color: #28a745; color: white; }
-        .type-student { background-color: #007bff; color: white; }
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px; }
-        .stat-card { background-color: #e9ecef; padding: 15px; border-radius: 5px; text-align: center; }
-        .stat-number { font-size: 1.8em; font-weight: bold; margin-bottom: 5px; }
-        #deactivate-user.modal-overlay {
-            position: fixed;
-            inset: 0;
-            display: none;               /* toggled to flex in JS */
-            align-items: center;
-            justify-content: center;
-            background: rgba(0,0,0,0.6);
-            z-index: 9999;               /* above everything */
-        }
-        /* Modal content container */
-        #deactivate-user .modal-dialog {
-            background: #fff;
-            width: 100%;
-            max-width: 540px;
-            border-radius: 8px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-            padding: 18px 20px;
-        }
-        /* Prevent background scroll when modal is open */
-        body.modal-open {
-            overflow: hidden;
-        }
-    </style>
-</head>
-<body>
-<div th:replace="~{fragments/navbar-common :: navbar-common(${currentUser})}"></div>
+    <!DOCTYPE html>
+    <html xmlns:th="http://www.thymeleaf.org" lang="en">
+    <head>
+        <title>Admin - Manage Users</title>
+        <link rel="stylesheet" th:href="@{/css/style.css}">
+        <style>
+            body { margin: 20px; }
+            .admin-header { background-color: #dc3545; color: white; padding: 15px; margin-bottom: 20px; border-radius: 5px; }
+            table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+            th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+            th { background-color: #f8f9fa; font-weight: bold; }
+            tr:nth-child(even) { background-color: #f8f9fa; }
+            .btn { padding: 8px 16px; margin: 2px; border: none; border-radius: 4px; cursor: pointer; text-decoration: none; display: inline-block; }
+            .btn-danger { background-color: #dc3545; color: white; }
+            .btn-green { background-color: #4CAF50; color: white; }
+            .btn-info { background-color: #17a2b8; color: white; }
+            .btn-primary { background-color: #007bff; color: white; }
+            .btn-warning { background-color: #ffc107; color: #212529; }
+            .btn:hover { opacity: 0.8; }
+            .user-type { padding: 4px 8px; border-radius: 12px; font-size: 0.8em; font-weight: bold; }
+            .type-admin { background-color: #dc3545; color: white; }
+            .type-organiser { background-color: #28a745; color: white; }
+            .type-student { background-color: #007bff; color: white; }
+            .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px; }
+            .stat-card { background-color: #e9ecef; padding: 15px; border-radius: 5px; text-align: center; }
+            .stat-number { font-size: 1.8em; font-weight: bold; margin-bottom: 5px; }
+            #deactivate-user.modal-overlay {
+                position: fixed;
+                inset: 0;
+                display: none;               /* toggled to flex in JS */
+                align-items: center;
+                justify-content: center;
+                background: rgba(0,0,0,0.6);
+                z-index: 9999;               /* above everything */
+            }
+            /* Modal content container */
+            #deactivate-user .modal-dialog {
+                background: #fff;
+                width: 100%;
+                max-width: 540px;
+                border-radius: 8px;
+                box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+                padding: 18px 20px;
+            }
+            #unban-user.modal-overlay {
+                position: fixed;
+                inset: 0;
+                display: none;               /* toggled to flex in JS */
+                align-items: center;
+                justify-content: center;
+                background: rgba(0,0,0,0.6);
+                z-index: 9999;               /* above everything */
+            }
+            /* Modal content container */
+            #unban-user .modal-dialog {
+                background: #fff;
+                width: 100%;
+                max-width: 540px;
+                border-radius: 8px;
+                box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+                padding: 18px 20px;
+            }
+            /* Prevent background scroll when modal is open */
+            body.modal-open {
+                overflow: hidden;
+            }
+        </style>
+    </head>
+    <body>
+    <div th:replace="~{fragments/navbar-common :: navbar-common(${currentUser})}"></div>
 
-<div class="admin-header">
-    <h1>👥 Admin Panel - User Management</h1>
-    <p>View and manage all user accounts</p>
-</div>
-
-<!-- Navigation Links -->
-<div style="margin-bottom: 20px;">
-    <a href="/admin/dashboard" class="btn btn-primary">📊 Dashboard</a>
-    <a href="/events" class="btn btn-info">📅 Manage Events</a>
-</div>
-
-<!-- User Statistics -->
-<div class="stats-grid">
-    <div class="stat-card">
-        <div class="stat-number" style="color: #007bff;" th:text="${users != null ? #lists.size(users) : 0}">0</div>
-        <div>Total Users</div>
+    <div class="admin-header">
+        <h1>👥 Admin Panel - User Management</h1>
+        <p>View and manage all user accounts</p>
     </div>
-    <div class="stat-card">
-        <div class="stat-number" style="color: #dc3545;" th:text="${adminCount ?: 0}">0</div>
-        <div>Admins</div>
+
+    <!-- Navigation Links -->
+    <div style="margin-bottom: 20px;">
+        <a href="/admin/dashboard" class="btn btn-primary">📊 Dashboard</a>
+        <a href="/events" class="btn btn-info">📅 Manage Events</a>
     </div>
-    <div class="stat-card">
-        <div class="stat-number" style="color: #28a745;" th:text="${organiserCount ?: 0}">0</div>
-        <div>Organizers</div>
+
+    <!-- User Statistics -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-number" style="color: #007bff;" th:text="${users != null ? #lists.size(users) : 0}">0</div>
+            <div>Total Users</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number" style="color: #dc3545;" th:text="${adminCount ?: 0}">0</div>
+            <div>Admins</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number" style="color: #28a745;" th:text="${organiserCount ?: 0}">0</div>
+            <div>Organizers</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number" style="color: #007bff;" th:text="${studentCount ?: 0}">0</div>
+            <div>Students</div>
+        </div>
     </div>
-    <div class="stat-card">
-        <div class="stat-number" style="color: #007bff;" th:text="${studentCount ?: 0}">0</div>
-        <div>Students</div>
+
+    <!-- Users Table -->
+    <h2>All Users</h2>
+
+    <div th:if="${users == null || #lists.isEmpty(users)}" style="text-align: center; padding: 40px; color: #6c757d;">
+        <h3>👥 No Users Found</h3>
+        <p>There are currently no users in the system.</p>
     </div>
-</div>
+    <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
+    <div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}"></div>
+    <table th:unless="${users == null || #lists.isEmpty(users)}">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Email</th>
+            <th>User Type</th>
+            <th>Events Created</th>
+            <th>Events Registered</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="user : ${users}">
+            <td th:text="${user.userId}">1</td>
+            <td>
+                <strong th:text="${user.name}">User Name</strong>
+            </td>
+            <td th:text="${user.email}">user@example.com</td>
+            <td>
+                <span th:if="${user.role.toString() == 'ADMIN'}" class="user-type type-admin">ADMIN</span>
+                <span th:if="${user.role.toString() == 'ORGANISER'}" class="user-type type-organiser">ORGANIZER</span>
+                <span th:if="${user.role.toString() == 'STUDENT'}" class="user-type type-student">STUDENT</span>
+            </td>
+            <td>
+                <span th:text="${user.organisedEvents != null ? #lists.size(user.organisedEvents) : 0}">0</span>
+                <br>
+                <a th:if="${user.organisedEvents != null and #lists.size(user.organisedEvents) > 0}"
+                   th:href="@{'/users/' + ${user.userId} + '/organizedEvents'}"
+                   style="font-size: 0.8em; color: #007bff;">View Events</a>
+            </td>
+            <td>
+                <span th:text="${user.registrations != null ? #lists.size(user.registrations) : 0}">0</span>
+                <br>
+                <a th:if="${user.registrations != null and #lists.size(user.registrations) > 0}"
+                   th:href="@{'/users/' + ${user.userId} + '/attendingEvents'}"
+                   style="font-size: 0.8em; color: #007bff;">View Registrations</a>
+            </td>
+            <td>
+                <!-- View User Details -->
+                <a th:href="@{'/users/' + ${user.userId}}"
+                   class="btn btn-info"
+                   style="font-size: 0.8em;">👁️ View</a>
 
-<!-- Users Table -->
-<h2>All Users</h2>
+                <!-- Edit User (if needed) -->
+                <a th:href="@{'/users/' + ${user.userId} + '/edit'}"
+                   class="btn btn-warning"
+                   style="font-size: 0.8em;">✏️ Edit</a>
 
-<div th:if="${users == null || #lists.isEmpty(users)}" style="text-align: center; padding: 40px; color: #6c757d;">
-    <h3>👥 No Users Found</h3>
-    <p>There are currently no users in the system.</p>
-</div>
-<div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
-<div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}"></div>
-<table th:unless="${users == null || #lists.isEmpty(users)}">
-    <thead>
-    <tr>
-        <th>ID</th>
-        <th>Name</th>
-        <th>Email</th>
-        <th>User Type</th>
-        <th>Events Created</th>
-        <th>Events Registered</th>
-        <th>Actions</th>
-    </tr>
-    </thead>
-    <tbody>
-    <tr th:each="user : ${users}">
-        <td th:text="${user.userId}">1</td>
-        <td>
-            <strong th:text="${user.name}">User Name</strong>
-        </td>
-        <td th:text="${user.email}">user@example.com</td>
-        <td>
-            <span th:if="${user.role.toString() == 'ADMIN'}" class="user-type type-admin">ADMIN</span>
-            <span th:if="${user.role.toString() == 'ORGANISER'}" class="user-type type-organiser">ORGANIZER</span>
-            <span th:if="${user.role.toString() == 'STUDENT'}" class="user-type type-student">STUDENT</span>
-        </td>
-        <td>
-            <span th:text="${user.organisedEvents != null ? #lists.size(user.organisedEvents) : 0}">0</span>
-            <br>
-            <a th:if="${user.organisedEvents != null and #lists.size(user.organisedEvents) > 0}"
-               th:href="@{'/users/' + ${user.userId} + '/organizedEvents'}"
-               style="font-size: 0.8em; color: #007bff;">View Events</a>
-        </td>
-        <td>
-            <span th:text="${user.registrations != null ? #lists.size(user.registrations) : 0}">0</span>
-            <br>
-            <a th:if="${user.registrations != null and #lists.size(user.registrations) > 0}"
-               th:href="@{'/users/' + ${user.userId} + '/attendingEvents'}"
-               style="font-size: 0.8em; color: #007bff;">View Registrations</a>
-        </td>
-        <td>
-            <!-- View User Details -->
-            <a th:href="@{'/users/' + ${user.userId}}"
-               class="btn btn-info"
-               style="font-size: 0.8em;">👁️ View</a>
-
-            <!-- Edit User (if needed) -->
-            <a th:href="@{'/users/' + ${user.userId} + '/edit'}"
-               class="btn btn-warning"
-               style="font-size: 0.8em;">✏️ Edit</a>
-
-            <!-- Deactivate User (if not banned) -->
-            <form th:if="${user.ban == null}"
-                    th:action="@{'/users/' + ${user.userId} + '/deactivate'}"
-                  method="post"
-                  style="display: inline;"
-                  onsubmit="return confirm('Are you sure you want to deactivate this user? This will prevent them from logging in.');">
-                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-                <th:block th:if="${user.ban == null}">
+                <!-- Deactivate User (if not banned) -->
+                <form th:if="${user.ban == null}"
+                        th:action="@{'/users/' + ${user.userId} + '/deactivate'}"
+                      method="post"
+                      style="display: inline;"
+                      onsubmit="return confirm('Are you sure you want to deactivate this user? This will prevent them from logging in.');">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                    <th:block th:if="${user.ban == null}">
+                        <button type="button"
+                                class="btn btn-danger"
+                                style="font-size: 0.8em;"
+                                th:disabled="${user.role.toString() == 'ADMIN'}"
+                                th:hidden="${user.role.toString() == 'ADMIN'}"
+                                th:attr="data-userid=${user.userId}, data-email=${user.email}"
+                                onclick="openBanModal(this)">
+                            🚫 Deactivate
+                        </button>
+                    </th:block>
+                </form>
+                <!-- Reactivate User (if user IS banned) -->
+                <form th:if="${user.ban != null}"
+                      th:action="@{'/users/' + ${user.userId} + '/reactivate'}"
+                      method="post"
+                      style="display: inline;"
+                      onsubmit="return confirm('Are you sure you want to reactivate this user? This will no longer prevent them from logging in.');">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                     <button type="button"
-                            class="btn btn-danger"
+                            class="btn btn-green"
                             style="font-size: 0.8em;"
-                            th:disabled="${user.role.toString() == 'ADMIN'}"
-                            th:hidden="${user.role.toString() == 'ADMIN'}"
-                            th:attr="data-userid=${user.userId}, data-email=${user.email}"
-                            onclick="openBanModal(this)">
-                        🚫 Deactivate
+                            th:attr="data-userid=${user.userId},
+                            data-email=${user.email},
+                            data-bantype=${user.ban != null ? user.ban.banType : ''},
+                            data-banreason=${user.ban != null ? user.ban.banReason : ''},
+                            data-banenddate=${user.ban != null and user.ban.banType.toString() == 'TEMPORARY' ? user.ban.banEndDate : ''}"
+                            onclick="openUnbanModal(this)"
+                            th:disabled="${user.role.toString() == 'ADMIN'}">
+                        ✅ Reactivate
                     </button>
-                </th:block>
-            </form>
-            <!-- Reactivate User (if user IS banned) -->
-            <form th:if="${user.ban != null}"
-                  th:action="@{'/users/' + ${user.userId} + '/reactivate'}"
-                  method="post"
-                  style="display: inline;"
-                  onsubmit="return confirm('Are you sure you want to reactivate this user? This will no longer prevent them from logging in.');">
-                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-                <button type="submit"
-                        class="btn btn-green"
-                        style="font-size: 0.8em;"
-                        th:disabled="${user.role.toString() == 'ADMIN'}">
-                    ✅ Reactivate
-                </button>
-            </form>
-        </td>
-    </tr>
-    </tbody>
-</table>
+                </form>
+            </td>
+        </tr>
+        </tbody>
+    </table>
 
-<!-- User Management Guidelines -->
-<div style="margin-top: 30px; padding: 20px; background-color: #fff3cd; border-left: 5px solid #ffc107; border-radius: 5px;">
-    <h3>⚠️ User Management Guidelines</h3>
-    <ul>
-        <li><strong>Admin accounts</strong> cannot be deactivated through this interface</li>
-        <li><strong>Organizer deactivation</strong> will also disable their events</li>
-        <li><strong>Student deactivation</strong> will cancel their event registrations</li>
-        <li>Always verify the reason before deactivating accounts</li>
-        <li>Consider contacting users before taking action when possible</li>
-    </ul>
-</div>
-
-<!-- Footer -->
-<div style="margin-top: 40px; padding: 20px; background-color: #f8f9fa; border-radius: 5px; text-align: center; color: #6c757d;">
-    <p><strong>User Management Panel</strong> | EventHub Campus Event Management System</p>
-    <p>Handle user accounts responsibly. All actions are logged for security.</p>
-</div>
-<div id="deactivate-user"
-     class="modal-overlay"
-     role="dialog"
-     aria-modal="true"
-     aria-labelledby="deactivate-title"
-     style="display:none;">
-    <div class="modal-dialog" role="document" onclick="event.stopPropagation()">
-        <h2 id="deactivate-title">🚫 Deactivate User: </h2>
-        <p id="ban-user-email">User email here</p>
-        <form id="deactivate-user-form" method="post">
-            <!-- Correct CSRF name -->
-            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-            <div style="margin-bottom:10px;">
-                <label for="banType"><strong>Ban Type:</strong></label><br>
-                <select id="banType" name="banType" required style="width:100%; padding:6px;">
-                    <option value="TEMPORARY">Temporary</option>
-                    <option value="PERMANENT">Permanent</option>
-                </select>
-            </div>
-            <div id="banEndDateContainer" style="margin-bottom:10px;">
-                <label for="banEndDate"><strong>Ban End Date:</strong></label><br>
-                <input type="datetime-local" id="banEndDate" name="banEndDate" style="width:100%; padding:6px;">
-            </div>
-            <div style="margin-bottom:10px;">
-                <label for="banReason"><strong>Reason:</strong></label><br>
-                <textarea id="banReason" name="banReason" rows="3" placeholder="Enter reason..." required
-                          style="width:100%; padding:6px;"></textarea>
-            </div>
-            <div style="text-align:right;">
-                <button type="button" class="btn btn-secondary" onclick="closeBanModal()">Cancel</button>
-                <button type="submit" class="btn btn-danger">Confirm Ban</button>
-            </div>
-        </form>
+    <!-- User Management Guidelines -->
+    <div style="margin-top: 30px; padding: 20px; background-color: #fff3cd; border-left: 5px solid #ffc107; border-radius: 5px;">
+        <h3>⚠️ User Management Guidelines</h3>
+        <ul>
+            <li><strong>Admin accounts</strong> cannot be deactivated through this interface</li>
+            <li><strong>Organizer deactivation</strong> will also disable their events</li>
+            <li><strong>Student deactivation</strong> will cancel their event registrations</li>
+            <li>Always verify the reason before deactivating accounts</li>
+            <li>Consider contacting users before taking action when possible</li>
+        </ul>
     </div>
-</div>
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const banType = document.getElementById('banType');
-        const banEndDateContainer = document.getElementById('banEndDateContainer');
-        const banEndDate = document.getElementById('banEndDate');
 
-        if (banType && banEndDateContainer && banEndDate) {
-            const update = () => {
-                if (banType.value === 'TEMPORARY') {
-                    banEndDateContainer.style.display = 'block';
-                    banEndDate.setAttribute('required', 'required');
-                } else {
-                    banEndDateContainer.style.display = 'none';
-                    banEndDate.removeAttribute('required');
-                }
-            };
-            banType.addEventListener('change', update);
-            update();
+    <!-- Footer -->
+    <div style="margin-top: 40px; padding: 20px; background-color: #f8f9fa; border-radius: 5px; text-align: center; color: #6c757d;">
+        <p><strong>User Management Panel</strong> | EventHub Campus Event Management System</p>
+        <p>Handle user accounts responsibly. All actions are logged for security.</p>
+    </div>
+    <div id="deactivate-user"
+         class="modal-overlay"
+         role="dialog"
+         aria-modal="true"
+         aria-labelledby="deactivate-title"
+         style="display:none;">
+        <div class="modal-dialog" role="document" onclick="event.stopPropagation()">
+            <h2 id="deactivate-title">🚫 Deactivate User: </h2>
+            <p id="ban-user-email">User email here</p>
+            <form id="deactivate-user-form" method="post">
+                <!-- Correct CSRF name -->
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                <div style="margin-bottom:10px;">
+                    <label for="banType"><strong>Ban Type:</strong></label><br>
+                    <select id="banType" name="banType" required style="width:100%; padding:6px;">
+                        <option value="TEMPORARY">Temporary</option>
+                        <option value="PERMANENT">Permanent</option>
+                    </select>
+                </div>
+                <div id="banEndDateContainer" style="margin-bottom:10px;">
+                    <label for="banEndDate"><strong>Ban End Date:</strong></label><br>
+                    <input type="datetime-local" id="banEndDate" name="banEndDate" style="width:100%; padding:6px;">
+                </div>
+                <div style="margin-bottom:10px;">
+                    <label for="banReason"><strong>Reason:</strong></label><br>
+                    <textarea id="banReason" name="banReason" rows="3" placeholder="Enter reason..." required
+                              style="width:100%; padding:6px;"></textarea>
+                </div>
+                <div style="text-align:right;">
+                    <button type="button" class="btn btn-secondary" onclick="closeBanModal()">Cancel</button>
+                    <button type="submit" class="btn btn-danger">Confirm Ban</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div id="unban-user"
+         class="modal-overlay"
+         role="dialog"
+         aria-modal="true"
+         aria-labelledby="unban-title"
+         style="display:none;">
+        <div class="modal-dialog" role="document" onclick="event.stopPropagation()">
+            <h2 id="unban-title">✅ Reactivate User</h2>
+
+            <p><strong>Email:</strong> <span id="unban-user-email"></span></p>
+            <p><strong>Ban Type:</strong> <span id="unban-ban-type"></span></p>
+            <p><strong>Reason:</strong> <span id="unban-ban-reason"></span></p>
+            <p id="unban-ban-enddate-container">
+                <strong>Ban End Date:</strong> <span id="unban-ban-enddate"></span>
+            </p>
+
+            <form id="unban-user-form" method="post">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                <div style="text-align:right; margin-top:10px;">
+                    <button type="button" class="btn btn-secondary" onclick="closeUnbanModal()">Cancel</button>
+                    <button type="submit" class="btn btn-green">Confirm Reactivation</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const banType = document.getElementById('banType');
+            const banEndDateContainer = document.getElementById('banEndDateContainer');
+            const banEndDate = document.getElementById('banEndDate');
+
+            if (banType && banEndDateContainer && banEndDate) {
+                const update = () => {
+                    if (banType.value === 'TEMPORARY') {
+                        banEndDateContainer.style.display = 'block';
+                        banEndDate.setAttribute('required', 'required');
+                    } else {
+                        banEndDateContainer.style.display = 'none';
+                        banEndDate.removeAttribute('required');
+                    }
+                };
+                banType.addEventListener('change', update);
+                update();
+            }
+        });
+
+        function openBanModal(button) {
+            const userId = button.getAttribute('data-userid');
+            const email = button.getAttribute('data-email');
+
+            const form = document.getElementById('deactivate-user-form');
+            const modal = document.getElementById('deactivate-user');
+            const emailElement = document.getElementById('ban-user-email');
+
+            form.action = `/users/${userId}/deactivate`;
+            emailElement.textContent = email;
+
+            modal.style.display = 'flex';
+            document.body.classList.add('modal-open');
+            setTimeout(() => document.getElementById('banType')?.focus(), 0);
         }
-    });
 
-    function openBanModal(button) {
-        const userId = button.getAttribute('data-userid');
-        const email = button.getAttribute('data-email');
+        function closeBanModal() {
+            const modal = document.getElementById('deactivate-user');
+            modal.style.display = 'none';
+            document.body.classList.remove('modal-open');
+        }
 
-        const form = document.getElementById('deactivate-user-form');
-        const modal = document.getElementById('deactivate-user');
-        const emailElement = document.getElementById('ban-user-email');
+        function openUnbanModal(button) {
+            const userId = button.getAttribute('data-userid');
+            const email = button.getAttribute('data-email');
+            const banType = button.getAttribute('data-bantype');
+            const banReason = button.getAttribute('data-banreason');
+            const banEndDate = button.getAttribute('data-banenddate');
 
-        form.action = `/users/${userId}/deactivate`;
-        emailElement.textContent = email;
+            const form = document.getElementById('unban-user-form');
+            const modal = document.getElementById('unban-user');
 
-        modal.style.display = 'flex';
-        document.body.classList.add('modal-open');
-        setTimeout(() => document.getElementById('banType')?.focus(), 0);
-    }
+            document.getElementById('unban-user-email').textContent = email;
+            document.getElementById('unban-ban-type').textContent = banType;
+            document.getElementById('unban-ban-reason').textContent = banReason;
 
-    function closeBanModal() {
-        const modal = document.getElementById('deactivate-user');
-        modal.style.display = 'none';
-        document.body.classList.remove('modal-open');
-    }
+            const endDateContainer = document.getElementById('unban-ban-enddate-container');
+            const endDateElement = document.getElementById('unban-ban-enddate');
 
-    // Optional: close on Escape only (no click-outside close)
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') closeBanModal();
-    });
+            if (banType === 'TEMPORARY' && banEndDate) {
+                endDateContainer.style.display = 'block';
+                endDateElement.textContent = new Date(banEndDate).toLocaleString();
+            } else {
+                endDateContainer.style.display = 'none';
+            }
 
-    // Block clicks on the overlay from interacting with the page
-    document.getElementById('deactivate-user')?.addEventListener('click', (e) => {
-        // Do nothing; overlay blocks background. Do not close on outside click.
-        e.stopPropagation();
-    });
-</script>
-</body>
-</html>
+            form.action = `/users/${userId}/reactivate`;
+            modal.style.display = 'flex';
+            document.body.classList.add('modal-open');
+        }
+
+        function closeUnbanModal() {
+            const modal = document.getElementById('unban-user');
+            modal.style.display = 'none';
+            document.body.classList.remove('modal-open');
+        }
+
+        // Optional: close on Escape only (no click-outside close)
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeBanModal();
+            if (e.key === 'Escape') closeUnbanModal();
+        });
+
+        // Block clicks on the overlay from interacting with the page
+        document.getElementById('deactivate-user')?.addEventListener('click', (e) => {
+            // Do nothing; overlay blocks background. Do not close on outside click.
+            e.stopPropagation();
+        });
+    </script>
+    </body>
+    </html>

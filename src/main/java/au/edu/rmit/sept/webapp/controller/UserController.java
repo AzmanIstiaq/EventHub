@@ -122,6 +122,19 @@ public class UserController {
         try {
             User user = userService.findById(userId)
                     .orElseThrow(() -> new IllegalArgumentException("Invalid user ID"));
+            // Check that the user is actually banned
+            if (user.getBan() == null) {
+                redirectAttributes.addFlashAttribute("errorMessage", "User is not currently banned.");
+                return "redirect:/users";
+            }
+
+            // Check that temporary bans have not expired
+            if (user.getBan().getBanType() == BanType.TEMPORARY &&
+                user.getBan().getBanEndDate() != null &&
+                user.getBan().getBanEndDate().isBefore(LocalDateTime.now())) {
+                redirectAttributes.addFlashAttribute("errorMessage", "User's temporary ban has already expired.");
+                return "redirect:/users";
+            }
 
 
             // Delete the ban on the user
