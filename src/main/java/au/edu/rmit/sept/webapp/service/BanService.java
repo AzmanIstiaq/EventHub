@@ -70,4 +70,8 @@
             user.setBan(null);
             deleteBanById(banId);
         }
+
+        public void updateBan(Ban existingBan) {
+            banRepository.save(existingBan);
+        }
     }

@@ -337,4 +337,78 @@ public class UserController {
         return "redirect:/users";
     }
 
+    // Edit ban details
+    @PostMapping("/{userId}/editban")
+    public String editBanDetails(@AuthenticationPrincipal CustomUserDetails currentUser,
+                                 @PathVariable int userId,
+                                 @RequestParam BanType banType,
+                                 @RequestParam(required = false)
+                                     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+                                     LocalDateTime banEndDate,
+                                 @RequestParam String banReason,
+                                 RedirectAttributes redirectAttributes) {
+        try {
+            // Check ban existence
+            User user = userService.findById(userId)
+                    .orElseThrow(() -> new IllegalArgumentException("Invalid user ID"));
+            Ban existingBan = user.getBan();
+            if (existingBan == null) {
+                redirectAttributes.addFlashAttribute("errorMessage", "User is not currently banned.");
+                return "redirect:/users";
+            }
+
+            // Check ban is not expired
+            if (existingBan.getBanType() == BanType.TEMPORARY &&
+                    existingBan.getBanEndDate() != null &&
+                    existingBan.getBanEndDate().isBefore(LocalDateTime.now())) {
+                redirectAttributes.addFlashAttribute("errorMessage", "User's temporary ban has already expired.");
+                return "redirect:/users";
+            }
+
+            // Get the current admin user performing the edit
+            User adminUser = userService.findById(currentUser.getId())
+                    .orElseThrow(() -> new IllegalArgumentException("Invalid admin user ID"));
+
+            // Verify the current user is an admin
+            if (!adminUser.isAdmin()) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Only admins can edit bans.");
+                return "redirect:/login";
+            }
+
+            // Ensure that there is no null values where required
+            if (banType == null || banReason == null || banReason.isBlank()) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Ban type and reason are required.");
+                return "redirect:/users";
+            }
+            if (banType == BanType.TEMPORARY && banEndDate == null) {
+                redirectAttributes.addFlashAttribute("errorMessage", "If ban type is temporary, a ban end date must be provided.");
+                return "redirect:/users";
+            }
+
+            if (banType == BanType.TEMPORARY && banEndDate.isBefore(LocalDateTime.now().plusHours(1L))) {
+                redirectAttributes.addFlashAttribute("errorMessage", "New ban end date must be at least 1 hour in the future for temporary bans.");
+                return "redirect:/users";
+            }
+
+            // Update ban details
+            existingBan.setBanType(banType);
+            existingBan.setBanReason(banReason);
+            if (banType == BanType.TEMPORARY) {
+                existingBan.setBanEndDate(banEndDate);
+            } else {
+                existingBan.setBanEndDate(null); // Clear end date for permanent bans changed from temporary
+            }
+            banService.updateBan(existingBan);
+            redirectAttributes.addFlashAttribute("successMessage",
+                    "Ban details for user '" + user.getName() + "' have been updated successfully.");
+            return "redirect:/users";
+        }
+        catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage",
+                    "Error updating ban details: " + e.getMessage());
+            return "redirect:/users";
+        }
+    }
+
+
 }
