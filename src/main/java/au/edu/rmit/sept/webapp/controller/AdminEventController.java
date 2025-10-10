@@ -1,8 +1,6 @@
 package au.edu.rmit.sept.webapp.controller;
 
-import au.edu.rmit.sept.webapp.model.Event;
-import au.edu.rmit.sept.webapp.model.Keyword;
-import au.edu.rmit.sept.webapp.model.User;
+import au.edu.rmit.sept.webapp.model.*;
 import au.edu.rmit.sept.webapp.security.CustomUserDetails;
 import au.edu.rmit.sept.webapp.service.AuditLogService;
 import au.edu.rmit.sept.webapp.service.CategoryService;
@@ -129,7 +127,7 @@ public class AdminEventController {
         event.setHidden(true);
         eventService.save(event);
         if (admin != null) {
-            auditLogService.record(admin.getId(), "EVENT_HIDE", "EVENT", id, "Event hidden by admin");
+            auditLogService.record(admin.getId(), AdminAction.EVENT_HIDE, AdminTargetType.EVENT, id, "Event hidden by admin");
         }
         return "redirect:/admin/events/" + id;
     }
@@ -141,7 +139,7 @@ public class AdminEventController {
         event.setHidden(false);
         eventService.save(event);
         if (admin != null) {
-            auditLogService.record(admin.getId(), "EVENT_UNHIDE", "EVENT", id, "Event unhidden by admin");
+            auditLogService.record(admin.getId(), AdminAction.EVENT_UNHIDE, AdminTargetType.EVENT, id, "Event unhidden by admin");
         }
         return "redirect:/admin/events/" + id;
     }
@@ -150,7 +148,7 @@ public class AdminEventController {
     public String deleteEvent(@PathVariable Long id, @AuthenticationPrincipal CustomUserDetails admin) {
         eventService.deleteById(id); // make sure EventService has this (see snippet below)
         if (admin != null) {
-            auditLogService.record(admin.getId(), "EVENT_DELETE", "EVENT", id, "Event deleted by admin");
+            auditLogService.record(admin.getId(), AdminAction.EVENT_DELETE, AdminTargetType.EVENT, id, "Event deleted by admin");
         }
         return "redirect:/events";
     }

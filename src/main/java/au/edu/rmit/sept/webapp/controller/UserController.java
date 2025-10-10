@@ -3,6 +3,7 @@ package au.edu.rmit.sept.webapp.controller;
 
 import au.edu.rmit.sept.webapp.model.*;
 import au.edu.rmit.sept.webapp.security.CustomUserDetails;
+import au.edu.rmit.sept.webapp.service.AuditLogService;
 import au.edu.rmit.sept.webapp.service.BanService;
 import au.edu.rmit.sept.webapp.service.RegistrationService;
 import au.edu.rmit.sept.webapp.service.UserService;
@@ -39,12 +40,14 @@ public class UserController {
     private final UserService userService;
     private final RegistrationService registrationService;
     private final BanService banService;
+    private final AuditLogService auditLogService;
     PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
-    public UserController(UserService userService, RegistrationService registrationService, BanService banService) {
+    public UserController(UserService userService, RegistrationService registrationService, BanService banService, AuditLogService auditLogService) {
         this.userService = userService;
         this.registrationService = registrationService;
         this.banService = banService;
+        this.auditLogService = auditLogService;
     }
 
     // View all users (for user management) with statistics
@@ -399,6 +402,21 @@ public class UserController {
                 existingBan.setBanEndDate(null); // Clear end date for permanent bans changed from temporary
             }
             banService.updateBan(existingBan);
+
+            // Now that the ban modifications are done, add a record of this event to audit log
+            AuditLog auditLog = new AuditLog();
+            auditLog.setAdminUserId(adminUser.getUserId());
+            auditLog.setAction(AdminAction.BAN_EDIT);
+            auditLog.setTargetType(AdminTargetType.USER);
+            auditLog.setTargetId(user.getUserId());
+            String details = String.format("Ban for user '%s' (ID: %d) updated by admin '%s' (ID: %d): Type changed to %s, Reason updated.",
+                    user.getName(), user.getUserId(), adminUser.getName(), adminUser.getUserId(), banType);
+            if (banType == BanType.TEMPORARY) {
+                details += String.format(" New end date: %s.", banEndDate);
+            }
+            auditLog.setDetails(details);
+            auditLogService.record(auditLog.getAdminUserId(), auditLog.getAction(), auditLog.getTargetType(), auditLog.getTargetId(), auditLog.getDetails());
+
             redirectAttributes.addFlashAttribute("successMessage",
                     "Ban details for user '" + user.getName() + "' have been updated successfully.");
             return "redirect:/users";

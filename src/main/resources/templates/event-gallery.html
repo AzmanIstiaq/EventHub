@@ -2,10 +2,10 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title th:text="${event.name} + ' Gallery'"></title>
+    <title th:text="${event.title} + ' Gallery'"></title>
 </head>
 <body>
-<h2 th:text="${event.name} + ' Gallery'"></h2>
+<h2 th:text="${event.title} + ' Gallery'"></h2>
 
 <!-- Only visible if user is authenticated AND is an organiser -->
 <div th:if="${#authorization.expression('isAuthenticated()')

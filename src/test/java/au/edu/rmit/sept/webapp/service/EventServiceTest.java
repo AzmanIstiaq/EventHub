@@ -18,11 +18,13 @@ public class EventServiceTest {
 
     private EventRepository eventRepository;
     private EventService eventService;
+    private RegistrationService registrationService;
 
     @BeforeEach
     void setUp() {
         eventRepository = mock(EventRepository.class);
-        eventService = new EventService(eventRepository);
+        registrationService = mock(RegistrationService.class);
+        eventService = new EventService(eventRepository, registrationService);
     }
 
     @Test

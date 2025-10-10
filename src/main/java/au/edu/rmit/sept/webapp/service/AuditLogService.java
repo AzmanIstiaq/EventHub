@@ -1,5 +1,7 @@
 package au.edu.rmit.sept.webapp.service;
 
+import au.edu.rmit.sept.webapp.model.AdminAction;
+import au.edu.rmit.sept.webapp.model.AdminTargetType;
 import au.edu.rmit.sept.webapp.model.AuditLog;
 import au.edu.rmit.sept.webapp.repository.AuditLogRepository;
 import org.springframework.stereotype.Service;
@@ -14,13 +16,13 @@ public class AuditLogService {
     }
 
     @Transactional
-    public AuditLog record(Long adminUserId, String action, String targetType, Long targetId, String details) {
+    public void record(Long adminUserId, AdminAction action, AdminTargetType targetType, Long targetId, String details) {
         AuditLog log = new AuditLog();
         log.setAdminUserId(adminUserId);
         log.setAction(action);
         log.setTargetType(targetType);
         log.setTargetId(targetId);
         log.setDetails(details);
-        return repo.save(log);
+        repo.save(log);
     }
 }
