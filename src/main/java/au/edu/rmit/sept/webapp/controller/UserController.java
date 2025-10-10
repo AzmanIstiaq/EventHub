@@ -1,5 +1,6 @@
 package au.edu.rmit.sept.webapp.controller;
 
+
 import au.edu.rmit.sept.webapp.model.*;
 import au.edu.rmit.sept.webapp.security.CustomUserDetails;
 import au.edu.rmit.sept.webapp.service.BanService;
@@ -7,6 +8,7 @@ import au.edu.rmit.sept.webapp.service.RegistrationService;
 import au.edu.rmit.sept.webapp.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -15,7 +17,11 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDateTime;
@@ -24,6 +30,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+
 /// Used to perform user based operations and analytics when needed.
 /// CRUD operations for users
 @Controller
@@ -261,6 +268,73 @@ public class UserController {
         SecurityContextHolder.getContext().setAuthentication(newAuth);
         redirectAttributes.addFlashAttribute("success", "Updated profile successfully");
         return "redirect:/events";
+    }
+
+    // Admin: Show edit form for user role assignment
+    @GetMapping("/{userId}/edit")
+    public String showEditUserForm(@AuthenticationPrincipal CustomUserDetails currentUser,
+                                   @PathVariable Long userId,
+                                   Model model,
+                                   RedirectAttributes redirectAttributes) {
+        // Verify admin access
+        User adminUser = userService.findById(currentUser.getId())
+                .orElseThrow(() -> new IllegalArgumentException("Invalid admin ID"));
+        
+        if (!adminUser.isAdmin()) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Access denied. Admin privileges required.");
+            return "redirect:/events";
+        }
+
+        User user = userService.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid user ID"));
+
+        model.addAttribute("user", user);
+        model.addAttribute("currentUser", adminUser);
+        model.addAttribute("userTypes", UserType.values());
+        
+        return "admin-user-edit";
+    }
+
+    // Admin: Update user role
+    @PostMapping("/{userId}/edit")
+    public String updateUserRole(@AuthenticationPrincipal CustomUserDetails currentUser,
+                                 @PathVariable Long userId,
+                                 @RequestParam String role,
+                                 RedirectAttributes redirectAttributes) {
+        try {
+            // Verify admin access
+            User adminUser = userService.findById(currentUser.getId())
+                    .orElseThrow(() -> new IllegalArgumentException("Invalid admin ID"));
+            
+            if (!adminUser.isAdmin()) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Access denied. Admin privileges required.");
+                return "redirect:/events";
+            }
+
+            User user = userService.findById(userId)
+                    .orElseThrow(() -> new IllegalArgumentException("Invalid user ID"));
+
+            // Prevent changing own role
+            if (user.getUserId().equals(adminUser.getUserId())) {
+                redirectAttributes.addFlashAttribute("errorMessage", "You cannot change your own role.");
+                return "redirect:/users";
+            }
+
+            UserType newRole = UserType.valueOf(role);
+            UserType oldRole = user.getRole();
+            
+            user.setRole(newRole);
+            userService.save(user);
+
+            redirectAttributes.addFlashAttribute("successMessage", 
+                "User '" + user.getName() + "' role updated from " + oldRole + " to " + newRole + " successfully.");
+        } catch (IllegalArgumentException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Invalid role selected: " + e.getMessage());
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Error updating user role: " + e.getMessage());
+        }
+
+        return "redirect:/users";
     }
 
 }

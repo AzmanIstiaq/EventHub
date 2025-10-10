@@ -1,27 +1,39 @@
 package au.edu.rmit.sept.webapp.controller;
 
-import au.edu.rmit.sept.webapp.model.User;
-import au.edu.rmit.sept.webapp.model.UserType;
-import au.edu.rmit.sept.webapp.TestHelpers.WithMockCustomUser;
-import au.edu.rmit.sept.webapp.repository.*;
-import au.edu.rmit.sept.webapp.service.*;
+import java.util.List;
+import java.util.Optional;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.when;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.web.servlet.MockMvc;
-
-import java.util.List;
-import java.util.Optional;
-
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import org.springframework.test.web.servlet.MockMvc;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.flash;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
+
+import au.edu.rmit.sept.webapp.TestHelpers.WithMockCustomUser;
+import au.edu.rmit.sept.webapp.model.User;
+import au.edu.rmit.sept.webapp.model.UserType;
+import au.edu.rmit.sept.webapp.repository.CategoryRepository;
+import au.edu.rmit.sept.webapp.repository.EventRepository;
+import au.edu.rmit.sept.webapp.repository.KeywordRepository;
+import au.edu.rmit.sept.webapp.repository.RegistrationRepository;
+import au.edu.rmit.sept.webapp.repository.UserRepository;
+import au.edu.rmit.sept.webapp.service.CategoryService;
+import au.edu.rmit.sept.webapp.service.EventService;
+import au.edu.rmit.sept.webapp.service.KeywordService;
+import au.edu.rmit.sept.webapp.service.RegistrationService;
+import au.edu.rmit.sept.webapp.service.UserService;
 
 @WebMvcTest(controllers = UserController.class)
 @AutoConfigureMockMvc
@@ -83,6 +95,124 @@ class UserControllerTest {
         mvc.perform(post("/users/{userId}/deactivate", 1L).with(csrf()))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/users"));
+    }
+
+    @Test
+    @WithMockCustomUser(username = "admin", role = UserType.ADMIN)
+    @DisplayName("Admin can view edit user form")
+    void adminShowEditUserForm() throws Exception {
+        User admin = new User();
+        admin.setUserId(1L);
+        admin.setName("Admin User");
+        admin.setRole(UserType.ADMIN);
+
+        User targetUser = new User();
+        targetUser.setUserId(2L);
+        targetUser.setName("Student User");
+        targetUser.setRole(UserType.STUDENT);
+
+        when(userService.findById(1L)).thenReturn(Optional.of(admin));
+        when(userService.findById(2L)).thenReturn(Optional.of(targetUser));
+
+        mvc.perform(get("/users/{userId}/edit", 2L))
+                .andExpect(status().isOk())
+                .andExpect(view().name("admin-user-edit"))
+                .andExpect(model().attributeExists("user"))
+                .andExpect(model().attributeExists("currentUser"))
+                .andExpect(model().attributeExists("userTypes"));
+    }
+
+    @Test
+    @WithMockCustomUser(username = "admin", role = UserType.ADMIN)
+    @DisplayName("Admin can update user role successfully")
+    void adminUpdateUserRole() throws Exception {
+        User admin = new User();
+        admin.setUserId(1L);
+        admin.setName("Admin User");
+        admin.setRole(UserType.ADMIN);
+
+        User targetUser = new User();
+        targetUser.setUserId(2L);
+        targetUser.setName("Student User");
+        targetUser.setRole(UserType.STUDENT);
+
+        when(userService.findById(1L)).thenReturn(Optional.of(admin));
+        when(userService.findById(2L)).thenReturn(Optional.of(targetUser));
+        when(userService.save(targetUser)).thenReturn(targetUser);
+
+        mvc.perform(post("/users/{userId}/edit", 2L)
+                        .with(csrf())
+                        .param("role", "ORGANISER"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/users"))
+                .andExpect(flash().attributeExists("successMessage"));
+    }
+
+    @Test
+    @WithMockCustomUser(username = "admin", role = UserType.ADMIN)
+    @DisplayName("Admin cannot change their own role")
+    void adminCannotChangeSelfRole() throws Exception {
+        User admin = new User();
+        admin.setUserId(1L);
+        admin.setName("Admin User");
+        admin.setRole(UserType.ADMIN);
+
+        when(userService.findById(1L)).thenReturn(Optional.of(admin));
+
+        mvc.perform(post("/users/{userId}/edit", 1L)
+                        .with(csrf())
+                        .param("role", "STUDENT"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/users"))
+                .andExpect(flash().attribute("errorMessage", "You cannot change your own role."));
+    }
+
+    @Test
+    @WithMockCustomUser(username = "student", role = UserType.STUDENT)
+    @DisplayName("Non-admin user cannot access edit user form")
+    void nonAdminCannotAccessEditUserForm() throws Exception {
+        User student = new User();
+        student.setUserId(100L);
+        student.setName("Student User");
+        student.setRole(UserType.STUDENT);
+
+        User targetUser = new User();
+        targetUser.setUserId(2L);
+        targetUser.setName("Other User");
+        targetUser.setRole(UserType.STUDENT);
+
+        when(userService.findById(100L)).thenReturn(Optional.of(student));
+        when(userService.findById(2L)).thenReturn(Optional.of(targetUser));
+
+        mvc.perform(get("/users/{userId}/edit", 2L))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/events"))
+                .andExpect(flash().attribute("errorMessage", "Access denied. Admin privileges required."));
+    }
+
+    @Test
+    @WithMockCustomUser(username = "student", role = UserType.STUDENT)
+    @DisplayName("Non-admin user cannot update user role")
+    void nonAdminCannotUpdateUserRole() throws Exception {
+        User student = new User();
+        student.setUserId(100L);
+        student.setName("Student User");
+        student.setRole(UserType.STUDENT);
+
+        User targetUser = new User();
+        targetUser.setUserId(2L);
+        targetUser.setName("Other User");
+        targetUser.setRole(UserType.STUDENT);
+
+        when(userService.findById(100L)).thenReturn(Optional.of(student));
+        when(userService.findById(2L)).thenReturn(Optional.of(targetUser));
+
+        mvc.perform(post("/users/{userId}/edit", 2L)
+                        .with(csrf())
+                        .param("role", "ORGANISER"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/events"))
+                .andExpect(flash().attribute("errorMessage", "Access denied. Admin privileges required."));
     }
 
     // --- PROFILE ENDPOINTS (ANY LOGGED-IN USER) ---
