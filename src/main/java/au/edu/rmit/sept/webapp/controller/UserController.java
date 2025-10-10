@@ -119,6 +119,21 @@ public class UserController {
                 ban.setBanEndDate(banEndDate);
             }
             banService.banUser(ban);
+
+            // Add a record of this event to audit log
+            AuditLog auditLog = new AuditLog();
+            auditLog.setAdminUserId(adminUser.getUserId());
+            auditLog.setAction(AdminAction.BAN_USER);
+            auditLog.setTargetType(AdminTargetType.USER);
+            auditLog.setTargetId(user.getUserId());
+            String details = String.format("User '%s' (ID: %d) banned by admin '%s' (ID: %d): Type: %s, Reason: %s.",
+                    user.getName(), user.getUserId(), adminUser.getName(), adminUser.getUserId(), banType, banReason);
+            if (banType == BanType.TEMPORARY) {
+                details += String.format(" End date: %s.", banEndDate);
+            }
+            auditLog.setDetails(details);
+            auditLogService.record(auditLog.getAdminUserId(), auditLog.getAction(), auditLog.getTargetType(), auditLog.getTargetId(), auditLog.getDetails());
+
             // For now, we'll just show a message
             redirectAttributes.addFlashAttribute("successMessage",
                     "User '" + user.getName() + "' has been deactivated. Backend has been updated.");
@@ -154,6 +169,18 @@ public class UserController {
 
             // Delete the ban on the user
             banService.removeBan(user);
+
+            // Log this action in the audit log
+            AuditLog auditLog = new AuditLog();
+            auditLog.setAdminUserId(currentUser.getId());
+            auditLog.setAction(AdminAction.BAN_REMOVE);
+            auditLog.setTargetType(AdminTargetType.USER);
+            auditLog.setTargetId(user.getUserId());
+            String details = String.format("Ban for user '%s' (ID: %d) removed by admin '%s' (ID: %d).",
+                    user.getName(), user.getUserId(), currentUser.getUsername(), currentUser.getId());
+            auditLog.setDetails(details);
+            auditLogService.record(auditLog.getAdminUserId(), auditLog.getAction(), auditLog.getTargetType(), auditLog.getTargetId(), auditLog.getDetails());
+
             // For now, we'll just show a message
             redirectAttributes.addFlashAttribute("successMessage",
                     "User '" + user.getName() + "' has been reactivated. Backend should be updated.");
