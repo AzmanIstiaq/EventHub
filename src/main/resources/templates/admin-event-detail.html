@@ -95,6 +95,18 @@
   <!-- Admin Actions -->
   <div style="border-top: 2px solid #dee2e6; padding-top: 20px; margin-top: 20px;">
     <h4>🔧 Admin Actions</h4>
+
+      <form th:action="@{'/admin/events/' + ${event.eventId} + '/hide'}" method="post" style="display:inline;">
+        <button type="submit" class="btn btn-secondary" th:if="${!event.hidden}">Hide Event</button>
+      </form>
+      <form th:action="@{'/admin/events/' + ${event.eventId} + '/unhide'}" method="post" style="display:inline;">
+        <button type="submit" class="btn btn-success" th:if="${event.hidden}">Unhide Event</button>
+      </form>
+      <form th:action="@{'/admin/events/' + ${event.eventId} + '/delete'}" method="post" style="display:inline;" 
+            onsubmit="return confirm('Delete this event? This cannot be undone.');">
+        <button type="submit" class="btn btn-danger">Delete Event</button>
+      </form>
+    
       <a th:href="@{'/admin/events/' + ${event.eventId} + '/edit'}"
          class="btn btn-primary">✏️ Edit Event</a>
 
@@ -141,6 +153,18 @@
   <h3>👥 Event Registrations</h3>
   <div style="text-align: center; padding: 40px; color: #6c757d;">
     <h4>📝 No Registrations Yet</h4>
+
+      <form th:action="@{'/admin/events/' + ${event.eventId} + '/hide'}" method="post" style="display:inline;">
+        <button type="submit" class="btn btn-secondary" th:if="${!event.hidden}">Hide Event</button>
+      </form>
+      <form th:action="@{'/admin/events/' + ${event.eventId} + '/unhide'}" method="post" style="display:inline;">
+        <button type="submit" class="btn btn-success" th:if="${event.hidden}">Unhide Event</button>
+      </form>
+      <form th:action="@{'/admin/events/' + ${event.eventId} + '/delete'}" method="post" style="display:inline;" 
+            onsubmit="return confirm('Delete this event? This cannot be undone.');">
+        <button type="submit" class="btn btn-danger">Delete Event</button>
+      </form>
+    
     <p>No one has registered for this event yet.</p>
   </div>
 </div>
@@ -151,3 +175,12 @@
 </div>
 </body>
 </html>
+    <div class="card">
+      <h4>User Feedback</h4>
+      <div th:if="${#lists.isEmpty(event.feedbacks)}">No feedback yet.</div>
+      <div th:each="fb : ${event.feedbacks}" class="feedback-item" style="border-bottom:1px solid #eee; padding:10px 0;">
+        <div><strong th:text="${fb.user.fullName}">User</strong> rated <span th:text="${fb.rating}">0</span>/5</div>
+        <div th:text="${fb.comment}">Comment text...</div>
+      </div>
+    </div>
+    
