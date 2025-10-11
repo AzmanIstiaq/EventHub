@@ -51,7 +51,28 @@ public class SecurityConfig {
                                 response.sendRedirect("/");
                             }
                         })
-                        .failureUrl("/login?error=true")
+                        .failureHandler((request, response, authentication) -> {
+                            String redirectUrl = "/login?error=true";
+
+                            // Check if the exception is due to a locked account
+                            if (authentication.getClass().getSimpleName().equals("LockedException")) {
+                                // If so, find out what type of ban it is (permanent or temporary)
+                                var userDetails = userDetailsService.loadUserByUsername(request.getParameter("username"));
+                                if (userDetails != null) {
+                                    var customDetails = (au.edu.rmit.sept.webapp.security.CustomUserDetails) userDetails;
+                                    var ban = customDetails.getUser().getBan();
+                                    if (ban != null && ban.getBanType() != null) {
+                                        if (ban.getBanType() == au.edu.rmit.sept.webapp.model.BanType.PERMANENT) {
+                                            redirectUrl = "/login?error=permanent_ban";
+                                        } else if (ban.getBanType() == au.edu.rmit.sept.webapp.model.BanType.TEMPORARY) {
+                                            redirectUrl = "/login?error=temporary_ban";
+                                        }
+                                    }
+                                }
+                            }
+
+                            response.sendRedirect(redirectUrl);
+                        })
                         .permitAll()
                 )
                 .logout(logout -> logout.permitAll())
