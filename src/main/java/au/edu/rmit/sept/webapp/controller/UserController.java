@@ -1,15 +1,14 @@
 package au.edu.rmit.sept.webapp.controller;
 
-
 import au.edu.rmit.sept.webapp.model.*;
 import au.edu.rmit.sept.webapp.security.CustomUserDetails;
 import au.edu.rmit.sept.webapp.service.AuditLogService;
 import au.edu.rmit.sept.webapp.service.BanService;
 import au.edu.rmit.sept.webapp.service.RegistrationService;
 import au.edu.rmit.sept.webapp.service.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.format.annotation.DateTimeFormat;
-
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -32,11 +31,12 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-/// Used to perform user based operations and analytics when needed.
-/// CRUD operations for users
 @Controller
 @RequestMapping("/users")
 public class UserController {
+
+    private static final Logger log = LoggerFactory.getLogger(UserController.class);
+
     private final UserService userService;
     private final RegistrationService registrationService;
     private final BanService banService;
@@ -50,10 +50,35 @@ public class UserController {
         this.auditLogService = auditLogService;
     }
 
-    // View all users (for user management) with statistics
+    @org.springframework.transaction.annotation.Transactional
     @GetMapping
     public String viewAllUsers(@AuthenticationPrincipal CustomUserDetails currentUser, Model model) {
+        log.info("=== viewAllUsers() called ===");
+
+        // Expire temporary bans first
+        log.info("Calling expireTemporaryBans()...");
+        banService.expireTemporaryBans();
+        log.info("expireTemporaryBans() completed");
+
+        // Now fetch all users
+        log.info("Fetching all users...");
         List<User> allUsers = userService.getAllUsers();
+        log.info("Fetched {} users", allUsers.size());
+
+        // Log ban status of each user
+        int bannedCount = 0;
+        for (User user : allUsers) {
+            if (user.getBan() != null) {
+                bannedCount++;
+                log.info("User ID: {}, Name: {}, Has Ban: YES, Ban Type: {}, End Date: {}",
+                        user.getUserId(),
+                        user.getName(),
+                        user.getBan().getBanType(),
+                        user.getBan().getBanEndDate());
+            }
+        }
+        log.info("Total banned users: {}", bannedCount);
+
         model.addAttribute("users", allUsers);
 
         User adminUser = userService.findById(currentUser.getId())
@@ -69,39 +94,37 @@ public class UserController {
         int studentCount = (int) allUsers.stream()
                 .filter(user -> user.getRole() == UserType.STUDENT)
                 .count();
-                
+
         model.addAttribute("currentUser", adminUser);
         model.addAttribute("adminCount", adminCount);
         model.addAttribute("organiserCount", organiserCount);
         model.addAttribute("studentCount", studentCount);
 
+        log.info("=== viewAllUsers() completed ===");
         return "admin-users";
     }
 
-    // Deactivate/ban user accounts
+    // Rest of the methods remain the same...
     @PostMapping("/{userId}/deactivate")
     public String deactivateUser(@AuthenticationPrincipal CustomUserDetails currentUser, @PathVariable int userId,
                                  @RequestParam BanType banType,
                                  @RequestParam(required = false)
-                                     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
-                                     LocalDateTime banEndDate,
+                                 @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+                                 LocalDateTime banEndDate,
                                  @RequestParam String banReason,
                                  RedirectAttributes redirectAttributes) {
         try {
             User user = userService.findById(userId)
                     .orElseThrow(() -> new IllegalArgumentException("Invalid user ID"));
 
-            // Get the current admin user performing the ban
             User adminUser = userService.findById(currentUser.getId())
                     .orElseThrow(() -> new IllegalArgumentException("Invalid admin user ID"));
 
-            // Verify the current user is an admin
             if (!adminUser.isAdmin()) {
                 redirectAttributes.addFlashAttribute("errorMessage", "Only admins can deactivate users.");
                 return "redirect:/login";
             }
 
-            // Ensure that if the ban type is TEMPORARY, a ban end date is provided
             if (banType == BanType.TEMPORARY && banEndDate == null) {
                 redirectAttributes.addFlashAttribute("errorMessage", "If ban type is temporary, a ban end date must be provided.");
                 return "redirect:/users";
@@ -112,15 +135,12 @@ public class UserController {
                 return "redirect:/users";
             }
 
-
-            // Create a ban in the ban table (backend)
             Ban ban = new Ban(user, adminUser, banType, banReason);
             if (banType == BanType.TEMPORARY) {
                 ban.setBanEndDate(banEndDate);
             }
             banService.banUser(ban);
 
-            // Add a record of this event to audit log
             AuditLog auditLog = new AuditLog();
             auditLog.setAdminUserId(adminUser.getUserId());
             auditLog.setAction(AdminAction.BAN_USER);
@@ -134,7 +154,6 @@ public class UserController {
             auditLog.setDetails(details);
             auditLogService.record(auditLog.getAdminUserId(), auditLog.getAction(), auditLog.getTargetType(), auditLog.getTargetId(), auditLog.getDetails());
 
-            // For now, we'll just show a message
             redirectAttributes.addFlashAttribute("successMessage",
                     "User '" + user.getName() + "' has been deactivated. Backend has been updated.");
         } catch (Exception e) {
@@ -145,32 +164,26 @@ public class UserController {
         return "redirect:/users";
     }
 
-    // Reactivate/ban user accounts
     @PostMapping("/{userId}/reactivate")
     public String reactivateUser(@AuthenticationPrincipal CustomUserDetails currentUser, @PathVariable int userId,
                                  RedirectAttributes redirectAttributes) {
         try {
             User user = userService.findById(userId)
                     .orElseThrow(() -> new IllegalArgumentException("Invalid user ID"));
-            // Check that the user is actually banned
             if (user.getBan() == null) {
                 redirectAttributes.addFlashAttribute("errorMessage", "User is not currently banned.");
                 return "redirect:/users";
             }
 
-            // Check that temporary bans have not expired
             if (user.getBan().getBanType() == BanType.TEMPORARY &&
-                user.getBan().getBanEndDate() != null &&
-                user.getBan().getBanEndDate().isBefore(LocalDateTime.now())) {
+                    user.getBan().getBanEndDate() != null &&
+                    user.getBan().getBanEndDate().isBefore(LocalDateTime.now())) {
                 redirectAttributes.addFlashAttribute("errorMessage", "User's temporary ban has already expired.");
                 return "redirect:/users";
             }
 
-
-            // Delete the ban on the user
             banService.removeBan(user);
 
-            // Log this action in the audit log
             AuditLog auditLog = new AuditLog();
             auditLog.setAdminUserId(currentUser.getId());
             auditLog.setAction(AdminAction.BAN_REMOVE);
@@ -181,7 +194,6 @@ public class UserController {
             auditLog.setDetails(details);
             auditLogService.record(auditLog.getAdminUserId(), auditLog.getAction(), auditLog.getTargetType(), auditLog.getTargetId(), auditLog.getDetails());
 
-            // For now, we'll just show a message
             redirectAttributes.addFlashAttribute("successMessage",
                     "User '" + user.getName() + "' has been reactivated. Backend should be updated.");
         } catch (Exception e) {
@@ -192,7 +204,6 @@ public class UserController {
         return "redirect:/users";
     }
 
-    // Get a single user by ID
     @GetMapping("/{id}")
     public ResponseEntity<User> getUserById(@AuthenticationPrincipal CustomUserDetails currentUser, @PathVariable long id) {
         return userService.findById(id)
@@ -200,7 +211,6 @@ public class UserController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    // Get events this user is attending
     @GetMapping("/{id}/attendingEvents")
     public ResponseEntity<List<Event>> getAttendingEvents(@PathVariable long id) {
         var events = registrationService.findByUserId(id)
@@ -211,8 +221,6 @@ public class UserController {
         return ResponseEntity.ok(events);
     }
 
-
-    // Get events this user has organized
     @GetMapping("/{id}/organizedEvents")
     public ResponseEntity<Set<Event>> getOrganizedEvents(@AuthenticationPrincipal CustomUserDetails currentUser, @PathVariable long id) {
         return userService.findById(id)
@@ -226,7 +234,6 @@ public class UserController {
                 .orElseThrow(() -> new IllegalArgumentException("Invalid organiser ID"));
         model.addAttribute("formAction", "/users/profile/save");
         model.addAttribute("currentUser", user);
-
         return "manage-profile";
     }
 
@@ -249,7 +256,6 @@ public class UserController {
                                     RedirectAttributes redirectAttrs) {
         if (userService.findByEmail(email).isPresent()) {
             redirectAttrs.addFlashAttribute("error", "Email already in use");
-
             return "redirect:/users/profile/create";
         }
 
@@ -265,7 +271,6 @@ public class UserController {
         return "redirect:/login?createSuccess";
     }
 
-
     @PostMapping("/profile/save")
     public String saveProfile(@AuthenticationPrincipal CustomUserDetails currentUser,
                               @RequestParam String name,
@@ -278,7 +283,6 @@ public class UserController {
         Optional<User> userEmail = userService.findByEmail(email);
         if (userEmail.isPresent() && userEmail.get().getUserId() != currentUser.getId()) {
             redirectAttributes.addFlashAttribute("error", "Email already in use, please choose another.");
-
             return "redirect:/users/profile";
         }
         user.setName(name);
@@ -290,7 +294,6 @@ public class UserController {
 
         User updatedUser = userService.save(user);
 
-        // 🔑 Update Authentication in SecurityContext with new details
         CustomUserDetails updatedDetails = new CustomUserDetails(updatedUser);
         UsernamePasswordAuthenticationToken newAuth =
                 new UsernamePasswordAuthenticationToken(updatedDetails, updatedDetails.getPassword(), updatedDetails.getAuthorities());
@@ -300,16 +303,14 @@ public class UserController {
         return "redirect:/events";
     }
 
-    // Admin: Show edit form for user role assignment
     @GetMapping("/{userId}/edit")
     public String showEditUserForm(@AuthenticationPrincipal CustomUserDetails currentUser,
                                    @PathVariable Long userId,
                                    Model model,
                                    RedirectAttributes redirectAttributes) {
-        // Verify admin access
         User adminUser = userService.findById(currentUser.getId())
                 .orElseThrow(() -> new IllegalArgumentException("Invalid admin ID"));
-        
+
         if (!adminUser.isAdmin()) {
             redirectAttributes.addFlashAttribute("errorMessage", "Access denied. Admin privileges required.");
             return "redirect:/events";
@@ -321,21 +322,19 @@ public class UserController {
         model.addAttribute("user", user);
         model.addAttribute("currentUser", adminUser);
         model.addAttribute("userTypes", UserType.values());
-        
+
         return "admin-user-edit";
     }
 
-    // Admin: Update user role
     @PostMapping("/{userId}/edit")
     public String updateUserRole(@AuthenticationPrincipal CustomUserDetails currentUser,
                                  @PathVariable Long userId,
                                  @RequestParam String role,
                                  RedirectAttributes redirectAttributes) {
         try {
-            // Verify admin access
             User adminUser = userService.findById(currentUser.getId())
                     .orElseThrow(() -> new IllegalArgumentException("Invalid admin ID"));
-            
+
             if (!adminUser.isAdmin()) {
                 redirectAttributes.addFlashAttribute("errorMessage", "Access denied. Admin privileges required.");
                 return "redirect:/events";
@@ -344,7 +343,6 @@ public class UserController {
             User user = userService.findById(userId)
                     .orElseThrow(() -> new IllegalArgumentException("Invalid user ID"));
 
-            // Prevent changing own role
             if (user.getUserId().equals(adminUser.getUserId())) {
                 redirectAttributes.addFlashAttribute("errorMessage", "You cannot change your own role.");
                 return "redirect:/users";
@@ -352,12 +350,12 @@ public class UserController {
 
             UserType newRole = UserType.valueOf(role);
             UserType oldRole = user.getRole();
-            
+
             user.setRole(newRole);
             userService.save(user);
 
-            redirectAttributes.addFlashAttribute("successMessage", 
-                "User '" + user.getName() + "' role updated from " + oldRole + " to " + newRole + " successfully.");
+            redirectAttributes.addFlashAttribute("successMessage",
+                    "User '" + user.getName() + "' role updated from " + oldRole + " to " + newRole + " successfully.");
         } catch (IllegalArgumentException e) {
             redirectAttributes.addFlashAttribute("errorMessage", "Invalid role selected: " + e.getMessage());
         } catch (Exception e) {
@@ -367,18 +365,16 @@ public class UserController {
         return "redirect:/users";
     }
 
-    // Edit ban details
     @PostMapping("/{userId}/editban")
     public String editBanDetails(@AuthenticationPrincipal CustomUserDetails currentUser,
                                  @PathVariable int userId,
                                  @RequestParam BanType banType,
                                  @RequestParam(required = false)
-                                     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
-                                     LocalDateTime banEndDate,
+                                 @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+                                 LocalDateTime banEndDate,
                                  @RequestParam String banReason,
                                  RedirectAttributes redirectAttributes) {
         try {
-            // Check ban existence
             User user = userService.findById(userId)
                     .orElseThrow(() -> new IllegalArgumentException("Invalid user ID"));
             Ban existingBan = user.getBan();
@@ -387,7 +383,6 @@ public class UserController {
                 return "redirect:/users";
             }
 
-            // Check ban is not expired
             if (existingBan.getBanType() == BanType.TEMPORARY &&
                     existingBan.getBanEndDate() != null &&
                     existingBan.getBanEndDate().isBefore(LocalDateTime.now())) {
@@ -395,17 +390,14 @@ public class UserController {
                 return "redirect:/users";
             }
 
-            // Get the current admin user performing the edit
             User adminUser = userService.findById(currentUser.getId())
                     .orElseThrow(() -> new IllegalArgumentException("Invalid admin user ID"));
 
-            // Verify the current user is an admin
             if (!adminUser.isAdmin()) {
                 redirectAttributes.addFlashAttribute("errorMessage", "Only admins can edit bans.");
                 return "redirect:/login";
             }
 
-            // Ensure that there is no null values where required
             if (banType == null || banReason == null || banReason.isBlank()) {
                 redirectAttributes.addFlashAttribute("errorMessage", "Ban type and reason are required.");
                 return "redirect:/users";
@@ -420,17 +412,15 @@ public class UserController {
                 return "redirect:/users";
             }
 
-            // Update ban details
             existingBan.setBanType(banType);
             existingBan.setBanReason(banReason);
             if (banType == BanType.TEMPORARY) {
                 existingBan.setBanEndDate(banEndDate);
             } else {
-                existingBan.setBanEndDate(null); // Clear end date for permanent bans changed from temporary
+                existingBan.setBanEndDate(null);
             }
             banService.updateBan(existingBan);
 
-            // Now that the ban modifications are done, add a record of this event to audit log
             AuditLog auditLog = new AuditLog();
             auditLog.setAdminUserId(adminUser.getUserId());
             auditLog.setAction(AdminAction.BAN_EDIT);
@@ -454,6 +444,4 @@ public class UserController {
             return "redirect:/users";
         }
     }
-
-
 }

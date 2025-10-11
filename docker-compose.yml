@@ -4,10 +4,12 @@ services:
     container_name: eventhub-db
     restart: always
     environment:
+      TZ: Australia/Melbourne
       MYSQL_ROOT_PASSWORD: rootpassword
       MYSQL_DATABASE: eventhub
       MYSQL_USER: appuser
       MYSQL_PASSWORD: apppassword
+      command: --default-time-zone=+11:00
     ports:
       - "3306:3306"
     volumes:
@@ -22,6 +24,8 @@ services:
       PMA_HOST: mysql
       PMA_USER: root
       PMA_PASSWORD: rootpassword
+      TZ: Australia/Melbourne
+      command: --default-time-zone=+11:00
     depends_on:
       - mysql
 
@@ -36,6 +40,8 @@ services:
       - "8080:8080"
     environment:
       - SPRING_PROFILES_ACTIVE=docker   # 👈 Forces app to use docker.properties
+      - TZ=Australia/Melbourne
+      - SPRING_JPA_PROPERTIES_HIBERNATE_JDBC_TIME_ZONE=Australia/Melbourne
     volumes:
       - ./src/main/resources/templates:/app/src/main/resources/templates
       - ./src/main/resources/static:/app/src/main/resources/static

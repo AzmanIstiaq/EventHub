@@ -5,15 +5,22 @@
     import au.edu.rmit.sept.webapp.model.User;
     import au.edu.rmit.sept.webapp.model.UserType;
     import au.edu.rmit.sept.webapp.repository.BanRepository;
-    import jakarta.transaction.Transactional;
+    import jakarta.persistence.PersistenceContext;
     import org.springframework.stereotype.Service;
+    import jakarta.persistence.EntityManager;
+    import org.springframework.transaction.annotation.Propagation;
+    import org.springframework.transaction.annotation.Transactional;
 
     import java.time.LocalDateTime;
+    import java.util.List;
 
     @Service
     public class BanService {
 
         private final BanRepository banRepository;
+
+        @PersistenceContext
+        private EntityManager em;
 
         public BanService(BanRepository banRepository) {
             this.banRepository = banRepository;
@@ -32,7 +39,7 @@
         }
 
 
-        @Transactional
+        @org.springframework.transaction.annotation.Transactional
         public void banUser(Ban ban) {
             User user = ban.getUser();
             if (isUserBanned(user)) {
@@ -61,17 +68,40 @@
             banRepository.save(ban);
         }
 
-        @Transactional
+        @org.springframework.transaction.annotation.Transactional
         public void removeBan(User user) {
-            if (!isUserBanned(user)) {
-                throw new IllegalArgumentException("User is not banned.");
-            }
-            long banId = findBanIdByUser(user);
+            Ban ban = banRepository.findByUser(user);
+            if (ban == null) throw new IllegalArgumentException("User is not banned.");
+            // Delete the ban row and set user's ban to null
+            banRepository.delete(ban);
             user.setBan(null);
-            deleteBanById(banId);
+            em.flush();
         }
 
         public void updateBan(Ban existingBan) {
             banRepository.save(existingBan);
         }
+
+        @Transactional(propagation = Propagation.REQUIRES_NEW)
+        public void expireTemporaryBans() {
+            // First get the user IDs with expired bans
+            List<Long> userIdsWithExpiredBans = em.createQuery(
+                            "SELECT b.user.userId FROM Ban b WHERE b.banType = :banType AND b.banEndDate < :now",
+                            Long.class)
+                    .setParameter("banType", BanType.TEMPORARY)
+                    .setParameter("now", LocalDateTime.now())
+                    .getResultList();
+
+            if (userIdsWithExpiredBans.isEmpty()) return;
+
+            // Then delete the bans directly using JPQL
+            em.createQuery("DELETE FROM Ban b WHERE b.user.userId IN :userIds")
+                    .setParameter("userIds", userIdsWithExpiredBans)
+                    .executeUpdate();
+
+            // Only flush, don't clear - this ensures changes are persisted
+            // but doesn't detach entities from the calling transaction
+            em.flush();
+        }
+
     }
