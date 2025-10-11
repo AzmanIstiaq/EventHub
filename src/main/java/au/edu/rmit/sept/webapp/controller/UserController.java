@@ -120,9 +120,19 @@ public class UserController {
             User adminUser = userService.findById(currentUser.getId())
                     .orElseThrow(() -> new IllegalArgumentException("Invalid admin user ID"));
 
+            if (user.getBan() != null) {
+                redirectAttributes.addFlashAttribute("errorMessage", "User is already banned.");
+                return "redirect:/users";
+            }
+
             if (!adminUser.isAdmin()) {
                 redirectAttributes.addFlashAttribute("errorMessage", "Only admins can deactivate users.");
                 return "redirect:/login";
+            }
+
+            if (user.getRole() == UserType.ADMIN) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Admins cannot be banned.");
+                return "redirect:/users";
             }
 
             if (banType == BanType.TEMPORARY && banEndDate == null) {

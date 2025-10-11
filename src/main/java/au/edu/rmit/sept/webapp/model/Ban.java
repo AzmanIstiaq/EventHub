@@ -58,6 +58,7 @@ public class Ban {
     public void setBanReason(String banReason) { this.banReason = banReason; }
 
     public Long getBanId() { return banId; }
+    public void setBanId(Long banId) { this.banId = banId; }
 
     public void setBanType(BanType banType) { this.banType = banType; }
     public BanType getBanType() { return banType; }

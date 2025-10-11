@@ -3,6 +3,8 @@ package au.edu.rmit.sept.webapp.controller;
 import java.util.List;
 import java.util.Optional;
 
+import au.edu.rmit.sept.webapp.model.Ban;
+import au.edu.rmit.sept.webapp.model.BanType;
 import au.edu.rmit.sept.webapp.service.*;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -289,6 +291,217 @@ class UserControllerTest {
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/users/profile"))
                 .andExpect(flash().attribute("error", "Email already in use, please choose another."));
+    }
+
+    // Tests for banning, unbanning, editing bans.
+    // Tests for each type of ban (temporary, permanent)
+    // Tests for edge cases (e.g., banning an already banned user, unbanning a non-banned user, etc.)
+
+    @Test
+    @WithMockCustomUser(username = "admin", role = UserType.ADMIN)
+    @DisplayName("Admin unban banned user successfully shows success message")
+    void adminUnbanUser() throws Exception {
+        // Create ban:
+        Ban b = new Ban();
+        b.setBanId(1L);
+        b.setBanReason("Violation of terms");
+        b.setBanType(BanType.PERMANENT);
+
+
+        // User being unbanned
+        User u = new User();
+        u.setUserId(1L);
+        u.setName("Banned User");
+        u.setRole(UserType.STUDENT);
+        u.setBan(b);
+
+        when(userService.findById(1L)).thenReturn(Optional.of(u));
+
+        mvc.perform(post("/users/{userId}/reactivate", 1L)
+                        .with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/users"))
+                .andExpect(flash().attribute("successMessage", "User 'Banned User' has been reactivated. Backend should be updated."));
+    }
+
+    @Test
+    @WithMockCustomUser(username = "admin", role = UserType.ADMIN)
+    @DisplayName("Admin unban non-banned user fails with error message")
+    void adminUnbanNonBannedUser() throws Exception {
+        // User being unbanned (with no ban placed on them)
+        User u = new User();
+        u.setUserId(1L);
+        u.setName("Banned User");
+        u.setRole(UserType.STUDENT);
+
+        when(userService.findById(1L)).thenReturn(Optional.of(u));
+
+        // Should redirect back to /users with error message
+        mvc.perform(post("/users/{userId}/reactivate", 1L)
+                        .with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/users"))
+                .andExpect(flash().attribute("errorMessage", "User is not currently banned."));
+
+    }
+
+    @Test
+    @WithMockCustomUser(username = "admin", role = UserType.ADMIN)
+    @DisplayName("Admin ban non-banned user successfully")
+    void adminBanNonBannedUser() throws Exception {
+        // Create student being banned
+        User u = new User();
+        u.setUserId(1L);
+        u.setName("X");
+        u.setRole(UserType.STUDENT);
+
+        when(userService.findById(1L)).thenReturn(Optional.of(u));
+
+        // Create admin performing ban
+        User admin = new User();
+        admin.setUserId(100L);
+        admin.setName("Admin User");
+        admin.setRole(UserType.ADMIN);
+
+        when(userService.findById(100L)).thenReturn(Optional.of(admin));
+
+        mvc.perform(post("/users/{userId}/deactivate", 1L).
+                        with(csrf())
+                        .param("banType", "PERMANENT")
+                        .param("banReason", "Test ban"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/users"))
+                .andExpect(flash().attribute("successMessage", "User 'X' has been deactivated. Backend has been updated."));
+    }
+
+    @Test
+    @WithMockCustomUser(username = "admin", role = UserType.ADMIN)
+    @DisplayName("Admin ban already banned user fails with error message")
+    void adminBanBannedUser() throws Exception {
+        // Create ban:
+        Ban b = new Ban();
+        b.setBanId(1L);
+        b.setBanReason("Violation of terms");
+        b.setBanType(BanType.PERMANENT);
+
+        // User being banned (who is already banned)
+        User u = new User();
+        u.setUserId(1L);
+        u.setName("Banned User");
+        u.setRole(UserType.STUDENT);
+        u.setBan(b);
+
+        when(userService.findById(1L)).thenReturn(Optional.of(u));
+
+        // Create admin performing ban
+        User admin = new User();
+        admin.setUserId(100L);
+        admin.setName("Admin User");
+        admin.setRole(UserType.ADMIN);
+
+        when(userService.findById(100L)).thenReturn(Optional.of(admin));
+
+        mvc.perform(post("/users/{userId}/deactivate", 1L).
+                        with(csrf())
+                        .param("banType", "PERMANENT")
+                        .param("banReason", "Test ban"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/users"))
+                .andExpect(flash().attribute("errorMessage", "User is already banned."));
+    }
+
+    @Test
+    @WithMockCustomUser(username = "admin", role = UserType.ADMIN)
+    @DisplayName("Edit a ban that exists successfully")
+    void adminEditBanThatExists() throws Exception {
+        // Create ban:
+        Ban b = new Ban();
+        b.setBanId(1L);
+        b.setBanReason("Violation of terms");
+        b.setBanType(BanType.PERMANENT);
+
+        // User being banned (who is already banned)
+        User u = new User();
+        u.setUserId(1L);
+        u.setName("Banned User");
+        u.setRole(UserType.STUDENT);
+        u.setBan(b);
+
+        when(userService.findById(1L)).thenReturn(Optional.of(u));
+
+        // Create admin performing ban
+        User admin = new User();
+        admin.setUserId(100L);
+        admin.setName("Admin User");
+        admin.setRole(UserType.ADMIN);
+
+        when(userService.findById(100L)).thenReturn(Optional.of(admin));
+
+        mvc.perform(post("/users/{userId}/editban", 1L).
+                        with(csrf())
+                        .param("banType", "PERMANENT")
+                        .param("banReason", "Edited reason"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/users"))
+                .andExpect(flash().attribute("successMessage", "Ban details for user 'Banned User' have been updated successfully."));
+    }
+
+    @Test
+    @WithMockCustomUser(username = "admin", role = UserType.ADMIN)
+    @DisplayName("Edit a ban that does not exist fails with error message")
+    void adminEditBanThatDoesNotExist() throws Exception {
+        // User being banned (who is not banned)
+        User u = new User();
+        u.setUserId(1L);
+        u.setName("Not Banned User");
+        u.setRole(UserType.STUDENT);
+
+        when(userService.findById(1L)).thenReturn(Optional.of(u));
+
+        // Create admin performing ban
+        User admin = new User();
+        admin.setUserId(100L);
+        admin.setName("Admin User");
+        admin.setRole(UserType.ADMIN);
+
+        when(userService.findById(100L)).thenReturn(Optional.of(admin));
+
+        mvc.perform(post("/users/{userId}/editban", 1L).
+                        with(csrf())
+                        .param("banType", "PERMANENT")
+                        .param("banReason", "Edited reason"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/users"))
+                .andExpect(flash().attribute("errorMessage", "User is not currently banned."));
+    }
+
+    @Test
+    @WithMockCustomUser(username = "admin", role = UserType.ADMIN)
+    @DisplayName("Any admin user cannot be banned")
+    void adminCannotBeBanned() throws Exception {
+        // Create admin being banned
+        User u = new User();
+        u.setUserId(1L);
+        u.setName("Admin User");
+        u.setRole(UserType.ADMIN);
+
+        when(userService.findById(1L)).thenReturn(Optional.of(u));
+
+        // Create admin performing ban
+        User admin = new User();
+        admin.setUserId(100L);
+        admin.setName("Admin User 2");
+        admin.setRole(UserType.ADMIN);
+
+        when(userService.findById(100L)).thenReturn(Optional.of(admin));
+
+        mvc.perform(post("/users/{userId}/deactivate", 1L).
+                        with(csrf())
+                        .param("banType", "PERMANENT")
+                        .param("banReason", "Test ban"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/users"))
+                .andExpect(flash().attribute("errorMessage", "Admins cannot be banned."));
     }
 
 }
