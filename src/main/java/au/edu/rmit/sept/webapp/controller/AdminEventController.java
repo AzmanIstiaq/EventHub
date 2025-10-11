@@ -9,6 +9,8 @@ import au.edu.rmit.sept.webapp.service.KeywordService;
 import au.edu.rmit.sept.webapp.service.RegistrationService;
 import au.edu.rmit.sept.webapp.service.UserService;
 import org.springframework.security.access.AccessDeniedException;
+import au.edu.rmit.sept.webapp.service.RegistrationService;
+import au.edu.rmit.sept.webapp.service.UserService;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -118,7 +120,7 @@ public class AdminEventController {
         }
 
         eventService.save(event);
-        return "redirect:/events/" + id;
+        return "redirect:/events/detail/" + id;
     }
 
     @PostMapping("/{id}/hide")

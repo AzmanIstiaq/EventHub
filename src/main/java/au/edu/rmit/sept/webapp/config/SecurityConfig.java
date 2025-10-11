@@ -35,7 +35,7 @@ public class SecurityConfig {
                         .requestMatchers("/events/public/**").permitAll()
                         .requestMatchers("/users/profile/**").permitAll()
                         .requestMatchers("/h2-console/**").permitAll()
-                        .requestMatchers("/admin/**").hasAuthority("ROLE_ADMIN")
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers("/events/*/gallery/upload").hasRole("ORGANISER")
                         .requestMatchers("/events/*/gallery/**").permitAll()
                         .requestMatchers("/users/**").hasRole("ADMIN")
@@ -46,7 +46,7 @@ public class SecurityConfig {
                         .loginPage("/login")
                         .successHandler((request, response, authentication) -> {
                             var auth = authentication.getAuthorities().iterator().next().getAuthority();
-                            if (auth.equals("ROLE_ADMIN") ||  auth.equals("ROLE_ORGANISER") || auth.equals("ROLE_STUDENT")) {
+                            if (auth.equals("ROLE_ADMIN") || auth.equals("ROLE_ORGANISER") || auth.equals("ROLE_STUDENT")) {
                                 response.sendRedirect("/events");
                             } else {
                                 response.sendRedirect("/");
@@ -82,12 +82,11 @@ public class SecurityConfig {
                         )
                 )
                 .logout(logout -> logout.permitAll())
-                .headers(headers -> headers.frameOptions().sameOrigin());  // <- Allow H2 console frames
-
+                // updated to the non-deprecated API
+                .headers(headers -> headers.frameOptions(frameOptions -> frameOptions.sameOrigin()));
 
         return http.build();
     }
-
 
     @Bean
     public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {

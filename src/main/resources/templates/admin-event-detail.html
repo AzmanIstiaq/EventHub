@@ -110,15 +110,6 @@
       <a th:href="@{'/admin/events/' + ${event.eventId} + '/edit'}"
          class="btn btn-primary">✏️ Edit Event</a>
 
-      <form th:action="@{'/events/' + ${event.eventId} + '/delete'}"
-          method="post"
-          style="display: inline;"
-          onsubmit="return confirm('Are you sure you want to delete this event? This will also cancel all registrations. This action cannot be undone.');">
-      <button type="submit" class="btn btn-danger">🗑️ Delete Event</button>
-    </form>
-
-    <a th:href="@{'/registrations/event/' + ${event.eventId}}"
-       class="btn btn-success">📋 View Registrations</a>
   </div>
 </div>
 
