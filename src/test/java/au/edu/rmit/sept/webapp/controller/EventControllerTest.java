@@ -13,6 +13,7 @@ import au.edu.rmit.sept.webapp.repository.UserRepository;
 import au.edu.rmit.sept.webapp.service.CategoryService;
 import au.edu.rmit.sept.webapp.service.EventService;
 import au.edu.rmit.sept.webapp.service.KeywordService;
+import au.edu.rmit.sept.webapp.service.EventGalleryService;
 import au.edu.rmit.sept.webapp.service.RegistrationService;
 import au.edu.rmit.sept.webapp.service.UserService;
 import org.junit.jupiter.api.DisplayName;
@@ -52,6 +53,7 @@ class EventControllerTest {
     @MockBean UserService userService;
     @MockBean CategoryService categoryService;
     @MockBean KeywordService keywordService;
+    @MockBean EventGalleryService eventGalleryService;
 
     @MockBean private UserRepository userRepo;
     @MockBean private EventRepository eventRepo;

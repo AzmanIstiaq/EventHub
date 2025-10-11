@@ -8,6 +8,7 @@ import au.edu.rmit.sept.webapp.service.EventService;
 import au.edu.rmit.sept.webapp.service.KeywordService;
 import au.edu.rmit.sept.webapp.service.RegistrationService;
 import au.edu.rmit.sept.webapp.service.UserService;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -72,7 +73,7 @@ public class AdminEventController {
                                     @AuthenticationPrincipal CustomUserDetails currentUser) {
         String role = currentUser.getAuthorities().iterator().next().getAuthority();
         if (!Objects.equals(role, "ROLE_ADMIN")) {
-            return "redirect:/events";
+            throw new AccessDeniedException("Access denied");
         }
 
         Event event = eventService.findById(id)
@@ -96,7 +97,7 @@ public class AdminEventController {
 
         String role = currentUser.getAuthorities().iterator().next().getAuthority();
         if (!Objects.equals(role, "ROLE_ADMIN")) {
-            return "redirect:/events";
+            throw new AccessDeniedException("Access denied");
         }
 
         Event event = eventService.findById(id)

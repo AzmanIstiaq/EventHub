@@ -35,6 +35,7 @@ public class SecurityConfig {
                         .requestMatchers("/events/public/**").permitAll()
                         .requestMatchers("/users/profile/**").permitAll()
                         .requestMatchers("/h2-console/**").permitAll()
+                        .requestMatchers("/admin/**").hasAuthority("ROLE_ADMIN")
                         .requestMatchers("/events/*/gallery/upload").hasRole("ORGANISER")
                         .requestMatchers("/events/*/gallery/**").permitAll()
                         .requestMatchers("/users/**").hasRole("ADMIN")
@@ -74,6 +75,11 @@ public class SecurityConfig {
                             response.sendRedirect(redirectUrl);
                         })
                         .permitAll()
+                )
+                .exceptionHandling(exception -> exception
+                        .accessDeniedHandler((request, response, accessDeniedException) ->
+                                response.sendRedirect("/error/403")
+                        )
                 )
                 .logout(logout -> logout.permitAll())
                 .headers(headers -> headers.frameOptions().sameOrigin());  // <- Allow H2 console frames
