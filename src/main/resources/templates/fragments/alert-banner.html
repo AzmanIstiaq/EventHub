@@ -1,4 +1,8 @@
-<div th:fragment="alert-banner(success, error)">
+<div th:fragment="alert-banner(success, error, info)">
+    <div th:if="${info}" class="alert alert-info">
+        <span th:text="${info}"></span>
+        <button type="button" class="alert-close" onclick="this.parentElement.remove()">×</button>
+    </div>
    <div th:if="${success}" class="alert alert-success">
     <span th:text="${success}"></span>
     <button type="button" class="alert-close" onclick="this.parentElement.remove()">×</button>

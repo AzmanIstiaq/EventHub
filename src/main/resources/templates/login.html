@@ -7,7 +7,7 @@
 <body>
 <div th:replace="~{fragments/navbar-common :: navbar-common(${currentUser})}"></div>
 <div class="login-container">
-    <div th:replace="~{fragments/alert-banner :: alert-banner(${success}, ${error})}"></div>
+    <div th:replace="~{fragments/alert-banner :: alert-banner(${success}, ${error}, ${info})}"></div>
     <div th:if="${param.error}">
         <div th:switch="${param.error[0]}">
 

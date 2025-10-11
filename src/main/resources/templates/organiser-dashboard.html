@@ -120,7 +120,7 @@
 <div th:replace="~{fragments/navbar-common :: navbar-common(${currentUser})}"></div>
 
 <div class="container">
-    <div th:replace="~{fragments/alert-banner :: alert-banner(${success}, ${error})}"></div>
+    <div th:replace="~{fragments/alert-banner :: alert-banner(${success}, ${error}, ${info})}"></div>
     <header>
         <h1 th:text="'Events for ' + ${organiser.name}"></h1>
         <button id="create-btn" class="btn btn-primary" onclick="openCreateForm()">+ Create New Event</button>

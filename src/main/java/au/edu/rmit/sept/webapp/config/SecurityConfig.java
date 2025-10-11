@@ -81,6 +81,7 @@ public class SecurityConfig {
                                 response.sendRedirect("/error/403")
                         )
                 )
+                .securityContext(context -> context.requireExplicitSave(false))
                 .logout(logout -> logout.permitAll())
                 // updated to the non-deprecated API
                 .headers(headers -> headers.frameOptions(frameOptions -> frameOptions.sameOrigin()));
