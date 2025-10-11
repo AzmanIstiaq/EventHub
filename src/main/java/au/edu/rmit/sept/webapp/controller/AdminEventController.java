@@ -120,7 +120,7 @@ public class AdminEventController {
         }
 
         eventService.save(event);
-        return "redirect:/events/" + id;
+        return "redirect:/events/detail/" + id;
     }
 
     @PostMapping("/{id}/hide")
