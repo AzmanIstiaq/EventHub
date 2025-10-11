@@ -102,7 +102,7 @@ class UserControllerTest {
     @DisplayName("Admin can view edit user form")
     void adminShowEditUserForm() throws Exception {
         User admin = new User();
-        admin.setUserId(1L);
+        admin.setUserId(100L);
         admin.setName("Admin User");
         admin.setRole(UserType.ADMIN);
 
@@ -111,7 +111,7 @@ class UserControllerTest {
         targetUser.setName("Student User");
         targetUser.setRole(UserType.STUDENT);
 
-        when(userService.findById(1L)).thenReturn(Optional.of(admin));
+        when(userService.findById(100L)).thenReturn(Optional.of(admin));
         when(userService.findById(2L)).thenReturn(Optional.of(targetUser));
 
         mvc.perform(get("/users/{userId}/edit", 2L))
@@ -127,7 +127,7 @@ class UserControllerTest {
     @DisplayName("Admin can update user role successfully")
     void adminUpdateUserRole() throws Exception {
         User admin = new User();
-        admin.setUserId(1L);
+        admin.setUserId(100L);
         admin.setName("Admin User");
         admin.setRole(UserType.ADMIN);
 
@@ -136,7 +136,7 @@ class UserControllerTest {
         targetUser.setName("Student User");
         targetUser.setRole(UserType.STUDENT);
 
-        when(userService.findById(1L)).thenReturn(Optional.of(admin));
+        when(userService.findById(100L)).thenReturn(Optional.of(admin));
         when(userService.findById(2L)).thenReturn(Optional.of(targetUser));
         when(userService.save(targetUser)).thenReturn(targetUser);
 
@@ -153,13 +153,13 @@ class UserControllerTest {
     @DisplayName("Admin cannot change their own role")
     void adminCannotChangeSelfRole() throws Exception {
         User admin = new User();
-        admin.setUserId(1L);
+        admin.setUserId(100L);
         admin.setName("Admin User");
         admin.setRole(UserType.ADMIN);
 
-        when(userService.findById(1L)).thenReturn(Optional.of(admin));
+        when(userService.findById(100L)).thenReturn(Optional.of(admin));
 
-        mvc.perform(post("/users/{userId}/edit", 1L)
+        mvc.perform(post("/users/{userId}/edit", 100L)
                         .with(csrf())
                         .param("role", "STUDENT"))
                 .andExpect(status().is3xxRedirection())
