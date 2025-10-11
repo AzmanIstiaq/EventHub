@@ -3,6 +3,7 @@ package au.edu.rmit.sept.webapp.controller;
 import java.util.List;
 import java.util.Optional;
 
+import au.edu.rmit.sept.webapp.service.*;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -29,11 +30,6 @@ import au.edu.rmit.sept.webapp.repository.EventRepository;
 import au.edu.rmit.sept.webapp.repository.KeywordRepository;
 import au.edu.rmit.sept.webapp.repository.RegistrationRepository;
 import au.edu.rmit.sept.webapp.repository.UserRepository;
-import au.edu.rmit.sept.webapp.service.CategoryService;
-import au.edu.rmit.sept.webapp.service.EventService;
-import au.edu.rmit.sept.webapp.service.KeywordService;
-import au.edu.rmit.sept.webapp.service.RegistrationService;
-import au.edu.rmit.sept.webapp.service.UserService;
 
 @WebMvcTest(controllers = UserController.class)
 @AutoConfigureMockMvc
@@ -46,12 +42,15 @@ class UserControllerTest {
     @MockBean UserService userService;
     @MockBean CategoryService categoryService;
     @MockBean KeywordService keywordService;
+    @MockBean BanService banService;
+    @MockBean AuditLogService auditLogService;
 
     @MockBean private UserRepository userRepo;
     @MockBean private EventRepository eventRepo;
     @MockBean private RegistrationRepository registrationRepo;
     @MockBean private CategoryRepository categoryRepo;
     @MockBean private KeywordRepository keywordRepo;
+
 
     // --- ADMIN ENDPOINTS ---
 
@@ -84,15 +83,26 @@ class UserControllerTest {
     @WithMockCustomUser(username = "admin", role = UserType.ADMIN)
     @DisplayName("Admin deactivate user success redirects")
     void adminDeactivateUser() throws Exception {
+        // Create student being banned
         User u = new User();
         u.setUserId(1L);
         u.setName("X");
-        u.setRole(UserType.ADMIN);
-
+        u.setRole(UserType.STUDENT);
 
         when(userService.findById(1L)).thenReturn(Optional.of(u));
 
-        mvc.perform(post("/users/{userId}/deactivate", 1L).with(csrf()))
+        // Create admin performing ban
+        User admin = new User();
+        admin.setUserId(100L);
+        admin.setName("Admin User");
+        admin.setRole(UserType.ADMIN);
+
+        when(userService.findById(100L)).thenReturn(Optional.of(admin));
+
+        mvc.perform(post("/users/{userId}/deactivate", 1L).
+                        with(csrf())
+                        .param("banType", "PERMANENT")
+                        .param("banReason", "Test ban"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/users"));
     }
