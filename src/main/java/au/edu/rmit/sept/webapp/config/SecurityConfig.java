@@ -46,8 +46,11 @@ public class SecurityConfig {
                         .loginPage("/login")
                         .successHandler((request, response, authentication) -> {
                             var auth = authentication.getAuthorities().iterator().next().getAuthority();
-                            if (auth.equals("ROLE_ADMIN") || auth.equals("ROLE_ORGANISER") || auth.equals("ROLE_STUDENT")) {
+                            if (auth.equals("ROLE_ORGANISER") || auth.equals("ROLE_STUDENT")) {
                                 response.sendRedirect("/events");
+                            }
+                            else if (auth.equals("ROLE_ADMIN")) {
+                                response.sendRedirect("/admin/dashboard");
                             } else {
                                 response.sendRedirect("/");
                             }
