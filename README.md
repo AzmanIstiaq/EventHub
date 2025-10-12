@@ -15,6 +15,7 @@
 
 ## Notes:
 - All documentation is in docs/Milestone3, including test execution evidence, which is under docs/Milestone3/CoverageReport. Run `index.html` in this folder to view.
+- Further testing evidence is under Test_Report Sprint 2.md in docs/Milestone3 and in `Test Results — webapp in webapp.html` which must also be run to view.
 - Scrum planning is under the 'Planning' tab.
 
 ## Records
@@ -142,3 +143,5 @@ docker-compose up --build
 - Running the project may take a while, especially the first time.
 
 - The default events are added with times using `LocalDateTime.now().plusDays(X)`, this means on the first run, they will be in the future, but if you stop and restart the application later, they may be in the past.
+
+- Due to the GitHub minutes budget being depleted, the CI/CD and GitHub Actions of this project were not possible to fully test and implement.
