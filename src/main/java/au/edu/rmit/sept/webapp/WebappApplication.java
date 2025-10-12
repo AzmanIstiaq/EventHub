@@ -77,35 +77,44 @@ public class WebappApplication {
 				));
 
 				// Continue with categories, events, registrations as before
-				Category cat1 = categoryRepo.save(new Category("CAT1"));
-				Category cat2 = categoryRepo.save(new Category("CAT2"));
+				Category cat1 = categoryRepo.save(new Category("Music"));
+				Category cat2 = categoryRepo.save(new Category("Sport"));
+				Category cat3 = categoryRepo.save(new Category("Tech"));
+				Category cat4 = categoryRepo.save(new Category("Food"));
+				Category cat5 = categoryRepo.save(new Category("Networking"));
+				Category cat6 = categoryRepo.save(new Category("Study"));
+				Category cat7 = categoryRepo.save(new Category("Health"));
+				Category cat8 = categoryRepo.save(new Category("Arts"));
+				Category cat9 = categoryRepo.save(new Category("Gaming"));
+				Category cat10 = categoryRepo.save(new Category("Outdoors"));
+				Category cat11 = categoryRepo.save(new Category("Socialising"));
 
 				Event hackathon = eventRepo.save(new Event(
 						"Hackathon", "24hr coding challenge",
 						LocalDateTime.now().minusDays(2),
 						"RMIT University Library, Melbourne VIC",
-						csit, cat1, -37.8075, 144.9630
+						csit, cat3, -37.8075, 144.9630
 				));
 
 				Event bbqNight = eventRepo.save(new Event(
 						"BBQ Night", "Free food and fun networking!",
 						LocalDateTime.now().plusDays(5),
 						"Carlton Gardens, Melbourne VIC",
-						csit, cat1, -37.8057, 144.9719
+						csit, cat4, -37.8057, 144.9719
 				));
 
 				Event musicJam = eventRepo.save(new Event(
 						"Music Jam", "Bring your instruments and jam with others!",
 						LocalDateTime.now().plusDays(3),
 						"Federation Square, Melbourne VIC",
-						nerdSociety, cat2, -37.8179, 144.9691
+						nerdSociety, cat1, -37.8179, 144.9691
 				));
 
 				Event gameNight = eventRepo.save(new Event(
 						"Game Night", "Board games and snacks",
 						LocalDateTime.now().plusDays(7),
 						"Melbourne Central Student Lounge, Melbourne VIC",
-						nerdSociety, cat2, -37.8104, 144.9623
+						nerdSociety, cat11, -37.8104, 144.9623
 				));
 
 				// Registrations

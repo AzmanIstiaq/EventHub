@@ -132,3 +132,7 @@ docker-compose up --build
 - The application can be stopped by pressing `CTRL + C` in the terminal where it is running, and then running `docker-compose down` to stop and remove the containers.
 
 - If an image fails to upload when interacting with your event as an organiser, choose a smaller image, as there is a size limit on uploads.
+
+- Running the project may take a while, especially the first time.
+
+- The default events are added with times using `LocalDateTime.now().plusDays(X)`, this means on the first run, they will be in the future, but if you stop and restart the application later, they may be in the past.
