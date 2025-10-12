@@ -137,3 +137,5 @@ docker-compose up --build
 - Running the project may take a while, especially the first time.
 
 - The default events are added with times using `LocalDateTime.now().plusDays(X)`, this means on the first run, they will be in the future, but if you stop and restart the application later, they may be in the past.
+
+- Due to the GitHub minutes budget being depleted, the CI/CD and GitHub Actions of this project were not possible to fully test and implement.
