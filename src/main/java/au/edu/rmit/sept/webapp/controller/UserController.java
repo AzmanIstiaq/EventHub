@@ -232,10 +232,28 @@ public class UserController {
     }
 
     @GetMapping("/{id}/organizedEvents")
-    public ResponseEntity<Set<Event>> getOrganizedEvents(@AuthenticationPrincipal CustomUserDetails currentUser, @PathVariable long id) {
-        return userService.findById(id)
-                .map(user -> ResponseEntity.ok(user.getOrganisedEvents()))
-                .orElse(ResponseEntity.notFound().build());
+    public String getOrganizedEvents(@AuthenticationPrincipal CustomUserDetails currentUser, @PathVariable long id, Model model) {
+        User admin = userService.findById(currentUser.getId())
+                .orElseThrow(() -> new IllegalArgumentException("Invalid admin ID"));
+        if (!admin.isAdmin()) {
+            throw new IllegalArgumentException("Access denied. Admin privileges required.");
+        }
+
+        User user = userService.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid organiser ID"));
+        // Check that requested user is an organiser
+        if (user.getRole() != UserType.ORGANISER) {
+            throw new IllegalArgumentException("User is not an organiser");
+        }
+        // If so, get all the events that they organised
+        Set<Event> events = user.getOrganisedEvents();
+
+        // Add attributes to the model
+        model.addAttribute("events", events);
+        model.addAttribute("organiser", user);
+        model.addAttribute("currentUser", admin);
+
+        return "admin-organised-events";
     }
 
     @GetMapping("/profile")
