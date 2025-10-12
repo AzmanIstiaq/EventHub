@@ -62,7 +62,7 @@
   <h3 th:if="${#lists.isEmpty(searchResults)}" class="empty-message">No events found.</h3>
   <div class="events-grid" th:unless="${#lists.isEmpty(searchResults)}">
    <div th:each="event : ${searchResults}">
-    <div th:replace="~{fragments/event-card :: event-card(${event}, ${currentUser}, ${futureEvents})}"></div>
+    <div th:replace="~{fragments/event-card :: event-card(${event}, ${currentUser}, ${futureEvents}, ${null})}"></div>
    </div>
   </div>
  </div>

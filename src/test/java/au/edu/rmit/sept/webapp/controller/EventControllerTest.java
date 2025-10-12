@@ -5,17 +5,8 @@ import au.edu.rmit.sept.webapp.model.Category;
 import au.edu.rmit.sept.webapp.model.Event;
 import au.edu.rmit.sept.webapp.model.User;
 import au.edu.rmit.sept.webapp.model.UserType;
-import au.edu.rmit.sept.webapp.repository.CategoryRepository;
-import au.edu.rmit.sept.webapp.repository.EventRepository;
-import au.edu.rmit.sept.webapp.repository.KeywordRepository;
-import au.edu.rmit.sept.webapp.repository.RegistrationRepository;
-import au.edu.rmit.sept.webapp.repository.UserRepository;
-import au.edu.rmit.sept.webapp.service.CategoryService;
-import au.edu.rmit.sept.webapp.service.EventService;
-import au.edu.rmit.sept.webapp.service.KeywordService;
-import au.edu.rmit.sept.webapp.service.EventGalleryService;
-import au.edu.rmit.sept.webapp.service.RegistrationService;
-import au.edu.rmit.sept.webapp.service.UserService;
+import au.edu.rmit.sept.webapp.repository.*;
+import au.edu.rmit.sept.webapp.service.*;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,12 +45,14 @@ class EventControllerTest {
     @MockBean CategoryService categoryService;
     @MockBean KeywordService keywordService;
     @MockBean EventGalleryService eventGalleryService;
+    @MockBean FeedbackService feedbackService;
 
     @MockBean private UserRepository userRepo;
     @MockBean private EventRepository eventRepo;
     @MockBean private RegistrationRepository registrationRepo;
     @MockBean private CategoryRepository categoryRepo;
     @MockBean private KeywordRepository keywordRepo;
+    @MockBean private FeedbackRepository feedbackRepo;
 
     @Test
     @WithMockCustomUser(username = "admin", role = UserType.ADMIN)

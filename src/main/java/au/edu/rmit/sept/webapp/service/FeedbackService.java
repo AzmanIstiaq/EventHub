@@ -32,5 +32,7 @@ public class FeedbackService {
     public List<Feedback> getFeedbackForEvent(Event event) {
         return feedbackRepository.findAllByEvent(event);
     }
+
+    public List<Feedback> getFeedbackForUser(User user) { return feedbackRepository.findAllByUser(user); }
 }
 
