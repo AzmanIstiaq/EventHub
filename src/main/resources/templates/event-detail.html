@@ -49,6 +49,34 @@
         .btn-back { background: #6c757d; }
         .btn-register { background: #28a745; }
         .btn-cancel { background: #dc3545; }
+
+        thead th {
+            background-color:#007bff;
+            color:white;
+        }
+
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+        td {
+            padding: 10px;
+            height: 60px;
+            width: 14.2%;
+            vertical-align: middle;
+        }
+        .event-day {
+            background-color: #6F42C1FF;
+            color: white;
+            font-weight: bold;
+        }
+        .today {
+            background-color: #70abff;
+            color: white;
+            font-weight: bold;
+        }
+        .other-month {
+            color: #aaa;
+        }
     </style>
 </head>
 <body>
@@ -78,6 +106,40 @@
     </div>
 
     <p th:text="${event.description}"></p>
+    <section style="margin-top: 2rem;">
+        <h3>📅 Event Calendar</h3>
+        <h3 th:text="${#strings.capitalize(month.month.name().toLowerCase()) + ' ' + month.year}"></h3>
+
+        <table style="width: 100%; border-collapse: collapse; text-align: center;">
+            <thead>
+            <tr>
+                <th>Sun</th>
+                <th>Mon</th>
+                <th>Tue</th>
+                <th>Wed</th>
+                <th>Thu</th>
+                <th>Fri</th>
+                <th>Sat</th>
+            </tr>
+            <tbody>
+            <tr th:each="week : ${calendarWeeks}">
+                <td th:each="day : ${week}"
+                    th:classappend="${
+                    (day.equals(eventDate) ? 'event-day ' : '') +
+                    (day.equals(today) ? 'today ' : '') +
+                    ((month != null and day.monthValue != month.monthValue) ? 'other-month' : '')}">
+                    <div th:text="${day.dayOfMonth}"></div>
+                    <div th:if="${day.equals(eventDate)}"
+                         th:text="${event.title}"
+                         style="font-size: 0.75em; margin-top: 4px; color: white; font-weight: bold;">
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+
+        </table>
+    </section>
+
 
     <!-- Actions shown only if user is logged in -->
     <div th:if="${currentUser != null && currentUser.getRole().name() == 'STUDENT'}">
