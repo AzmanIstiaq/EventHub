@@ -51,7 +51,7 @@
 
 ### Running With Docker (Docker desktop must be installed)
 1.  Ensure Docker Desktop is installed, and running. 
-2. Run the following command in the project root:
+2. Run the following command in the project root (this should work for all OS):
 
 ```bash
  docker-compose up --build
@@ -114,22 +114,28 @@ These new accounts will have no associated events.
 
 ## Testing
 
-In order to run tests, navigate to the root directory of the project in a terminal, and run the following command:
+In order to run tests, mvn must be installed. This can be verified by running `mvn -version` in a terminal.
+
+Navigate to the root directory of the project in a terminal, and run the following command:
 
 `mvn clean test`
 
+On Windows/Powershell, you may need to use `.\mvnw.cmd clean test` or `./mvnw clean test` instead.
+
 This will run all tests, and provide a summary of the results in the terminal.
+
+Otherwise, the tests can also be run be right-clicking the `src/test/java/au/edu/rmit/sept/webapp` folder in an IDE such as IntelliJ, and selecting the option to run all tests.
 
 ## Other Notes:
 - The current set up retains data between runs, so any changes made to the database will persist.
-If you wish to reset the database, you can do so by running the following commands in a terminal:
+If you wish to reset the database, you can do so by running the following commands in a terminal (these commands should work for all OS):
 
 ```bash
 docker-compose down -v
 docker-compose up --build
 ```
 
-- The application can be stopped by pressing `CTRL + C` in the terminal where it is running, and then running `docker-compose down` to stop and remove the containers.
+- The application can be stopped by pressing `CTRL + C` in the terminal where it is running, and then running `docker-compose down` (this command should work for all OS) to stop and remove the containers.
 
 - If an image fails to upload when interacting with your event as an organiser, choose a smaller image, as there is a size limit on uploads.
 
