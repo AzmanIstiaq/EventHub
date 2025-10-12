@@ -15,6 +15,7 @@
 
 ## Notes:
 - All documentation is in docs/Milestone3, including test execution evidence, which is under docs/Milestone3/CoverageReport. Run `index.html` in this folder to view.
+- Further testing evidence is under Test_Report Sprint 2.md in docs/Milestone3 and in `Test Results — webapp in webapp.html` which must also be run to view.
 - Scrum planning is under the 'Planning' tab.
 
 ## Records
