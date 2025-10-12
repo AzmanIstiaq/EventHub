@@ -15,11 +15,21 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.Optional;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import au.edu.rmit.sept.webapp.model.Registration;
 
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+
 
 @Controller
 @RequestMapping("/admin/events")
@@ -149,10 +159,78 @@ public class AdminEventController {
 
     @PostMapping("/{id}/delete")
     public String deleteEvent(@PathVariable Long id, @AuthenticationPrincipal CustomUserDetails admin) {
-        eventService.deleteById(id); // make sure EventService has this (see snippet below)
+        eventService.deleteById(id);
         if (admin != null) {
             auditLogService.record(admin.getId(), "EVENT_DELETE", "EVENT", id, "Event deleted by admin");
         }
         return "redirect:/events";
+    }
+
+    // NEW CSV EXPORT ENDPOINT
+    @GetMapping("/{eventId}/attendees.csv")
+    public void exportAttendeesCsv(@PathVariable Long eventId,
+                                   @AuthenticationPrincipal CustomUserDetails admin,
+                                   HttpServletResponse response) throws IOException {
+
+        Optional<Event> eventOpt = eventService.findById(eventId);
+        if (eventOpt.isEmpty()) {
+            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            return;
+        }
+
+        Event event = eventOpt.get();
+        List<?> attendees = registrationService.getRegistrationsForEvent(event);
+
+        String filename = "event-" + eventId + "-attendees.csv";
+        response.setContentType("text/csv");
+        response.setCharacterEncoding("UTF-8");
+        response.setHeader("Content-Disposition", "attachment; filename=\"" + filename + "\"");
+
+        try (PrintWriter writer = response.getWriter()) {
+            writer.println("attendeeId,firstName,lastName,email,registeredAt,status");
+
+            DateTimeFormatter dtf = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
+
+            for (Object obj : attendees) {
+                var r = (Registration) obj;
+
+                String registeredAt = r.getRegisteredAt() != null ? r.getRegisteredAt().format(dtf) : "";
+                String line = String.format("%d,%s,%s,%s,%s,%s",
+                        r.getId(),
+                        escapeCsv(r.getFirstName()),
+                        escapeCsv(r.getLastName()),
+                        escapeCsv(r.getEmail()),
+                        escapeCsv(registeredAt),
+                        escapeCsv(r.getStatus() != null ? r.getStatus().name() : "")
+                );
+                writer.println(line);
+            }
+            writer.flush();
+        }
+
+        // Audit log
+        try {
+            if (admin != null) {
+                auditLogService.record(admin.getId(), "EXPORT_ATTENDEE_CSV", "EVENT", eventId, "Exported attendee CSV");
+            } else {
+                Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+                if (auth != null) {
+                    String username = auth.getName();
+                    // optional: auditLogService.record(username,);
+                }
+            }
+        } catch (Exception ex) {
+            // do not fail the response; optionally log
+        }
+    }
+
+    // helper for CSV escaping
+    private String escapeCsv(String value) {
+        if (value == null) return "";
+        String v = value.replace("\"", "\"\"");
+        if (v.contains(",") || v.contains("\"") || v.contains("\n")) {
+            return "\"" + v + "\"";
+        }
+        return v;
     }
 }
