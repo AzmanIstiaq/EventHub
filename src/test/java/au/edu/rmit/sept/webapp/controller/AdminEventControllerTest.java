@@ -136,6 +136,37 @@ class AdminEventControllerTest {
     }
 
     @Test
+    @DisplayName("Null current user is handled gracefully on event detail page")
+    void nullCannotViewEventDetail() throws Exception {
+        long eventId = 2L;
+        Event event = mockEvent(eventId);
+        when(eventService.findById(eventId)).thenReturn(Optional.of(event));
+        when(userService.findById(anyLong())).thenReturn(Optional.of(mockAdmin()));
+
+        User regUser1 = new User();
+        regUser1.setUserId(101L);
+        regUser1.setName("Alice");
+
+        User regUser2 = new User();
+        regUser2.setUserId(102L);
+        regUser2.setName("Bob");
+
+        Registration registration1 = new Registration();
+        registration1.setUser(regUser1);
+
+        Registration registration2 = new Registration();
+        registration2.setUser(regUser2);
+
+        when(registrationService.getRegistrationsForEvent(event)).thenReturn(List.of(registration1, registration2));
+
+        // No @WithMockCustomUser annotation here, so current user is null
+        // Should throw IllegalArgumentException("Invalid user ID"));
+
+        mockMvc.perform(get("/admin/events/{id}", eventId))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
     @WithMockCustomUser(username = "admin", role = UserType.ADMIN)
     @DisplayName("Admin can update event successfully")
     void adminCanUpdateEvent() throws Exception {
@@ -160,6 +191,33 @@ class AdminEventControllerTest {
         verify(eventService).save(argThat(e ->
                 e.getTitle().equals("Updated Event") &&
                         e.getKeywords().stream().map(Keyword::getKeyword).toList().contains("Music")
+        ));
+    }
+
+    @Test
+    @WithMockCustomUser(username = "admin", role = UserType.ADMIN)
+    @DisplayName("Admin can update event successfully without keywords")
+    void adminCanUpdateEventWithoutKeywords() throws Exception {
+        long eventId = 10L;
+        Event existing = mockEvent(eventId);
+        when(eventService.findById(eventId)).thenReturn(Optional.of(existing));
+        when(keywordService.findOrCreateByName(anyString()))
+                .thenAnswer(invocation -> {
+                    String name = invocation.getArgument(0, String.class);
+                    Keyword k = new Keyword();
+                    k.setKeyword(name);
+                    return k;
+                });
+
+        mockMvc.perform(post("/admin/events/{id}/edit", eventId)
+                        .param("title", "Updated Event")
+                        .with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/events/detail/" + eventId));
+
+        verify(eventService).save(argThat(e ->
+                e.getTitle().equals("Updated Event") &&
+                        e.getKeywords().isEmpty()
         ));
     }
 
@@ -249,5 +307,74 @@ class AdminEventControllerTest {
                         .param("title", "Illegal Update")
                         .with(csrf()))
                 .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @WithMockCustomUser(username = "organiser", role = UserType.ORGANISER)
+    @DisplayName("Organiser can download csv of attendance for single event")
+    void organiserCanDownloadCsv() throws Exception {
+        long eventId = 30L;
+        Event event = mockEvent(eventId);
+        when(eventService.findById(eventId)).thenReturn(Optional.of(event));
+        when(userService.findById(anyLong())).thenReturn(Optional.of(mockAdmin()));
+
+        User regUser1 = new User();
+        regUser1.setUserId(201L);
+        regUser1.setName("Charlie");
+
+        User regUser2 = new User();
+        regUser2.setUserId(202L);
+        regUser2.setName("Dana");
+
+        Registration registration1 = new Registration();
+        registration1.setUser(regUser1);
+        registration1.setEvent(event);
+
+        Registration registration2 = new Registration();
+        registration2.setUser(regUser2);
+        registration2.setEvent(event);
+
+        when(registrationService.getRegistrationsForEvent(event)).thenReturn(List.of(registration1, registration2));
+
+        mockMvc.perform(get("/admin/events/{eventId}/attendees.csv", eventId))
+                .andExpect(status().isOk())
+                .andExpect(header().string(
+                        "Content-Disposition",
+                        "attachment; filename=\"event-#"+ eventId + "-attendees.csv\""
+                ))
+                .andExpect(content().contentType("text/csv;charset=UTF-8"))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("Charlie")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("Dana")));
+    }
+
+    @Test
+    @WithMockCustomUser(username = "organiser", role = UserType.ORGANISER)
+    @DisplayName("Organiser tries to download csv of attendance for single event that does not exist")
+    void organiserCantDownloadCsvDoesNotExist() throws Exception {
+        long eventId = 30L;
+        Event event = mockEvent(eventId);
+        when(eventService.findById(eventId)).thenReturn(Optional.empty());
+        when(userService.findById(anyLong())).thenReturn(Optional.of(mockAdmin()));
+
+        User regUser1 = new User();
+        regUser1.setUserId(201L);
+        regUser1.setName("Charlie");
+
+        User regUser2 = new User();
+        regUser2.setUserId(202L);
+        regUser2.setName("Dana");
+
+        Registration registration1 = new Registration();
+        registration1.setUser(regUser1);
+        registration1.setEvent(event);
+
+        Registration registration2 = new Registration();
+        registration2.setUser(regUser2);
+        registration2.setEvent(event);
+
+        when(registrationService.getRegistrationsForEvent(event)).thenReturn(List.of(registration1, registration2));
+        // Should throw have response of response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+        mockMvc.perform(get("/admin/events/{eventId}/attendees.csv", eventId))
+                .andExpect(status().isNotFound());
     }
 }

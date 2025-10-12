@@ -208,20 +208,6 @@ public class AdminEventController {
             writer.flush();
         }
 
-        // Audit log
-        try {
-            if (admin != null) {
-                auditLogService.record(admin.getId(), AdminAction.EXPORT_ATTENDEE_CSV, AdminTargetType.EVENT, eventId, "Exported attendee CSV");
-            } else {
-                Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-                if (auth != null) {
-                    String username = auth.getName();
-                    // optional: auditLogService.record(username,);
-                }
-            }
-        } catch (Exception ex) {
-            // do not fail the response; optionally log
-        }
     }
 
     // CSV Download for all events with attendees

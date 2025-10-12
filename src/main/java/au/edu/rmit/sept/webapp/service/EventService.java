@@ -101,7 +101,7 @@ public class EventService {
         if (registeredEvents.isEmpty()) {
             // If the user is not registered to any events, just return the top 2 most popular overall
             return eventRepository.findTop2MostPopular(
-                    LocalDateTime.now(), List.of(), true);
+                    LocalDateTime.now(), List.of(), true).subList(0, 2);
         }
         List<Long> registeredEventIds = registeredEvents.stream().map(Event::getEventId).toList();
         if (registeredEventIds.isEmpty()) {
