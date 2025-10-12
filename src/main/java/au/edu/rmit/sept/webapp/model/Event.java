@@ -33,6 +33,12 @@ public class Event {
     private String location;
 
     @Column(nullable = false)
+    private double latitude;
+
+    @Column(nullable = false)
+    private double longitude;
+
+    @Column(nullable = false)
     private boolean hidden = false;
 
     @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
@@ -66,13 +72,15 @@ public class Event {
     public Event() {}
 
     public Event(String title, String description, LocalDateTime dateTime,
-                 String location, User organiser, Category category) {
+                 String location, User organiser, Category category, double latitude, double longitude) {
         this.title = title;
         this.description = description;
         this.dateTime = dateTime;
         this.location = location;
         this.organiser = organiser;
         this.category = category;
+        this.latitude = latitude;
+        this.longitude = longitude;
     }
 
     // --- Getters and setters ---
@@ -94,6 +102,12 @@ public class Event {
 
     public String getLocation() { return location; }
     public void setLocation(String location) { this.location = location; }
+
+    public double getLatitude() { return latitude; }
+    public void setLatitude(double latitude) { this.latitude = latitude; }
+
+    public double getLongitude() { return longitude; }
+    public void setLongitude(double longitude) { this.longitude = longitude; }
 
     public Set<Registration> getRegistrations() { return registrations; }
     public void setRegistrations(Set<Registration> registrations) { this.registrations = registrations; }

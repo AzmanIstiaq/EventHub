@@ -41,7 +41,7 @@ class AcceptanceScenariosTest {
         userRepository.save(organiser);
 
         Event e = new Event("Welcome week", "desc.", LocalDateTime.now().plusDays(3),
-                "Main Hall", organiser, null);
+                "Main Hall", organiser, null, -37, 144);
         eventRepository.save(e);
 
         registrationService.registerUserForEvent(u, e);
