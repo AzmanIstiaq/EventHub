@@ -39,7 +39,7 @@
 
     <div th:if="${param.logout}">
         <div
-            th:replace="~{fragments/alert-banner :: alert-banner(success=${'You have been logged out.'}, error=${null})}">
+            th:replace="~{fragments/alert-banner :: alert-banner(success=${'You have been logged out.'}, error=${null}, info=${null})}">
         </div>
     </div>
     

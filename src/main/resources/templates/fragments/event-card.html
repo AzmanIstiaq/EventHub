@@ -1,4 +1,4 @@
-<div th:fragment="event-card(event, currentUser, futureEvents)" class="event-card">
+<div th:fragment="event-card(event, currentUser, futureEvents, feedback)" class="event-card">
     <div class="event-header">
         <h2 th:text="${event.title}"></h2>
     </div>
@@ -25,6 +25,16 @@
             <input type="hidden" name="userId" th:value="${currentUser.getUserId()}" />
             <button type="submit" class="btn btn-grey">Event Detail</button>
         </form>
+        <form th:if="${event.isInPast() && feedback != null && !feedback.contains(event)}" th:action="@{'/events/feedback/' + ${event.eventId}}" method="post">
+            <label>Rating (1-5):</label>
+            <input type="number" name="rating" min="1" max="5" required />
+
+            <label>Comment:</label>
+            <textarea name="comment" rows="4" cols="50"></textarea>
+            <input type="hidden" name="userId" th:value="${currentUser.getUserId()}"/>
+            <button type="submit">Submit Feedback</button>
+        </form>
+        <span th:if="${event.isInPast() && feedback != null && feedback.contains(event)}">You've already given your feedback for this event.</span>
     </div>
     <div th:unless="${currentUser != null && currentUser.getRole().name() == 'STUDENT'}">
         <a th:href="@{'/events/public/detail/' + ${event.getEventId()}}" class="btn btn-grey">Event Detail</a>
