@@ -222,13 +222,34 @@ public class UserController {
     }
 
     @GetMapping("/{id}/attendingEvents")
-    public ResponseEntity<List<Event>> getAttendingEvents(@PathVariable long id) {
-        var events = registrationService.findByUserId(id)
-                .stream()
-                .map(Registration::getEvent)
-                .collect(Collectors.toList());
+    public String getAttendingEvents(@AuthenticationPrincipal CustomUserDetails currentUser, @PathVariable long id, Model model) {
+        User admin = userService.findById(currentUser.getId())
+                .orElseThrow(() -> new IllegalArgumentException("Invalid admin ID"));
+        if (!admin.isAdmin()) {
+            throw new IllegalArgumentException("Access denied. Admin privileges required.");
+        }
 
-        return ResponseEntity.ok(events);
+        User student = userService.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid organiser ID"));
+        // Check that requested user is a student
+        if (student.getRole() != UserType.STUDENT) {
+            throw new IllegalArgumentException("User is not a student");
+        }
+
+        // If so, get all the events that they are attending
+        List<Registration> registrationsList = registrationService.findByUserId(student.getUserId());
+
+        Set<Event> registrations = registrationsList.stream()
+                .map(Registration::getEvent)
+                .collect(Collectors.toSet());
+
+        // Add attributes to the model
+        model.addAttribute("events", registrations);
+        model.addAttribute("student", student);
+        model.addAttribute("currentUser", admin);
+
+        return "admin-attending-events";
+
     }
 
     @GetMapping("/{id}/organizedEvents")
