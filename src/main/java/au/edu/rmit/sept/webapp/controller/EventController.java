@@ -275,7 +275,7 @@ public class EventController {
     // Delete inappropriate events
     @PostMapping("/{eventId}/delete")
     public String deleteEvent(@AuthenticationPrincipal CustomUserDetails currentUser,
-                                   @PathVariable int eventId,
+                                   @PathVariable Long eventId,
                               RedirectAttributes redirectAttributes) {
         String role = currentUser.getAuthorities()
                 .iterator()
@@ -294,7 +294,7 @@ public class EventController {
                 }
 
                 String eventTitle = event.getTitle();
-                eventService.delete(eventId);
+                eventService.deleteById(eventId);
 
                 redirectAttributes.addFlashAttribute("successMessage",
                         "Event '" + eventTitle + "' has been deleted successfully.");

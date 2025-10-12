@@ -9,6 +9,7 @@ import au.edu.rmit.sept.webapp.service.*;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -503,5 +504,57 @@ class UserControllerTest {
                 .andExpect(redirectedUrl("/users"))
                 .andExpect(flash().attribute("errorMessage", "Admins cannot be banned."));
     }
+
+    @Test
+    @WithMockCustomUser(username = "admin", role = UserType.ADMIN)
+    @DisplayName("Create profile with valid data redirects to login with success message")
+    void createProfileWithValidData() throws Exception {
+        when(userService.findByEmail("newuser@example.com")).thenReturn(Optional.empty());
+
+        mvc.perform(post("/users/profile/create")
+                        .with(csrf())
+                        .param("name", "New User")
+                        .param("email", "newuser@example.com")
+                        .param("password", "securepassword")
+                        .param("role", "STUDENT"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/login?createSuccess"))
+                .andExpect(flash().attribute("success", "User 'New User' has been created, login below."));
+    }
+
+    @Test
+    @WithMockCustomUser(username = "admin", role = UserType.ADMIN)
+    @DisplayName("Create profile with duplicate email redirects back with error message")
+    void createProfileWithDuplicateEmail() throws Exception {
+        User existingUser = new User();
+        existingUser.setEmail("existing@example.com");
+        when(userService.findByEmail("existing@example.com")).thenReturn(Optional.of(existingUser));
+
+        mvc.perform(post("/users/profile/create")
+                        .with(csrf())
+                        .param("name", "New User")
+                        .param("email", "existing@example.com")
+                        .param("password", "securepassword")
+                        .param("role", "STUDENT"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/users/profile/create"))
+                .andExpect(flash().attribute("error", "Email already in use"));
+    }
+
+    @Test
+    @WithMockCustomUser(username = "admin", role = UserType.ADMIN)
+    @DisplayName("Create profile with admin role redirects back with error message")
+    void createProfileWithAdminRole() throws Exception {
+        mvc.perform(post("/users/profile/create")
+                        .with(csrf())
+                        .param("name", "New Admin")
+                        .param("email", "admin@example.com")
+                        .param("password", "securepassword")
+                        .param("role", "ADMIN"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/users/profile/create"))
+                .andExpect(flash().attribute("error", "Invalid role selection"));
+    }
+
 
 }

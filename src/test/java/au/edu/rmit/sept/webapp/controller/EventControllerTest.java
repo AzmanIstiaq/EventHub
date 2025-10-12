@@ -249,7 +249,7 @@ class EventControllerTest {
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/events"));
 
-        verify(eventService).delete(100L);
+        verify(eventService).deleteById(100L);
     }
 
     @Test
@@ -371,7 +371,7 @@ class EventControllerTest {
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/events"));
 
-        verify(eventService).delete(eq(eventId));
+        verify(eventService).deleteById(eq(eventId));
     }
 
     @Test

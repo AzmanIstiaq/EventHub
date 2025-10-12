@@ -36,10 +36,6 @@ public class EventService {
         eventRepository.deleteById(id);
     }
 
-    // (Keeps your original name too, in case other code calls it)
-    public void delete(long id) {
-        eventRepository.deleteById(id);
-    }
 
     // Events for a specific organiser
     public List<Event> getUpcomingEventsForOrganiser(User organiser) {
