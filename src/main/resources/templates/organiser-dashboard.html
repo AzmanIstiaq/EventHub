@@ -218,6 +218,10 @@
                     <h2 th:text="${event.title}"></h2>
 
                     <div class="event-actions">
+                        <form th:action="@{'events/detail/' + ${event.eventId}}" method="get" style="display: inline;"
+                             >
+                            <button type="submit" class="btn" style="font-size: 0.8em; color: black">Event Detail</button>
+                        </form>
                         <button class="btn btn-edit"
                                 th:if="${event.dateTime.isAfter(T(java.time.LocalDateTime).now())}"
                                 th:onclick="'showEditForm(' + ${event.eventId} + ')'">Edit</button>
@@ -257,7 +261,14 @@
         <div class="event-card" th:each="event : ${pastEvents}">
             <div class="event-header">
                 <h2 th:text="${event.title}"></h2>
-                <h3 th:text="'Star Rating: ' + ${event.getStarRating()}"></h3>
+                <div class="event-actions">
+                    <form th:action="@{'events/detail/' + ${event.eventId}}" method="get" style="display: inline;"
+                    >
+                        <button type="submit" class="btn" style="font-size: 0.8em; color: black">Event Detail</button>
+                    </form>
+                    <h3 th:text="'Star Rating: ' + ${event.getStarRating()}"></h3>
+                </div>
+
             </div>
             <p class="event-meta">
                 <span th:text="${event.dateTime}"></span> @
