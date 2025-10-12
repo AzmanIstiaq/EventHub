@@ -37,8 +37,8 @@ class HomeControllerTest {
         List<Event> events = List.of(new Event(), new Event());
         
         when(userService.findById(1L)).thenReturn(Optional.of(user));
-        when(eventRepository.findAll()).thenReturn(events);
-        
+        when(eventRepository.findByDateTimeAfterOrderByDateTimeAsc(any())).thenReturn(events);
+
         Model model = new ExtendedModelMap();
         
         String result = homeController.home(currentUser, model);
@@ -54,8 +54,8 @@ class HomeControllerTest {
     @DisplayName("home() with null user returns home view with events only")
     void homeWithNullUserReturnsHomeView() {
         List<Event> events = List.of(new Event());
-        when(eventRepository.findAll()).thenReturn(events);
-        
+        when(eventRepository.findByDateTimeAfterOrderByDateTimeAsc(any())).thenReturn(events);
+
         Model model = new ExtendedModelMap();
         
         String result = homeController.home(null, model);
