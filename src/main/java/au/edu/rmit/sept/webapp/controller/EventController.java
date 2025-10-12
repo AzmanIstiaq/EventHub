@@ -424,6 +424,34 @@ public class EventController {
         model.addAttribute("photos", photos);
         model.addAttribute("isOrganiser", isOrganiser);
 
+        if (event.getDateTime() != null) {
+            java.time.LocalDate eventDate = event.getDateTime().toLocalDate();
+            java.time.YearMonth month = java.time.YearMonth.from(eventDate);
+
+            java.time.LocalDate firstDayOfMonth = month.atDay(1);
+            java.time.LocalDate lastDayOfMonth = month.atEndOfMonth();
+
+            // include extra days from previous/next month to fill the grid
+            java.time.LocalDate start = firstDayOfMonth.with(java.time.DayOfWeek.SUNDAY);
+            java.time.LocalDate end = lastDayOfMonth.with(java.time.DayOfWeek.SATURDAY);
+
+            java.util.List<java.util.List<java.time.LocalDate>> weeks = new java.util.ArrayList<>();
+            java.util.List<java.time.LocalDate> week = new java.util.ArrayList<>();
+
+            for (java.time.LocalDate date = start; !date.isAfter(end); date = date.plusDays(1)) {
+                week.add(date);
+                if (date.getDayOfWeek() == java.time.DayOfWeek.SATURDAY) {
+                    weeks.add(week);
+                    week = new java.util.ArrayList<>();
+                }
+            }
+
+            model.addAttribute("calendarWeeks", weeks);
+            model.addAttribute("eventDate", eventDate);
+            model.addAttribute("month", month);
+            model.addAttribute("today", java.time.LocalDate.now());
+        }
+
         return "event-detail";
     }
 
@@ -444,6 +472,34 @@ public class EventController {
         model.addAttribute("currentUser", user);
         model.addAttribute("photos", photos);
         model.addAttribute("isOrganiser", isOrganiser);
+
+        if (event.getDateTime() != null) {
+            java.time.LocalDate eventDate = event.getDateTime().toLocalDate();
+            java.time.YearMonth month = java.time.YearMonth.from(eventDate);
+
+            java.time.LocalDate firstDayOfMonth = month.atDay(1);
+            java.time.LocalDate lastDayOfMonth = month.atEndOfMonth();
+
+            // include extra days from previous/next month to fill the grid
+            java.time.LocalDate start = firstDayOfMonth.with(java.time.DayOfWeek.SUNDAY);
+            java.time.LocalDate end = lastDayOfMonth.with(java.time.DayOfWeek.SATURDAY);
+
+            java.util.List<java.util.List<java.time.LocalDate>> weeks = new java.util.ArrayList<>();
+            java.util.List<java.time.LocalDate> week = new java.util.ArrayList<>();
+
+            for (java.time.LocalDate date = start; !date.isAfter(end); date = date.plusDays(1)) {
+                week.add(date);
+                if (date.getDayOfWeek() == java.time.DayOfWeek.SATURDAY) {
+                    weeks.add(week);
+                    week = new java.util.ArrayList<>();
+                }
+            }
+
+            model.addAttribute("calendarWeeks", weeks);
+            model.addAttribute("eventDate", eventDate);
+            model.addAttribute("month", month);
+            model.addAttribute("today", java.time.LocalDate.now());
+        }
 
         return "event-detail";
     }
