@@ -33,19 +33,22 @@ public class EventController {
     private final CategoryService categoryService;
     private final KeywordService keywordService;
     private final EventGalleryService eventGalleryService;
+    private final FeedbackService feedbackService;
 
     public EventController(EventService eventService,
                            RegistrationService registrationService,
                            UserService userService,
                            CategoryService categoryService,
                            KeywordService keywordService,
-                           EventGalleryService eventGalleryService) {
+                           EventGalleryService eventGalleryService,
+                           FeedbackService feedbackService) {
         this.eventService = eventService;
         this.registrationService = registrationService;
         this.userService = userService;
         this.categoryService = categoryService;
         this.keywordService = keywordService;
         this.eventGalleryService = eventGalleryService;
+        this.feedbackService = feedbackService;
     }
 
     @GetMapping
@@ -328,7 +331,14 @@ public class EventController {
         List<Event> futureEvents = events.stream()
                 .filter(e -> e.getDateTime().isAfter(now))
                 .toList();
-
+        List<Feedback> feedback = feedbackService.getFeedbackForUser(user);
+        List<Event> eventsWithFeedback = new ArrayList<Event>();
+        for (Feedback f : feedback) {
+            if (pastEvents.contains(f.getEvent())) {
+                eventsWithFeedback.add(f.getEvent());
+            }
+        }
+        model.addAttribute("eventsWithFeedback", eventsWithFeedback);
         model.addAttribute("pastEvents", pastEvents);
         model.addAttribute("futureEvents", futureEvents);
         model.addAttribute("events", eventService.getAllUpcomingEvents());
