@@ -82,19 +82,30 @@ public class WebappApplication {
 
 				Event hackathon = eventRepo.save(new Event(
 						"Hackathon", "24hr coding challenge",
-						LocalDateTime.now().minusDays(2), "Library", csit, cat1
+						LocalDateTime.now().minusDays(2),
+						"RMIT University Library, Melbourne VIC",
+						csit, cat1, -37.8075, 144.9630
 				));
+
 				Event bbqNight = eventRepo.save(new Event(
 						"BBQ Night", "Free food and fun networking!",
-						LocalDateTime.now().plusDays(5), "Campus Park", csit, cat1
+						LocalDateTime.now().plusDays(5),
+						"Carlton Gardens, Melbourne VIC",
+						csit, cat1, -37.8057, 144.9719
 				));
+
 				Event musicJam = eventRepo.save(new Event(
 						"Music Jam", "Bring your instruments and jam with others!",
-						LocalDateTime.now().plusDays(3), "Auditorium", nerdSociety, cat2
+						LocalDateTime.now().plusDays(3),
+						"Federation Square, Melbourne VIC",
+						nerdSociety, cat2, -37.8179, 144.9691
 				));
+
 				Event gameNight = eventRepo.save(new Event(
 						"Game Night", "Board games and snacks",
-						LocalDateTime.now().plusDays(7), "Student Lounge", nerdSociety, cat2
+						LocalDateTime.now().plusDays(7),
+						"Melbourne Central Student Lounge, Melbourne VIC",
+						nerdSociety, cat2, -37.8104, 144.9623
 				));
 
 				// Registrations

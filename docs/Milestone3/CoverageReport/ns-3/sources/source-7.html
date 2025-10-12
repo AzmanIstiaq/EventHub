@@ -1,0 +1,175 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > HomeController</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">au.edu.rmit.sept.webapp.controller</a>
+</div>
+
+<h1>Coverage Summary for Class: HomeController (au.edu.rmit.sept.webapp.controller)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">HomeController</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (3/3)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (2/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (21/21)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;    package au.edu.rmit.sept.webapp.controller;
+&nbsp;
+&nbsp;    import au.edu.rmit.sept.webapp.model.Event;
+&nbsp;    import au.edu.rmit.sept.webapp.model.User;
+&nbsp;    import au.edu.rmit.sept.webapp.repository.EventRepository;
+&nbsp;    import au.edu.rmit.sept.webapp.security.CustomUserDetails;
+&nbsp;    import au.edu.rmit.sept.webapp.service.EventService;
+&nbsp;    import au.edu.rmit.sept.webapp.service.UserService;
+&nbsp;
+&nbsp;    import org.springframework.security.core.annotation.AuthenticationPrincipal;
+&nbsp;    import org.springframework.stereotype.Controller;
+&nbsp;    import org.springframework.ui.Model;
+&nbsp;    import org.springframework.web.bind.annotation.GetMapping;
+&nbsp;
+&nbsp;    import java.util.List;
+&nbsp;
+&nbsp;    @Controller
+&nbsp;    public class HomeController {
+&nbsp;
+&nbsp;        private final EventRepository eventRepo;
+&nbsp;        private final EventService eventService;
+&nbsp;        private final UserService userService;
+&nbsp;
+<b class="fc">&nbsp;        public HomeController(EventRepository eventRepo, EventService eventService, UserService userService) {</b>
+<b class="fc">&nbsp;            this.eventRepo = eventRepo;</b>
+<b class="fc">&nbsp;            this.eventService = eventService;</b>
+<b class="fc">&nbsp;            this.userService = userService;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        @GetMapping(&quot;/&quot;)
+&nbsp;        public String home(@AuthenticationPrincipal CustomUserDetails currentUser, Model model) {
+<b class="fc">&nbsp;            User user = null;</b>
+<b class="fc">&nbsp;            if (currentUser != null) {</b>
+<b class="fc">&nbsp;                user = userService.findById(currentUser.getId())</b>
+<b class="fc">&nbsp;                        .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Invalid user ID&quot;));</b>
+&nbsp;            }
+&nbsp;
+<b class="fc">&nbsp;            List&lt;Event&gt; event = eventRepo.findByDateTimeAfterOrderByDateTimeAsc(java.time.LocalDateTime.now());</b>
+&nbsp;
+<b class="fc">&nbsp;            model.addAttribute(&quot;currentUser&quot;, user);</b>
+<b class="fc">&nbsp;            model.addAttribute(&quot;events&quot;, event); // Pass events to the view</b>
+<b class="fc">&nbsp;            return &quot;index&quot;; // Loads templates/index.html</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        @GetMapping(&quot;/admin/dashboard&quot;)
+&nbsp;        public String adminDashboard(@AuthenticationPrincipal CustomUserDetails currentUser, Model model) {
+&nbsp;            // Get summary statistics
+<b class="fc">&nbsp;            List&lt;Event&gt; allEvents = eventService.getAllEvents();</b>
+<b class="fc">&nbsp;            List&lt;User&gt; allUsers = userService.getAllUsers();</b>
+<b class="fc">&nbsp;            User user = userService.findById(currentUser.getId())</b>
+<b class="fc">&nbsp;                    .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Invalid user ID&quot;));</b>
+<b class="fc">&nbsp;            model.addAttribute(&quot;currentUser&quot;, user);</b>
+<b class="fc">&nbsp;            model.addAttribute(&quot;totalEvents&quot;, allEvents.size());</b>
+<b class="fc">&nbsp;            model.addAttribute(&quot;totalUsers&quot;, allUsers.size());</b>
+<b class="fc">&nbsp;            model.addAttribute(&quot;recentEvents&quot;, allEvents.stream().limit(5).toList());</b>
+&nbsp;
+<b class="fc">&nbsp;            return &quot;admin-dashboard&quot;;</b>
+&nbsp;        }
+&nbsp;    }
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2025-10-12 21:52</div>
+</div>
+</body>
+</html>

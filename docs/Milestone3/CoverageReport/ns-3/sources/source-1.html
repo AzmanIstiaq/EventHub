@@ -1,0 +1,406 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > AdminEventController</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">au.edu.rmit.sept.webapp.controller</a>
+</div>
+
+<h1>Coverage Summary for Class: AdminEventController (au.edu.rmit.sept.webapp.controller)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">AdminEventController</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (10/10)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    54.8%
+  </span>
+  <span class="absValue">
+    (34/62)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    99.3%
+  </span>
+  <span class="absValue">
+    (139/140)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package au.edu.rmit.sept.webapp.controller;
+&nbsp;
+&nbsp;import au.edu.rmit.sept.webapp.model.*;
+&nbsp;import au.edu.rmit.sept.webapp.security.CustomUserDetails;
+&nbsp;import au.edu.rmit.sept.webapp.service.AuditLogService;
+&nbsp;import au.edu.rmit.sept.webapp.service.CategoryService;
+&nbsp;import au.edu.rmit.sept.webapp.service.EventService;
+&nbsp;import au.edu.rmit.sept.webapp.service.KeywordService;
+&nbsp;import au.edu.rmit.sept.webapp.service.RegistrationService;
+&nbsp;import au.edu.rmit.sept.webapp.service.UserService;
+&nbsp;import org.springframework.security.access.AccessDeniedException;
+&nbsp;import org.springframework.security.core.annotation.AuthenticationPrincipal;
+&nbsp;import org.springframework.stereotype.Controller;
+&nbsp;import org.springframework.ui.Model;
+&nbsp;import org.springframework.web.bind.annotation.*;
+&nbsp;import jakarta.servlet.http.HttpServletResponse;
+&nbsp;import java.io.IOException;
+&nbsp;import java.io.PrintWriter;
+&nbsp;import java.time.LocalDateTime;
+&nbsp;import java.time.format.DateTimeFormatter;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Optional;
+&nbsp;
+&nbsp;import java.util.Arrays;
+&nbsp;import java.util.Objects;
+&nbsp;import java.util.Set;
+&nbsp;import java.util.stream.Collectors;
+&nbsp;
+&nbsp;
+&nbsp;@Controller
+&nbsp;@RequestMapping(&quot;/admin/events&quot;)
+&nbsp;public class AdminEventController {
+&nbsp;
+&nbsp;    private final EventService eventService;
+&nbsp;    private final CategoryService categoryService;
+&nbsp;    private final KeywordService keywordService;
+&nbsp;    private final AuditLogService auditLogService;
+&nbsp;    private final RegistrationService registrationService;
+&nbsp;    private final UserService userService;
+&nbsp;
+<b class="fc">&nbsp;    public AdminEventController(EventService eventService,</b>
+&nbsp;                                CategoryService categoryService,
+&nbsp;                                KeywordService keywordService,
+&nbsp;                                AuditLogService auditLogService,
+&nbsp;                                RegistrationService registrationService,
+&nbsp;                                UserService userService) {
+<b class="fc">&nbsp;        this.eventService = eventService;</b>
+<b class="fc">&nbsp;        this.categoryService = categoryService;</b>
+<b class="fc">&nbsp;        this.keywordService = keywordService;</b>
+<b class="fc">&nbsp;        this.auditLogService = auditLogService;</b>
+<b class="fc">&nbsp;        this.registrationService = registrationService;</b>
+<b class="fc">&nbsp;        this.userService = userService;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    // Admin detailed view
+&nbsp;    @GetMapping(&quot;/{id}&quot;)
+&nbsp;    public String getAdminEventDetailPage(@PathVariable Long id,
+&nbsp;                                          @AuthenticationPrincipal CustomUserDetails currentUser,
+&nbsp;                                          Model model) {
+&nbsp;
+<b class="fc">&nbsp;        Event event = eventService.findById(id)</b>
+<b class="fc">&nbsp;                .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Invalid event ID&quot;));</b>
+&nbsp;
+<b class="fc">&nbsp;        User user = null;</b>
+<b class="pc">&nbsp;        if (currentUser != null) {</b>
+<b class="fc">&nbsp;            user = userService.findById(currentUser.getId())</b>
+<b class="fc">&nbsp;                    .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Invalid user ID&quot;));</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        model.addAttribute(&quot;currentUser&quot;, user);</b>
+<b class="fc">&nbsp;        model.addAttribute(&quot;event&quot;, event);</b>
+<b class="fc">&nbsp;        model.addAttribute(&quot;registrations&quot;, registrationService.getRegistrationsForEvent(event));</b>
+<b class="fc">&nbsp;        model.addAttribute(&quot;registrationCount&quot;, registrationService.getRegistrationsForEvent(event).size());</b>
+<b class="fc">&nbsp;        return &quot;admin-event-detail&quot;;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    // Show admin edit form
+&nbsp;    @GetMapping(&quot;/{id}/edit&quot;)
+&nbsp;    public String showAdminEditForm(@PathVariable Long id,
+&nbsp;                                    Model model,
+&nbsp;                                    @AuthenticationPrincipal CustomUserDetails currentUser) {
+<b class="fc">&nbsp;        String role = currentUser.getAuthorities().iterator().next().getAuthority();</b>
+<b class="fc">&nbsp;        if (!Objects.equals(role, &quot;ROLE_ADMIN&quot;)) {</b>
+<b class="fc">&nbsp;            throw new AccessDeniedException(&quot;Access denied&quot;);</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        Event event = eventService.findById(id)</b>
+<b class="fc">&nbsp;                .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Invalid event ID&quot;));</b>
+&nbsp;
+<b class="fc">&nbsp;        User user = userService.findById(currentUser.getId())</b>
+<b class="fc">&nbsp;                .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Invalid user ID&quot;));</b>
+&nbsp;
+<b class="fc">&nbsp;        model.addAttribute(&quot;event&quot;, event);</b>
+<b class="fc">&nbsp;        model.addAttribute(&quot;categories&quot;, categoryService.findAll());</b>
+<b class="fc">&nbsp;        model.addAttribute(&quot;currentUser&quot;, user);</b>
+<b class="fc">&nbsp;        return &quot;admin-event-edit&quot;;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    // Process update form
+&nbsp;    @PostMapping(&quot;/{id}/edit&quot;)
+&nbsp;    public String updateAdminEvent(@PathVariable Long id,
+&nbsp;                                   @ModelAttribute Event updatedEvent,
+&nbsp;                                   @RequestParam(required = false) String keywordsText,
+&nbsp;                                   @AuthenticationPrincipal CustomUserDetails currentUser) {
+&nbsp;
+<b class="fc">&nbsp;        String role = currentUser.getAuthorities().iterator().next().getAuthority();</b>
+<b class="fc">&nbsp;        if (!Objects.equals(role, &quot;ROLE_ADMIN&quot;)) {</b>
+<b class="fc">&nbsp;            throw new AccessDeniedException(&quot;Access denied&quot;);</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        Event event = eventService.findById(id)</b>
+<b class="fc">&nbsp;                .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Invalid event ID&quot;));</b>
+&nbsp;
+<b class="fc">&nbsp;        event.setTitle(updatedEvent.getTitle());</b>
+<b class="fc">&nbsp;        event.setDescription(updatedEvent.getDescription());</b>
+<b class="fc">&nbsp;        event.setDateTime(updatedEvent.getDateTime());</b>
+<b class="fc">&nbsp;        event.setLocation(updatedEvent.getLocation());</b>
+<b class="fc">&nbsp;        event.setCategory(updatedEvent.getCategory());</b>
+&nbsp;
+<b class="pc">&nbsp;        if (keywordsText != null &amp;&amp; !keywordsText.isBlank()) {</b>
+<b class="fc">&nbsp;            Set&lt;Keyword&gt; keywordSet = Arrays.stream(keywordsText.split(&quot;,&quot;))</b>
+<b class="fc">&nbsp;                    .map(String::trim)</b>
+<b class="fc">&nbsp;                    .map(keywordService::findOrCreateByName)</b>
+<b class="fc">&nbsp;                    .collect(Collectors.toSet());</b>
+<b class="fc">&nbsp;            event.setKeywords(keywordSet);</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        eventService.save(event);</b>
+<b class="fc">&nbsp;        return &quot;redirect:/events/detail/&quot; + id;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @PostMapping(&quot;/{id}/hide&quot;)
+&nbsp;    public String hideEvent(@PathVariable Long id, @AuthenticationPrincipal CustomUserDetails admin) {
+<b class="fc">&nbsp;        Event event = eventService.findById(id)</b>
+<b class="fc">&nbsp;                .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Invalid event ID&quot;));</b>
+<b class="fc">&nbsp;        event.setHidden(true);</b>
+<b class="fc">&nbsp;        eventService.save(event);</b>
+<b class="pc">&nbsp;        if (admin != null) {</b>
+<b class="fc">&nbsp;            auditLogService.record(admin.getId(), AdminAction.EVENT_HIDE, AdminTargetType.EVENT, id, &quot;Event hidden by admin&quot;);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return &quot;redirect:/admin/events/&quot; + id;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @PostMapping(&quot;/{id}/unhide&quot;)
+&nbsp;    public String unhideEvent(@PathVariable Long id, @AuthenticationPrincipal CustomUserDetails admin) {
+<b class="fc">&nbsp;        Event event = eventService.findById(id)</b>
+<b class="fc">&nbsp;                .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Invalid event ID&quot;));</b>
+<b class="fc">&nbsp;        event.setHidden(false);</b>
+<b class="fc">&nbsp;        eventService.save(event);</b>
+<b class="pc">&nbsp;        if (admin != null) {</b>
+<b class="fc">&nbsp;            auditLogService.record(admin.getId(), AdminAction.EVENT_UNHIDE, AdminTargetType.EVENT, id, &quot;Event unhidden by admin&quot;);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return &quot;redirect:/admin/events/&quot; + id;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @PostMapping(&quot;/{id}/delete&quot;)
+&nbsp;    public String deleteEvent(@PathVariable Long id, @AuthenticationPrincipal CustomUserDetails admin) {
+<b class="fc">&nbsp;        eventService.deleteById(id);</b>
+<b class="pc">&nbsp;        if (admin != null) {</b>
+<b class="fc">&nbsp;            auditLogService.record(admin.getId(), AdminAction.EVENT_DELETE, AdminTargetType.EVENT, id, &quot;Event deleted by admin&quot;);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return &quot;redirect:/events&quot;;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    // NEW CSV EXPORT ENDPOINT
+&nbsp;    @GetMapping(&quot;/{eventId}/attendees.csv&quot;)
+&nbsp;    public void exportAttendeesCsvSingleEvent(@PathVariable Long eventId,
+&nbsp;                                              @AuthenticationPrincipal CustomUserDetails admin,
+&nbsp;                                              HttpServletResponse response) throws IOException {
+&nbsp;
+<b class="fc">&nbsp;        Optional&lt;Event&gt; eventOpt = eventService.findById(eventId);</b>
+<b class="fc">&nbsp;        if (eventOpt.isEmpty()) {</b>
+<b class="fc">&nbsp;            response.setStatus(HttpServletResponse.SC_NOT_FOUND);</b>
+&nbsp;            return;
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        Event event = eventOpt.get();</b>
+<b class="fc">&nbsp;        List&lt;?&gt; attendees = registrationService.getRegistrationsForEvent(event);</b>
+&nbsp;
+<b class="fc">&nbsp;        String filename = &quot;event-#&quot; + eventId + &quot;-attendees.csv&quot;;</b>
+<b class="fc">&nbsp;        response.setContentType(&quot;text/csv&quot;);</b>
+<b class="fc">&nbsp;        response.setCharacterEncoding(&quot;UTF-8&quot;);</b>
+<b class="fc">&nbsp;        response.setHeader(&quot;Content-Disposition&quot;, &quot;attachment; filename=\&quot;&quot; + filename + &quot;\&quot;&quot;);</b>
+&nbsp;
+<b class="fc">&nbsp;        try (PrintWriter writer = response.getWriter()) {</b>
+<b class="fc">&nbsp;            writer.println(&quot;attendeeId,attendeeName,email,eventStatus,registeredAt&quot;);</b>
+&nbsp;
+<b class="fc">&nbsp;            DateTimeFormatter dtf = DateTimeFormatter.ISO_LOCAL_DATE_TIME;</b>
+&nbsp;
+<b class="fc">&nbsp;            for (Object obj : attendees) {</b>
+<b class="fc">&nbsp;                var r = (Registration) obj;</b>
+&nbsp;
+<b class="pc">&nbsp;                String futureOrPastStatus = r.getEvent().getDateTime().isAfter(java.time.LocalDateTime.now()) ? &quot;Upcoming&quot; : &quot;Past&quot;;</b>
+&nbsp;
+<b class="pc">&nbsp;                String registeredAt = r.getRegistrationDate() != null ? r.getRegistrationDate().format(dtf) : &quot;&quot;;</b>
+<b class="fc">&nbsp;                String line = String.format(&quot;%d,%s,%s,%s,%s&quot;,</b>
+<b class="fc">&nbsp;                        r.getRegistrationId(),</b>
+<b class="fc">&nbsp;                        escapeCsv(r.getUser().getName()),</b>
+<b class="fc">&nbsp;                        escapeCsv(r.getUser().getEmail()),</b>
+<b class="fc">&nbsp;                        escapeCsv(futureOrPastStatus),</b>
+<b class="fc">&nbsp;                        escapeCsv(registeredAt)</b>
+&nbsp;                );
+<b class="fc">&nbsp;                writer.println(line);</b>
+&nbsp;            }
+<b class="fc">&nbsp;            writer.flush();</b>
+<b class="pc">&nbsp;        }</b>
+&nbsp;
+&nbsp;    }
+&nbsp;
+&nbsp;    // CSV Download for all events with attendees
+&nbsp;    @GetMapping(&quot;/all/attendees.csv&quot;)
+&nbsp;    public void downloadAllEventsCsv(@AuthenticationPrincipal CustomUserDetails admin,
+&nbsp;                                     HttpServletResponse response) throws IOException {
+&nbsp;
+<b class="fc">&nbsp;        List&lt;Event&gt; events = eventService.getAllEvents();</b>
+&nbsp;
+<b class="fc">&nbsp;        String filename = &quot;all-events-with-attendees.csv&quot;;</b>
+<b class="fc">&nbsp;        response.setContentType(&quot;text/csv&quot;);</b>
+<b class="fc">&nbsp;        response.setCharacterEncoding(&quot;UTF-8&quot;);</b>
+<b class="fc">&nbsp;        response.setHeader(&quot;Content-Disposition&quot;, &quot;attachment; filename=\&quot;&quot; + filename + &quot;\&quot;&quot;);</b>
+&nbsp;
+<b class="fc">&nbsp;        try (PrintWriter writer = response.getWriter()) {</b>
+&nbsp;            // CSV header
+<b class="fc">&nbsp;            writer.println(&quot;eventId,title,description,dateTime,location,category,keywords,hidden,eventStatus,attendeeId,attendeeName,email,registeredAt&quot;);</b>
+&nbsp;
+<b class="fc">&nbsp;            DateTimeFormatter dtf = DateTimeFormatter.ISO_LOCAL_DATE_TIME;</b>
+&nbsp;
+<b class="fc">&nbsp;            for (Event event : events) {</b>
+<b class="fc">&nbsp;                String keywords = event.getKeywords().stream()</b>
+<b class="fc">&nbsp;                        .map(Keyword::getKeyword)</b>
+<b class="fc">&nbsp;                        .collect(Collectors.joining(&quot;;&quot;));</b>
+&nbsp;
+&nbsp;                // Determine event status
+<b class="pc">&nbsp;                String eventStatus = event.getDateTime().isAfter(LocalDateTime.now()) ? &quot;Upcoming&quot; : &quot;Past&quot;;</b>
+&nbsp;
+&nbsp;                // Get registrations for the event
+<b class="fc">&nbsp;                List&lt;Registration&gt; registrations = registrationService.getRegistrationsForEvent(event);</b>
+&nbsp;
+&nbsp;                // If no attendees, still output one row with empty attendee fields
+<b class="fc">&nbsp;                if (registrations.isEmpty()) {</b>
+<b class="fc">&nbsp;                    String line = String.format(&quot;%d,%s,%s,%s,%s,%s,%s,%s,%s,,,,&quot;,</b>
+<b class="fc">&nbsp;                            event.getEventId(),</b>
+<b class="fc">&nbsp;                            escapeCsv(event.getTitle()),</b>
+<b class="fc">&nbsp;                            escapeCsv(event.getDescription()),</b>
+<b class="fc">&nbsp;                            escapeCsv(event.getDateTime().format(dtf)),</b>
+<b class="fc">&nbsp;                            escapeCsv(event.getLocation()),</b>
+<b class="pc">&nbsp;                            escapeCsv(event.getCategory() != null ? event.getCategory().getCategory() : &quot;&quot;),</b>
+<b class="fc">&nbsp;                            escapeCsv(keywords),</b>
+<b class="pc">&nbsp;                            event.isHidden() ? &quot;Yes&quot; : &quot;No&quot;,</b>
+<b class="fc">&nbsp;                            eventStatus</b>
+&nbsp;                    );
+<b class="fc">&nbsp;                    writer.println(line);</b>
+&nbsp;                } else {
+&nbsp;                    // Output one row per attendee
+<b class="fc">&nbsp;                    for (Registration r : registrations) {</b>
+<b class="pc">&nbsp;                        String registeredAt = r.getRegistrationDate() != null ? r.getRegistrationDate().format(dtf) : &quot;&quot;;</b>
+<b class="fc">&nbsp;                        String line = String.format(&quot;%d,%s,%s,%s,%s,%s,%s,%s,%s,%d,%s,%s,%s&quot;,</b>
+<b class="fc">&nbsp;                                event.getEventId(),</b>
+<b class="fc">&nbsp;                                escapeCsv(event.getTitle()),</b>
+<b class="fc">&nbsp;                                escapeCsv(event.getDescription()),</b>
+<b class="fc">&nbsp;                                escapeCsv(event.getDateTime().format(dtf)),</b>
+<b class="fc">&nbsp;                                escapeCsv(event.getLocation()),</b>
+<b class="pc">&nbsp;                                escapeCsv(event.getCategory() != null ? event.getCategory().getCategory() : &quot;&quot;),</b>
+<b class="fc">&nbsp;                                escapeCsv(keywords),</b>
+<b class="pc">&nbsp;                                event.isHidden() ? &quot;Yes&quot; : &quot;No&quot;,</b>
+<b class="fc">&nbsp;                                eventStatus,</b>
+<b class="fc">&nbsp;                                r.getUser().getUserId(),</b>
+<b class="fc">&nbsp;                                escapeCsv(r.getUser().getName()),</b>
+<b class="fc">&nbsp;                                escapeCsv(r.getUser().getEmail()),</b>
+<b class="fc">&nbsp;                                escapeCsv(registeredAt)</b>
+&nbsp;                        );
+<b class="fc">&nbsp;                        writer.println(line);</b>
+&nbsp;                    }
+&nbsp;                }
+&nbsp;            }
+<b class="fc">&nbsp;            writer.flush();</b>
+<b class="pc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;
+&nbsp;    // helper for CSV escaping
+&nbsp;    private String escapeCsv(String value) {
+<b class="fc">&nbsp;        if (value == null) return &quot;&quot;;</b>
+<b class="fc">&nbsp;        String v = value.replace(&quot;\&quot;&quot;, &quot;\&quot;\&quot;&quot;);</b>
+<b class="pc">&nbsp;        if (v.contains(&quot;,&quot;) || v.contains(&quot;\&quot;&quot;) || v.contains(&quot;\n&quot;)) {</b>
+<b class="nc">&nbsp;            return &quot;\&quot;&quot; + v + &quot;\&quot;&quot;;</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return v;</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2025-10-12 21:52</div>
+</div>
+</body>
+</html>

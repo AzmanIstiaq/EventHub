@@ -1,0 +1,161 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > EventGalleryService</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">au.edu.rmit.sept.webapp.service</a>
+</div>
+
+<h1>Coverage Summary for Class: EventGalleryService (au.edu.rmit.sept.webapp.service)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">EventGalleryService</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (3/3)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    83.3%
+  </span>
+  <span class="absValue">
+    (5/6)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    93.3%
+  </span>
+  <span class="absValue">
+    (14/15)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package au.edu.rmit.sept.webapp.service;
+&nbsp;
+&nbsp;import au.edu.rmit.sept.webapp.model.Event;
+&nbsp;import au.edu.rmit.sept.webapp.model.EventGallery;
+&nbsp;import au.edu.rmit.sept.webapp.repository.EventGalleryRepository;
+&nbsp;import org.springframework.stereotype.Service;
+&nbsp;import org.springframework.web.multipart.MultipartFile;
+&nbsp;
+&nbsp;import java.io.IOException;
+&nbsp;import java.nio.file.*;
+&nbsp;import java.util.List;
+&nbsp;
+&nbsp;@Service
+&nbsp;public class EventGalleryService {
+&nbsp;    private final EventGalleryRepository repository;
+<b class="fc">&nbsp;    private final Path uploadDir = Paths.get(&quot;src/main/resources/static/uploads&quot;);</b>
+&nbsp;
+<b class="fc">&nbsp;    public EventGalleryService(EventGalleryRepository repository) throws IOException {</b>
+<b class="fc">&nbsp;        this.repository = repository;</b>
+<b class="pc">&nbsp;        if  (Files.notExists(uploadDir)) {</b>
+<b class="nc">&nbsp;            Files.createDirectories(uploadDir);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    public void uploadPhoto(Event event, MultipartFile file) throws IOException {
+<b class="fc">&nbsp;        if (file.isEmpty()) {</b>
+<b class="fc">&nbsp;            throw new IllegalArgumentException(&quot;Empty file!&quot;);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        if (!file.getContentType().startsWith(&quot;image/&quot;)) {</b>
+<b class="fc">&nbsp;            throw new IllegalArgumentException(&quot;Only image files are allowed!&quot;);</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        String filename = System.currentTimeMillis() + &quot;_&quot; + file.getOriginalFilename();</b>
+<b class="fc">&nbsp;        Path filePath = uploadDir.resolve(filename);</b>
+<b class="fc">&nbsp;        Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);</b>
+&nbsp;
+<b class="fc">&nbsp;        EventGallery gallery = new EventGallery(event, filename);</b>
+<b class="fc">&nbsp;        repository.save(gallery);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public List&lt;EventGallery&gt; getPhotosByEvent(Event event) {
+<b class="fc">&nbsp;        return repository.findByEvent(event);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2025-10-12 21:52</div>
+</div>
+</body>
+</html>
