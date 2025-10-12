@@ -51,14 +51,15 @@
 ## Running the Project
 
 ### Running With Docker (Docker desktop must be installed)
-1.  Ensure Docker Desktop is installed, and running. 
-2. Run the following command in the project root (this should work for all OS):
+1.  Ensure Docker Desktop is installed, and running.
+2.  Ensure that ports 8080, 8081, and 3306 are free before building.
+3. Run the following command in the project root (this should work for all OS):
 
 ```bash
  docker-compose up --build
 ```
 
-2. Visit http://localhost:8080 to access the application.
+4. Visit http://localhost:8080 to access the application.
    The docker profile ensures database connections and other environment variables are configured correctly for containerized execution.
 
 ### Profiles
