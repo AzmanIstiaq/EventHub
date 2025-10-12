@@ -90,7 +90,7 @@ public class Event {
     public void setDateTime(LocalDateTime dateTime) { this.dateTime = dateTime; }
 
     public boolean isInPast() {
-        return this.dateTime.isBefore(LocalDateTime.now());
+        return dateTime != null && dateTime.isBefore(LocalDateTime.now());
     }
 
     public String getLocation() { return location; }

@@ -54,7 +54,7 @@
     </div>
     <div class="events-grid" th:unless="${#lists.isEmpty(suggestedEvents)}">
       <div th:each="event : ${suggestedEvents}">
-        <div th:replace="~{fragments/event-card :: event-card(${event}, ${currentUser}, ${futureEvents})}"></div>
+        <div th:replace="~{fragments/event-card :: event-card(${event}, ${currentUser}, ${futureEvents}, ${null})}"></div>
       </div>
     </div>
   </div>

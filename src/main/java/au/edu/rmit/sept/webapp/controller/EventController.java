@@ -123,6 +123,7 @@ public class EventController {
                                 Model model) {
         User user = userService.findById(currentUser.getUser().getUserId())
                     .orElseThrow(() -> new IllegalArgumentException("Invalid user ID"));
+
                                     
         return searchEventsGlobal(user, query, startDate, endDate, categoryId, model);
     }

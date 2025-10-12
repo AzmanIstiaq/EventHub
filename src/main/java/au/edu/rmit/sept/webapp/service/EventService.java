@@ -77,6 +77,9 @@ public class EventService {
         if (to == null) {
             return eventRepository.searchEvents(query, from, categoryId);
         }
+        if (from == null) {
+            from = LocalDateTime.MIN;
+        }
         return eventRepository.searchEventsWithEnd(query, from, to, categoryId);
     }
 
