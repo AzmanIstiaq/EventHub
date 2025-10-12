@@ -9,8 +9,6 @@ import au.edu.rmit.sept.webapp.service.KeywordService;
 import au.edu.rmit.sept.webapp.service.RegistrationService;
 import au.edu.rmit.sept.webapp.service.UserService;
 import org.springframework.security.access.AccessDeniedException;
-import au.edu.rmit.sept.webapp.service.RegistrationService;
-import au.edu.rmit.sept.webapp.service.UserService;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -18,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
@@ -168,9 +167,9 @@ public class AdminEventController {
 
     // NEW CSV EXPORT ENDPOINT
     @GetMapping("/{eventId}/attendees.csv")
-    public void exportAttendeesCsv(@PathVariable Long eventId,
-                                   @AuthenticationPrincipal CustomUserDetails admin,
-                                   HttpServletResponse response) throws IOException {
+    public void exportAttendeesCsvSingleEvent(@PathVariable Long eventId,
+                                              @AuthenticationPrincipal CustomUserDetails admin,
+                                              HttpServletResponse response) throws IOException {
 
         Optional<Event> eventOpt = eventService.findById(eventId);
         if (eventOpt.isEmpty()) {
@@ -181,24 +180,27 @@ public class AdminEventController {
         Event event = eventOpt.get();
         List<?> attendees = registrationService.getRegistrationsForEvent(event);
 
-        String filename = "event-" + eventId + "-attendees.csv";
+        String filename = "event-#" + eventId + "-attendees.csv";
         response.setContentType("text/csv");
         response.setCharacterEncoding("UTF-8");
         response.setHeader("Content-Disposition", "attachment; filename=\"" + filename + "\"");
 
         try (PrintWriter writer = response.getWriter()) {
-            writer.println("attendeeId,firstName,lastName,email,registeredAt,status");
+            writer.println("attendeeId,attendeeName,email,eventStatus,registeredAt");
 
             DateTimeFormatter dtf = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
 
             for (Object obj : attendees) {
                 var r = (Registration) obj;
 
+                String futureOrPastStatus = r.getEvent().getDateTime().isAfter(java.time.LocalDateTime.now()) ? "Upcoming" : "Past";
+
                 String registeredAt = r.getRegistrationDate() != null ? r.getRegistrationDate().format(dtf) : "";
-                String line = String.format("%d,%s,%s,%s,%s,%s",
+                String line = String.format("%d,%s,%s,%s,%s",
                         r.getRegistrationId(),
                         escapeCsv(r.getUser().getName()),
                         escapeCsv(r.getUser().getEmail()),
+                        escapeCsv(futureOrPastStatus),
                         escapeCsv(registeredAt)
                 );
                 writer.println(line);
@@ -221,6 +223,86 @@ public class AdminEventController {
             // do not fail the response; optionally log
         }
     }
+
+    // CSV Download for all events with attendees
+    @GetMapping("/all/attendees.csv")
+    public void downloadAllEventsCsv(@AuthenticationPrincipal CustomUserDetails admin,
+                                     HttpServletResponse response) throws IOException {
+
+        List<Event> events = eventService.getAllEvents();
+
+        String filename = "all-events-with-attendees.csv";
+        response.setContentType("text/csv");
+        response.setCharacterEncoding("UTF-8");
+        response.setHeader("Content-Disposition", "attachment; filename=\"" + filename + "\"");
+
+        try (PrintWriter writer = response.getWriter()) {
+            // CSV header
+            writer.println("eventId,title,description,dateTime,location,category,keywords,hidden,eventStatus,attendeeId,attendeeName,email,registeredAt");
+
+            DateTimeFormatter dtf = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
+
+            for (Event event : events) {
+                String keywords = event.getKeywords().stream()
+                        .map(Keyword::getKeyword)
+                        .collect(Collectors.joining(";"));
+
+                // Determine event status
+                String eventStatus = event.getDateTime().isAfter(LocalDateTime.now()) ? "Upcoming" : "Past";
+
+                // Get registrations for the event
+                List<Registration> registrations = registrationService.getRegistrationsForEvent(event);
+
+                // If no attendees, still output one row with empty attendee fields
+                if (registrations.isEmpty()) {
+                    String line = String.format("%d,%s,%s,%s,%s,%s,%s,%s,%s,,,,",
+                            event.getEventId(),
+                            escapeCsv(event.getTitle()),
+                            escapeCsv(event.getDescription()),
+                            escapeCsv(event.getDateTime().format(dtf)),
+                            escapeCsv(event.getLocation()),
+                            escapeCsv(event.getCategory() != null ? event.getCategory().getCategory() : ""),
+                            escapeCsv(keywords),
+                            event.isHidden() ? "Yes" : "No",
+                            eventStatus
+                    );
+                    writer.println(line);
+                } else {
+                    // Output one row per attendee
+                    for (Registration r : registrations) {
+                        String registeredAt = r.getRegistrationDate() != null ? r.getRegistrationDate().format(dtf) : "";
+                        String line = String.format("%d,%s,%s,%s,%s,%s,%s,%s,%s,%d,%s,%s,%s",
+                                event.getEventId(),
+                                escapeCsv(event.getTitle()),
+                                escapeCsv(event.getDescription()),
+                                escapeCsv(event.getDateTime().format(dtf)),
+                                escapeCsv(event.getLocation()),
+                                escapeCsv(event.getCategory() != null ? event.getCategory().getCategory() : ""),
+                                escapeCsv(keywords),
+                                event.isHidden() ? "Yes" : "No",
+                                eventStatus,
+                                r.getUser().getUserId(),
+                                escapeCsv(r.getUser().getName()),
+                                escapeCsv(r.getUser().getEmail()),
+                                escapeCsv(registeredAt)
+                        );
+                        writer.println(line);
+                    }
+                }
+            }
+            writer.flush();
+        }
+
+        // Audit log
+        try {
+            if (admin != null) {
+                auditLogService.record(admin.getId(), AdminAction.EXPORT_ALL_ATTENDEES_CSV, AdminTargetType.EVENT, null, "Exported all events with attendees CSV");
+            }
+        } catch (Exception ex) {
+            // do not fail the response; optionally log
+        }
+    }
+
 
     // helper for CSV escaping
     private String escapeCsv(String value) {

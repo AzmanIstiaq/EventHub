@@ -168,4 +168,5 @@ public class Event {
 
     public boolean isHidden() { return hidden; }
     public void setHidden(boolean hidden) { this.hidden = hidden; }
+
 }

@@ -140,6 +140,14 @@
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
+
+        .btn-download {
+            background-color: #28a745; /* Green */
+            color: white;
+        }
+        .btn-download:hover {
+            opacity: 0.9;
+        }
         
         @media (max-width: 768px) {
             .stats-container {
@@ -208,6 +216,14 @@
 <!-- Events Table -->
 <h2>All Events</h2>
 
+<!-- Button to download CSV of registrations -->
+<a th:href="@{'/admin/events/all/attendees.csv'}"
+   class="btn btn-download"
+   style="font-size: 0.8em;"
+   download>
+    📥 Download CSV of All Registrations
+</a>
+
 <div th:if="${events == null || #lists.isEmpty(events)}" style="text-align: center; padding: 40px; color: #6c757d;">
     <h3>📅 No Events Found</h3>
     <p>There are currently no events in the system.</p>
@@ -249,8 +265,6 @@
         </td>
         <td>
             <span th:text="${event.registrations != null ? #lists.size(event.registrations) : 0}">0</span>
-            <br>
-            <a th:href="@{'/registrations/event/' + ${event.eventId}}" style="font-size: 0.8em; color: #007bff;">View Details</a>
         </td>
         <td class="event-actions">
             <!-- View Event Details -->
@@ -261,6 +275,14 @@
             <!-- Edit Event (redirect to admin edit) -->
             <a th:href="@{'/admin/events/' + ${event.eventId} + '/edit'}"
                class="btn btn-primary">✏️ Edit Event</a>
+
+            <!-- Download Attendees CSV -->
+            <a th:href="@{'/admin/events/' + ${event.eventId} + '/attendees.csv'}"
+               class="btn btn-download"
+               style="font-size: 0.8em;"
+               download>
+                📥 Download CSV
+            </a>
 
             <!-- Delete Event -->
             <form th:action="@{'/events/' + ${event.eventId} + '/delete'}"

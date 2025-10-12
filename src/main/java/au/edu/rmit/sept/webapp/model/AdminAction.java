@@ -9,5 +9,6 @@ public enum AdminAction {
     BAN_USER,
     BAN_REMOVE,
     BAN_EDIT,
-    EXPORT_ATTENDEE_CSV
+    EXPORT_ATTENDEE_CSV,
+    EXPORT_ALL_ATTENDEES_CSV
 }
