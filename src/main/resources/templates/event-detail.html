@@ -141,8 +141,8 @@
     </section>
 
 
-    <!-- Actions shown only if user is logged in -->
-    <div th:if="${currentUser != null && currentUser.getRole().name() == 'STUDENT'}">
+    <!-- Actions shown only if user is logged in and in a non-public view-->
+    <div th:if="${currentUser != null && currentUser.getRole().name() == 'STUDENT' && !isPublicView}">
         <!-- Cancel if registered -->
         <form th:if="${registered && !event.isInPast()}"
               style="display:inline;" th:action="@{/events/deleteRegistration}" method="post">

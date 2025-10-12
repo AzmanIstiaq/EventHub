@@ -35,8 +35,10 @@ public class HomeController {
                     .orElseThrow(() -> new IllegalArgumentException("Invalid user ID"));
         }
 
+        List<Event> event = eventRepo.findByDateTimeAfterOrderByDateTimeAsc(java.time.LocalDateTime.now());
+
         model.addAttribute("currentUser", user);
-        model.addAttribute("events", eventRepo.findAll()); // Pass events to the view
+        model.addAttribute("events", event); // Pass events to the view
         return "index"; // Loads templates/index.html
     }
 

@@ -403,6 +403,7 @@ public class EventController {
         model.addAttribute("registrations", registrations);
         model.addAttribute("registrationCount", registrations.size());
         model.addAttribute("photos", photos);
+        model.addAttribute("isPublicView", false);
 
         return "admin-event-detail";
     }
@@ -420,6 +421,12 @@ public class EventController {
         if (user == null) {
             model.addAttribute("registered", false);
         }
+        else if (user.getRegistrations() == null) {
+            model.addAttribute("registered", false);
+        }
+        else if (user.getRegistrations().isEmpty()) {
+            model.addAttribute("registered", false);
+        }
         else {
             model.addAttribute("registered", event.checkUserRegistered(user.getRegistrations()));
         }
@@ -428,6 +435,7 @@ public class EventController {
         model.addAttribute("currentUser", user);
         model.addAttribute("photos", photos);
         model.addAttribute("isOrganiser", isOrganiser);
+        model.addAttribute("isPublicView", false);
 
         if (event.getDateTime() != null) {
             java.time.LocalDate eventDate = event.getDateTime().toLocalDate();
@@ -472,11 +480,14 @@ public class EventController {
         if (user != null && event.getOrganiser() != null) {
             isOrganiser = event.getOrganiser().getUserId().equals(user.getUserId());
         }
-        
+
+        // Even if user is logged, "public" view does not show registration status
+        model.addAttribute("registered", false);
         model.addAttribute("event", event);
         model.addAttribute("currentUser", user);
         model.addAttribute("photos", photos);
         model.addAttribute("isOrganiser", isOrganiser);
+        model.addAttribute("isPublicView", true);
 
         if (event.getDateTime() != null) {
             java.time.LocalDate eventDate = event.getDateTime().toLocalDate();
