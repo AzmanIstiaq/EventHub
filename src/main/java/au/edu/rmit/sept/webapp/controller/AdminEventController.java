@@ -278,15 +278,6 @@ public class AdminEventController {
             }
             writer.flush();
         }
-
-        // Audit log
-        try {
-            if (admin != null) {
-                auditLogService.record(admin.getId(), AdminAction.EXPORT_ALL_ATTENDEES_CSV, AdminTargetType.EVENT, null, "Exported all events with attendees CSV");
-            }
-        } catch (Exception ex) {
-            // do not fail the response; optionally log
-        }
     }
 
 

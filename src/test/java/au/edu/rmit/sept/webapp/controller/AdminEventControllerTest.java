@@ -377,4 +377,68 @@ class AdminEventControllerTest {
         mockMvc.perform(get("/admin/events/{eventId}/attendees.csv", eventId))
                 .andExpect(status().isNotFound());
     }
+
+    @Test
+    @WithMockCustomUser(username = "student", role = UserType.ORGANISER)
+    @DisplayName("Organsier can download csv of attendance for all events")
+    void organiserCanDownloadCsvForAllEvents() throws Exception {
+        Event event1 = mockEvent(40L);
+        Event event2 = mockEvent(41L);
+        when(eventService.getAllEvents()).thenReturn(List.of(event1, event2));
+        when(userService.findById(anyLong())).thenReturn(Optional.of(mockAdmin()));
+
+        User regUser1 = new User();
+        regUser1.setUserId(301L);
+        regUser1.setName("Eve");
+
+        User regUser2 = new User();
+        regUser2.setUserId(302L);
+        regUser2.setName("Frank");
+
+        Registration registration1 = new Registration();
+        registration1.setUser(regUser1);
+        registration1.setEvent(event1);
+
+        Registration registration2 = new Registration();
+        registration2.setUser(regUser2);
+        registration2.setEvent(event2);
+
+        when(registrationService.getRegistrationsForEvent(event1)).thenReturn(List.of(registration1));
+        when(registrationService.getRegistrationsForEvent(event2)).thenReturn(List.of(registration2));
+
+        mockMvc.perform(get("/admin/events/all/attendees.csv"))
+                .andExpect(status().isOk())
+                .andExpect(header().string(
+                        "Content-Disposition",
+                        "attachment; filename=\"all-events-with-attendees.csv\""
+                ))
+                .andExpect(content().contentType("text/csv;charset=UTF-8"))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("Eve")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("Frank")));
+    }
+
+    @Test
+    @WithMockCustomUser(username = "student", role = UserType.ORGANISER)
+    @DisplayName("Organsier can download csv of attendance for all events with no attendees")
+    void organiserCanDownloadCsvForAllEventsNoAttendees() throws Exception {
+        Event event1 = mockEvent(40L);
+        Event event2 = mockEvent(41L);
+        when(eventService.getAllEvents()).thenReturn(List.of(event1, event2));
+        when(userService.findById(anyLong())).thenReturn(Optional.of(mockAdmin()));
+
+
+        when(registrationService.getRegistrationsForEvent(event1)).thenReturn(List.of());
+        when(registrationService.getRegistrationsForEvent(event2)).thenReturn(List.of());
+
+        mockMvc.perform(get("/admin/events/all/attendees.csv"))
+                .andExpect(status().isOk())
+                .andExpect(header().string(
+                        "Content-Disposition",
+                        "attachment; filename=\"all-events-with-attendees.csv\""
+                ))
+                .andExpect(content().contentType("text/csv;charset=UTF-8"))
+                // The string ,,,,No,Upcoming,,,, indicates no attendees for the events, but events exist and are listed
+                .andExpect(content().string(org.hamcrest.Matchers.containsString(",,,,No,Upcoming,,,,")));
+    }
+
 }
