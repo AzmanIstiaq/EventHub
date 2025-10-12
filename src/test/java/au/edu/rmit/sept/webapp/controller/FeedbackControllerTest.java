@@ -6,7 +6,6 @@ import au.edu.rmit.sept.webapp.model.User;
 import au.edu.rmit.sept.webapp.model.UserType;
 import au.edu.rmit.sept.webapp.repository.*;
 import au.edu.rmit.sept.webapp.service.*;
-import org.hibernate.validator.constraints.ModCheck;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,8 +17,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.Optional;
 
 import static org.mockito.Mockito.*;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.security.config.http.MatcherType.mvc;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;

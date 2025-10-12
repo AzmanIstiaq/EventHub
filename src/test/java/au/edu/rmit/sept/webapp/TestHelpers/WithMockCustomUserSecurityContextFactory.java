@@ -1,14 +1,11 @@
 package au.edu.rmit.sept.webapp.TestHelpers;
 
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.test.context.support.WithSecurityContextFactory;
 
 import au.edu.rmit.sept.webapp.model.User;
 import au.edu.rmit.sept.webapp.security.CustomUserDetails;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextImpl;
-
-import java.util.List;
 
 public class WithMockCustomUserSecurityContextFactory
   implements WithSecurityContextFactory<WithMockCustomUser> {

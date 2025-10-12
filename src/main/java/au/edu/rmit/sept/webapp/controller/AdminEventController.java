@@ -20,9 +20,6 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import au.edu.rmit.sept.webapp.model.Registration;
 
 import java.util.Arrays;
 import java.util.Objects;

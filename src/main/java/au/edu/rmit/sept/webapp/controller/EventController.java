@@ -417,8 +417,13 @@ public class EventController {
         if (user != null && event.getOrganiser() != null) {
             isOrganiser = event.getOrganiser().getUserId().equals(user.getUserId());
         }
+        if (user == null) {
+            model.addAttribute("registered", false);
+        }
+        else {
+            model.addAttribute("registered", event.checkUserRegistered(user.getRegistrations()));
+        }
 
-        model.addAttribute("registered", event.checkUserRegistered(user.getRegistrations()));
         model.addAttribute("event", event);
         model.addAttribute("currentUser", user);
         model.addAttribute("photos", photos);

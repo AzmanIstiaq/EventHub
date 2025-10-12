@@ -1,8 +1,6 @@
 package au.edu.rmit.sept.webapp.service;
 
 import au.edu.rmit.sept.webapp.model.User;
-import au.edu.rmit.sept.webapp.model.UserType;
-import au.edu.rmit.sept.webapp.repository.BanRepository;
 import au.edu.rmit.sept.webapp.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
