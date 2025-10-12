@@ -194,14 +194,12 @@ public class AdminEventController {
             for (Object obj : attendees) {
                 var r = (Registration) obj;
 
-                String registeredAt = r.getRegisteredAt() != null ? r.getRegisteredAt().format(dtf) : "";
+                String registeredAt = r.getRegistrationDate() != null ? r.getRegistrationDate().format(dtf) : "";
                 String line = String.format("%d,%s,%s,%s,%s,%s",
-                        r.getId(),
-                        escapeCsv(r.getFirstName()),
-                        escapeCsv(r.getLastName()),
-                        escapeCsv(r.getEmail()),
-                        escapeCsv(registeredAt),
-                        escapeCsv(r.getStatus() != null ? r.getStatus().name() : "")
+                        r.getRegistrationId(),
+                        escapeCsv(r.getUser().getName()),
+                        escapeCsv(r.getUser().getEmail()),
+                        escapeCsv(registeredAt)
                 );
                 writer.println(line);
             }
@@ -211,7 +209,7 @@ public class AdminEventController {
         // Audit log
         try {
             if (admin != null) {
-                auditLogService.record(admin.getId(), "EXPORT_ATTENDEE_CSV", "EVENT", eventId, "Exported attendee CSV");
+                auditLogService.record(admin.getId(), AdminAction.EXPORT_ATTENDEE_CSV, AdminTargetType.EVENT, eventId, "Exported attendee CSV");
             } else {
                 Authentication auth = SecurityContextHolder.getContext().getAuthentication();
                 if (auth != null) {

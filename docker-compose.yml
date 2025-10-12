@@ -47,6 +47,7 @@ services:
       - ./src/main/resources/static:/app/src/main/resources/static
       - ./logs:/app/logs
       - ./src/main/resources/static/uploads:/app/src/main/resources/static/uploads
+      - ~/.m2:/root/.m2
 
 volumes:
   mysql_data:
