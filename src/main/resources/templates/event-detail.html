@@ -3,6 +3,8 @@
 <head>
     <link rel="stylesheet" th:href="@{/css/style.css}">
     <title th:text="${event.title}">Event Details</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
     <style>
         body {
             margin: 0;
@@ -201,12 +203,33 @@
             No photos have been uploaded yet for this event.
         </p>
     </section>
-
+    <div id="map" style="height: 500px;"></div>
 
     <!-- If no logged-in user, show a different back button -->
     <div th:unless="${currentUser != null && currentUser.getRole().name() == 'STUDENT'}">
         <a href="/events/public" class="btn btn-back">← Back to Events</a>
     </div>
+
 </div>
 </body>
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    const eventLat = [[${event.latitude}]];
+    const eventLng = [[${event.longitude}]];
+    const eventLoc = [[${event.location}]];
+
+    document.addEventListener("DOMContentLoaded", function() {
+        const map = L.map('map').setView([eventLat, eventLng], 13);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+
+        L.marker([eventLat, eventLng]).addTo(map)
+            .bindPopup(eventLoc)
+            .openPopup();
+    });
+    /*]]>*/
+</script>
+
 </html>

@@ -45,7 +45,7 @@ public class RegistrationServiceTest {
         userRepository.save(user);
         Category category = new Category("category");
         categoryRepository.save(category);
-        Event event = new Event(title, "description", LocalDateTime.now(), "location", user, category);
+        Event event = new Event(title, "description", LocalDateTime.now(), "location", user, category, -37, 144);
         return eventRepository.save(event);
     }
 
