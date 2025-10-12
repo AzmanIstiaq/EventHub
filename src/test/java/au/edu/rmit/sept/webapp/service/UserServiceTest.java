@@ -16,11 +16,13 @@ class UserServiceTest {
 
     private UserRepository userRepository;
     private UserService userService;
+    private BanService banService;
 
     @BeforeEach
     void setup() {
         userRepository = mock(UserRepository.class);
-        userService = new UserService(userRepository);
+        banService = mock(BanService.class);
+        userService = new UserService(userRepository, banService);
     }
 
     @Test

@@ -1,13 +1,13 @@
 package au.edu.rmit.sept.webapp.controller;
 
-import au.edu.rmit.sept.webapp.model.Event;
-import au.edu.rmit.sept.webapp.model.Keyword;
-import au.edu.rmit.sept.webapp.model.User;
+import au.edu.rmit.sept.webapp.model.*;
 import au.edu.rmit.sept.webapp.security.CustomUserDetails;
 import au.edu.rmit.sept.webapp.service.AuditLogService;
 import au.edu.rmit.sept.webapp.service.CategoryService;
 import au.edu.rmit.sept.webapp.service.EventService;
 import au.edu.rmit.sept.webapp.service.KeywordService;
+import au.edu.rmit.sept.webapp.service.RegistrationService;
+import au.edu.rmit.sept.webapp.service.UserService;
 import org.springframework.security.access.AccessDeniedException;
 import au.edu.rmit.sept.webapp.service.RegistrationService;
 import au.edu.rmit.sept.webapp.service.UserService;
@@ -140,7 +140,7 @@ public class AdminEventController {
         event.setHidden(true);
         eventService.save(event);
         if (admin != null) {
-            auditLogService.record(admin.getId(), "EVENT_HIDE", "EVENT", id, "Event hidden by admin");
+            auditLogService.record(admin.getId(), AdminAction.EVENT_HIDE, AdminTargetType.EVENT, id, "Event hidden by admin");
         }
         return "redirect:/admin/events/" + id;
     }
@@ -152,7 +152,7 @@ public class AdminEventController {
         event.setHidden(false);
         eventService.save(event);
         if (admin != null) {
-            auditLogService.record(admin.getId(), "EVENT_UNHIDE", "EVENT", id, "Event unhidden by admin");
+            auditLogService.record(admin.getId(), AdminAction.EVENT_UNHIDE, AdminTargetType.EVENT, id, "Event unhidden by admin");
         }
         return "redirect:/admin/events/" + id;
     }
@@ -161,7 +161,7 @@ public class AdminEventController {
     public String deleteEvent(@PathVariable Long id, @AuthenticationPrincipal CustomUserDetails admin) {
         eventService.deleteById(id);
         if (admin != null) {
-            auditLogService.record(admin.getId(), "EVENT_DELETE", "EVENT", id, "Event deleted by admin");
+            auditLogService.record(admin.getId(), AdminAction.EVENT_DELETE, AdminTargetType.EVENT, id, "Event deleted by admin");
         }
         return "redirect:/events";
     }

@@ -31,7 +31,7 @@ public class User {
     private LocalDateTime joinDate;
 
     // Bans (one-to-one)
-    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     @JsonManagedReference
     private Ban ban;
 

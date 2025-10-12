@@ -23,7 +23,7 @@ public class EventServiceTest {
     @BeforeEach
     void setUp() {
         eventRepository = mock(EventRepository.class);
-
+        registrationService = mock(RegistrationService.class);
         eventService = new EventService(eventRepository, registrationService);
     }
 

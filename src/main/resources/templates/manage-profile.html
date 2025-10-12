@@ -8,7 +8,7 @@
 <body>
 <div th:replace="~{fragments/navbar-common :: navbar-common(${currentUser})}"></div>
 <div class="container">
-    <div th:replace="~{fragments/alert-banner :: alert-banner(${success}, ${error})}"></div>
+    <div th:replace="~{fragments/alert-banner :: alert-banner(${success}, ${error}, ${info})}"></div>
     <div class="form-card">
         <h1 th:text="${currentUser != null} ? 'Edit Profile' : 'Create Profile'"></h1>
 

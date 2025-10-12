@@ -170,7 +170,7 @@
       <h4>User Feedback</h4>
       <div th:if="${#lists.isEmpty(event.feedbacks)}">No feedback yet.</div>
       <div th:each="fb : ${event.feedbacks}" class="feedback-item" style="border-bottom:1px solid #eee; padding:10px 0;">
-        <div><strong th:text="${fb.user.fullName}">User</strong> rated <span th:text="${fb.rating}">0</span>/5</div>
+        <div><strong th:text="${fb.user.name}">User</strong> rated <span th:text="${fb.rating}">0</span>/5</div>
         <div th:text="${fb.comment}">Comment text...</div>
       </div>
     </div>

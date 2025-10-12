@@ -304,6 +304,12 @@ body {
     border-left: 5px solid #10b981;
 }
 
+.alert-info {
+    background: #6b7280;
+    color: white;
+    border-left: 5px solid white;
+}
+
 /* Error = red */
 .alert-error {
     background: #fee2e2;

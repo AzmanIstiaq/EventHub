@@ -156,6 +156,8 @@
     <p>View and manage all events across the platform</p>
 </div>
 
+<div th:replace="~{fragments/alert-banner :: alert-banner(${success}, ${error}, ${info})}"></div>
+
 <!-- Navigation Links -->
 <div style="margin-bottom: 20px;">
     <a href="/admin/dashboard" class="btn btn-primary">📊 Dashboard</a>
