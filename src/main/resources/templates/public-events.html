@@ -15,6 +15,7 @@
   <div class="tabs">
     <div class="tab" th:classappend="${activeTab == 'upcoming' or activeTab == null} ? ' active'" onclick="openTab('upcoming')">Upcoming Events</div>
     <div class="tab" th:if="${currentUser != null && currentUser.getRole().name() == 'STUDENT'}" th:classappend="${activeTab == 'registered'} ? ' active'" onclick="openTab('registered')">Registered Events</div>
+    <div class="tab" th:if="${currentUser != null && currentUser.getRole().name() == 'STUDENT'}" th:classappend="${activeTab == 'suggested'} ? ' active'" onclick="openTab('suggested')">Suggested Events</div>
     <div class="tab" th:if="${currentUser != null && currentUser.getRole().name() == 'STUDENT'}" onclick="openTab('past')">Past Events</div>
     <div class="tab" th:classappend="${activeTab == 'search'} ? ' active'" onclick="openTab('search')">Search</div>
   </div>
@@ -44,6 +45,20 @@
       </div>
     </div>
   </div>
+
+  <!-- Suggested Events Tab -->
+  <div id="suggested" class="tab-content" th:if="${currentUser != null && currentUser.getRole().name() == 'STUDENT'}">
+    <h2>Your Suggested Events</h2>
+    <div th:if="${#lists.isEmpty(suggestedEvents)}" class="empty-message">
+      You have no suggested events.
+    </div>
+    <div class="events-grid" th:unless="${#lists.isEmpty(suggestedEvents)}">
+      <div th:each="event : ${suggestedEvents}">
+        <div th:replace="~{fragments/event-card :: event-card(${event}, ${currentUser}, ${futureEvents})}"></div>
+      </div>
+    </div>
+  </div>
+
   <!-- Past registered events -->
   <div id="past" class="tab-content" th:if="${currentUser != null && currentUser.getRole().name() == 'STUDENT'}">
     <h2>Your Past Events</h2>

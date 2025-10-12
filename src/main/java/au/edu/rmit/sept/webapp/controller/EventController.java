@@ -320,6 +320,7 @@ public class EventController {
     private String listStudentEvents(User user,
                                      Model model) {
         List<Event> events = eventService.getEventsUserRegisteredTo(user.getUserId());
+        List<Event> suggestedEvents = eventService.getSuggestedEventsForUser(user.getUserId());
 
         LocalDateTime now = LocalDateTime.now();
         List<Event> pastEvents = events.stream()
@@ -331,6 +332,7 @@ public class EventController {
 
         model.addAttribute("pastEvents", pastEvents);
         model.addAttribute("futureEvents", futureEvents);
+        model.addAttribute("suggestedEvents", suggestedEvents);
         model.addAttribute("events", eventService.getAllUpcomingEvents());
         model.addAttribute("currentUser", user);
         model.addAttribute("activeTab", "upcoming");
@@ -444,9 +446,11 @@ public class EventController {
         Model model) {
             List<Event> futureEvents = new ArrayList<>();
             List<Event> pastEvents = new ArrayList<>();
+            List<Event> suggestedEvents = new ArrayList<>();
 
             if (user != null) {
                 List<Event> events = eventService.getEventsUserRegisteredTo(user.getUserId());
+                suggestedEvents = eventService.getSuggestedEventsForUser(user.getUserId());
 
                 LocalDateTime now = LocalDateTime.now();
                 pastEvents = events.stream()
@@ -456,10 +460,18 @@ public class EventController {
                         .filter(e -> e.getDateTime().isAfter(now))
                         .toList();
             }
+
+            if (suggestedEvents.isEmpty()) {
+                Event testEvent = new Event();
+                testEvent.setTitle("No Suggested Events Found");
+                testEvent.setDescription("You are not registered to any events yet, so we cannot suggest any events. Please register to some events to get suggestions.");
+                suggestedEvents = List.of(testEvent);
+            }
             
 
             model.addAttribute("pastEvents", pastEvents);
             model.addAttribute("futureEvents", futureEvents);
+            model.addAttribute("suggestedEvents", suggestedEvents);
             model.addAttribute("events", eventService.getAllUpcomingEvents());
             model.addAttribute("currentUser", user);
             model.addAttribute("activeTab", "upcoming");
