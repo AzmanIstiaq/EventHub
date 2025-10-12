@@ -14,7 +14,7 @@
 - Azman Istiaq Asfi (s4076788)
 
 ## Notes:
-- All documentation is in docs/Milestone3, including test execution evidence, which is under docs/Milestone2/CoverageReport.
+- All documentation is in docs/Milestone3, including test execution evidence, which is under docs/Milestone3/CoverageReport. Run `index.html` in this folder to view.
 - Scrum planning is under the 'Planning' tab.
 
 ## Records
