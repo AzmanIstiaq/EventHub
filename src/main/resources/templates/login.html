@@ -7,13 +7,39 @@
 <body>
 <div th:replace="~{fragments/navbar-common :: navbar-common(${currentUser})}"></div>
 <div class="login-container">
-    <div th:replace="~{fragments/alert-banner :: alert-banner(${success}, ${error})}"></div>
+    <div th:replace="~{fragments/alert-banner :: alert-banner(${success}, ${error}, ${info})}"></div>
     <div th:if="${param.error}">
-        <div th:replace="~{fragments/alert-banner :: alert-banner(success=${null}, error=${'Invalid Credentials'})}"></div>
+        <div th:switch="${param.error[0]}">
+
+            <div th:case="'permanent_ban'">
+                <div th:replace="~{fragments/alert-banner :: alert-banner(
+                success=${null}, error=${'Your account has been permanently banned.'})}">
+                </div>
+            </div>
+
+            <div th:case="'temporary_ban'">
+                <div th:replace="~{fragments/alert-banner :: alert-banner(
+                success=${null}, error=${'Your account is temporarily banned.'})}">
+                </div>
+            </div>
+
+            <div th:case="'invalid_credentials'">
+                <div th:replace="~{fragments/alert-banner :: alert-banner(
+                success=${null}, error=${'Invalid credentials'})}">
+                </div>
+            </div>
+
+            <div th:case="*">
+                <div th:replace="~{fragments/alert-banner :: alert-banner(
+                success=${null}, error=${'Login failed'})}">
+                </div>
+            </div>
+        </div>
     </div>
+
     <div th:if="${param.logout}">
         <div
-            th:replace="~{fragments/alert-banner :: alert-banner(success=${'You have been logged out.'}, error=${null})}">
+            th:replace="~{fragments/alert-banner :: alert-banner(success=${'You have been logged out.'}, error=${null}, info=${null})}">
         </div>
     </div>
     

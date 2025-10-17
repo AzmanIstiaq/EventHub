@@ -1,0 +1,267 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > WebappApplication</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">au.edu.rmit.sept.webapp</a>
+</div>
+
+<h1>Coverage Summary for Class: WebappApplication (au.edu.rmit.sept.webapp)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">WebappApplication</td>
+<td class="coverageStat">
+  <span class="percent">
+    75%
+  </span>
+  <span class="absValue">
+    (3/4)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    50%
+  </span>
+  <span class="absValue">
+    (1/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    97.4%
+  </span>
+  <span class="absValue">
+    (38/39)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">WebappApplication$$SpringCGLIB$$0</td>
+  </tr>
+  <tr>
+    <td class="name">WebappApplication$$SpringCGLIB$$FastClass$$0</td>
+  </tr>
+  <tr>
+    <td class="name">WebappApplication$$SpringCGLIB$$FastClass$$1</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    75%
+  </span>
+  <span class="absValue">
+    (3/4)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    50%
+  </span>
+  <span class="absValue">
+    (1/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    97.4%
+  </span>
+  <span class="absValue">
+    (38/39)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package au.edu.rmit.sept.webapp;
+&nbsp;
+&nbsp;import au.edu.rmit.sept.webapp.model.*;
+&nbsp;import au.edu.rmit.sept.webapp.repository.*;
+&nbsp;import org.springframework.boot.CommandLineRunner;
+&nbsp;import org.springframework.context.annotation.Bean;
+&nbsp;import org.springframework.boot.SpringApplication;
+&nbsp;import org.springframework.boot.autoconfigure.SpringBootApplication;
+&nbsp;import org.springframework.security.crypto.password.PasswordEncoder;
+&nbsp;import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+&nbsp;
+&nbsp;import java.time.LocalDateTime;
+&nbsp;
+&nbsp;/**
+&nbsp; * Main application class.
+&nbsp; */
+&nbsp;@SpringBootApplication
+<b class="fc">&nbsp;public class WebappApplication {</b>
+&nbsp;	public static void main(String[] args) {
+<b class="nc">&nbsp;		SpringApplication.run(WebappApplication.class, args);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Bean
+&nbsp;	CommandLineRunner init(UserRepository userRepo,
+&nbsp;						   EventRepository eventRepo,
+&nbsp;						   RegistrationRepository registrationRepo,
+&nbsp;						   CategoryRepository categoryRepo,
+&nbsp;						   KeywordRepository keywordRepo) {
+<b class="fc">&nbsp;		return args -&gt; {</b>
+<b class="fc">&nbsp;			PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();</b>
+&nbsp;			// Organisers
+<b class="pc">&nbsp;			if (userRepo.findAll().isEmpty()) {</b>
+<b class="fc">&nbsp;				User csit = userRepo.save(new User(</b>
+&nbsp;						&quot;CSIT Club&quot;,
+&nbsp;						&quot;csit@uni.edu&quot;,
+<b class="fc">&nbsp;						passwordEncoder.encode(&quot;password&quot;),</b>
+&nbsp;						UserType.ORGANISER
+&nbsp;				));
+<b class="fc">&nbsp;				User nerdSociety = userRepo.save(new User(</b>
+&nbsp;						&quot;Nerd Society&quot;,
+&nbsp;						&quot;nerds@uni.edu&quot;,
+<b class="fc">&nbsp;						passwordEncoder.encode(&quot;password&quot;),</b>
+&nbsp;						UserType.ORGANISER
+&nbsp;				));
+&nbsp;
+&nbsp;				// Students
+<b class="fc">&nbsp;				User alice = userRepo.save(new User(</b>
+&nbsp;						&quot;Alice Blogs&quot;,
+&nbsp;						&quot;alice@uni.edu&quot;,
+<b class="fc">&nbsp;						passwordEncoder.encode(&quot;password&quot;),</b>
+&nbsp;						UserType.STUDENT
+&nbsp;				));
+<b class="fc">&nbsp;				User charlie = userRepo.save(new User(</b>
+&nbsp;						&quot;Charlie Brown&quot;,
+&nbsp;						&quot;charlie@uni.edu&quot;,
+<b class="fc">&nbsp;						passwordEncoder.encode(&quot;password&quot;),</b>
+&nbsp;						UserType.STUDENT
+&nbsp;				));
+<b class="fc">&nbsp;				User diana = userRepo.save(new User(</b>
+&nbsp;						&quot;Diana Prince&quot;,
+&nbsp;						&quot;diana@uni.edu&quot;,
+<b class="fc">&nbsp;						passwordEncoder.encode(&quot;password&quot;),</b>
+&nbsp;						UserType.STUDENT
+&nbsp;				));
+<b class="fc">&nbsp;				User eric = userRepo.save(new User(</b>
+&nbsp;						&quot;Eric Yang&quot;,
+&nbsp;						&quot;eric@uni.edu&quot;,
+<b class="fc">&nbsp;						passwordEncoder.encode(&quot;password&quot;),</b>
+&nbsp;						UserType.STUDENT
+&nbsp;				));
+&nbsp;
+<b class="fc">&nbsp;				User admin = userRepo.save(new User(</b>
+&nbsp;						&quot;Admin User&quot;,
+&nbsp;						&quot;admin@uni.edu&quot;,
+<b class="fc">&nbsp;						passwordEncoder.encode(&quot;password&quot;),</b>
+&nbsp;						UserType.ADMIN
+&nbsp;				));
+&nbsp;
+&nbsp;				// Continue with categories, events, registrations as before
+<b class="fc">&nbsp;				Category cat1 = categoryRepo.save(new Category(&quot;CAT1&quot;));</b>
+<b class="fc">&nbsp;				Category cat2 = categoryRepo.save(new Category(&quot;CAT2&quot;));</b>
+&nbsp;
+<b class="fc">&nbsp;				Event hackathon = eventRepo.save(new Event(</b>
+&nbsp;						&quot;Hackathon&quot;, &quot;24hr coding challenge&quot;,
+<b class="fc">&nbsp;						LocalDateTime.now().minusDays(2),</b>
+&nbsp;						&quot;RMIT University Library, Melbourne VIC&quot;,
+&nbsp;						csit, cat1, -37.8075, 144.9630
+&nbsp;				));
+&nbsp;
+<b class="fc">&nbsp;				Event bbqNight = eventRepo.save(new Event(</b>
+&nbsp;						&quot;BBQ Night&quot;, &quot;Free food and fun networking!&quot;,
+<b class="fc">&nbsp;						LocalDateTime.now().plusDays(5),</b>
+&nbsp;						&quot;Carlton Gardens, Melbourne VIC&quot;,
+&nbsp;						csit, cat1, -37.8057, 144.9719
+&nbsp;				));
+&nbsp;
+<b class="fc">&nbsp;				Event musicJam = eventRepo.save(new Event(</b>
+&nbsp;						&quot;Music Jam&quot;, &quot;Bring your instruments and jam with others!&quot;,
+<b class="fc">&nbsp;						LocalDateTime.now().plusDays(3),</b>
+&nbsp;						&quot;Federation Square, Melbourne VIC&quot;,
+&nbsp;						nerdSociety, cat2, -37.8179, 144.9691
+&nbsp;				));
+&nbsp;
+<b class="fc">&nbsp;				Event gameNight = eventRepo.save(new Event(</b>
+&nbsp;						&quot;Game Night&quot;, &quot;Board games and snacks&quot;,
+<b class="fc">&nbsp;						LocalDateTime.now().plusDays(7),</b>
+&nbsp;						&quot;Melbourne Central Student Lounge, Melbourne VIC&quot;,
+&nbsp;						nerdSociety, cat2, -37.8104, 144.9623
+&nbsp;				));
+&nbsp;
+&nbsp;				// Registrations
+<b class="fc">&nbsp;				registrationRepo.save(new Registration(alice, hackathon));</b>
+<b class="fc">&nbsp;				registrationRepo.save(new Registration(charlie, hackathon));</b>
+<b class="fc">&nbsp;				registrationRepo.save(new Registration(diana, hackathon));</b>
+<b class="fc">&nbsp;				registrationRepo.save(new Registration(eric, bbqNight));</b>
+<b class="fc">&nbsp;				registrationRepo.save(new Registration(alice, bbqNight));</b>
+<b class="fc">&nbsp;				registrationRepo.save(new Registration(charlie, musicJam));</b>
+<b class="fc">&nbsp;				registrationRepo.save(new Registration(diana, musicJam));</b>
+<b class="fc">&nbsp;				registrationRepo.save(new Registration(eric, musicJam));</b>
+<b class="fc">&nbsp;				registrationRepo.save(new Registration(alice, gameNight));</b>
+<b class="fc">&nbsp;				registrationRepo.save(new Registration(diana, gameNight));</b>
+&nbsp;			}
+&nbsp;		};
+&nbsp;	}
+&nbsp;
+&nbsp;
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2025-10-12 21:52</div>
+</div>
+</body>
+</html>

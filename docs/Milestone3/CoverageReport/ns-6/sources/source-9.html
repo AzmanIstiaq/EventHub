@@ -1,0 +1,196 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > RegistrationService</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">au.edu.rmit.sept.webapp.service</a>
+</div>
+
+<h1>Coverage Summary for Class: RegistrationService (au.edu.rmit.sept.webapp.service)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">RegistrationService</td>
+<td class="coverageStat">
+  <span class="percent">
+    50%
+  </span>
+  <span class="absValue">
+    (3/6)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    75%
+  </span>
+  <span class="absValue">
+    (3/4)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    68.8%
+  </span>
+  <span class="absValue">
+    (11/16)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">RegistrationService$$SpringCGLIB$$0</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    50%
+  </span>
+  <span class="absValue">
+    (3/6)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    75%
+  </span>
+  <span class="absValue">
+    (3/4)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    68.8%
+  </span>
+  <span class="absValue">
+    (11/16)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package au.edu.rmit.sept.webapp.service;
+&nbsp;
+&nbsp;import au.edu.rmit.sept.webapp.model.Event;
+&nbsp;import au.edu.rmit.sept.webapp.model.Registration;
+&nbsp;import au.edu.rmit.sept.webapp.model.User;
+&nbsp;import au.edu.rmit.sept.webapp.repository.RegistrationRepository;
+&nbsp;import org.springframework.stereotype.Service;
+&nbsp;import org.springframework.transaction.annotation.Transactional;
+&nbsp;
+&nbsp;import java.util.List;
+&nbsp;
+&nbsp;@Service
+&nbsp;public class RegistrationService {
+&nbsp;
+&nbsp;    private final RegistrationRepository registrationRepository;
+&nbsp;
+<b class="fc">&nbsp;    public RegistrationService(RegistrationRepository registrationRepository) {</b>
+<b class="fc">&nbsp;        this.registrationRepository = registrationRepository;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    // Register a user for an event
+&nbsp;    @Transactional
+&nbsp;    public Registration registerUserForEvent(User user, Event event) {
+<b class="fc">&nbsp;        if (registrationRepository.existsByUserAndEvent(user, event)) {</b>
+<b class="fc">&nbsp;            throw new IllegalStateException(&quot;User already registered for this event&quot;);</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        Registration registration = new Registration();</b>
+<b class="fc">&nbsp;        registration.setUser(user);</b>
+<b class="fc">&nbsp;        registration.setEvent(event);</b>
+&nbsp;
+<b class="fc">&nbsp;        return registrationRepository.save(registration);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    // Find registrations by user ID
+&nbsp;    public List&lt;Registration&gt; findByUserId(long id) {
+<b class="nc">&nbsp;        return registrationRepository.findByUser_UserId(id);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;
+&nbsp;    public List&lt;Registration&gt; getRegistrationsForEvent(Event event) {
+<b class="nc">&nbsp;        return registrationRepository.findByEvent(event);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    // Delete a registration for a user and event
+&nbsp;    @Transactional
+&nbsp;    public void deleteRegistrationForEvent(Long userId, Long eventId) {
+<b class="fc">&nbsp;        int deleted = registrationRepository.deleteRegistration(userId, eventId);</b>
+<b class="pc">&nbsp;        if (deleted == 0) {</b>
+<b class="nc">&nbsp;            throw new IllegalArgumentException(</b>
+<b class="nc">&nbsp;                    &quot;No registration found for userId=&quot; + userId + &quot; and eventId=&quot; + eventId</b>
+&nbsp;            );
+&nbsp;        }
+&nbsp;        // Clear persistence context to ensure entity is removed immediately
+<b class="fc">&nbsp;        registrationRepository.flush();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    // Check if a user is registered for an event
+&nbsp;    public boolean isUserRegistered(Long eventId, Long userId) {
+<b class="nc">&nbsp;        return registrationRepository.existsByEvent_EventIdAndUser_UserId(eventId, userId);</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2025-10-12 21:52</div>
+</div>
+</body>
+</html>

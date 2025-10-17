@@ -18,11 +18,13 @@ public class EventServiceTest {
 
     private EventRepository eventRepository;
     private EventService eventService;
+    private RegistrationService registrationService;
 
     @BeforeEach
     void setUp() {
         eventRepository = mock(EventRepository.class);
-        eventService = new EventService(eventRepository);
+        registrationService = mock(RegistrationService.class);
+        eventService = new EventService(eventRepository, registrationService);
     }
 
     @Test
@@ -71,4 +73,82 @@ public class EventServiceTest {
 
         assertThat(upcoming).contains(future);
     }
+
+    @Test
+    @DisplayName("Delete event by ID")
+    void deleteEventById() {
+        Long eventId = 1L;
+        doNothing().when(eventRepository).deleteById(eventId);
+
+        eventService.deleteById(eventId);
+
+        verify(eventRepository, times(1)).deleteById(eventId);
+    }
+
+    @Test
+    @DisplayName("getPastEventsForOrganiser(): returns only past events (boundary: now)")
+    void pastBoundaryNow() {
+        User organiser = new User();
+        organiser.setUserId(42L);
+
+        Event past = new Event();
+        past.setDateTime(LocalDateTime.now().minusMinutes(1));
+        Event nowEdge = new Event();
+        nowEdge.setDateTime(LocalDateTime.now());
+        Event future = new Event();
+        future.setDateTime(LocalDateTime.now().plusMinutes(1));
+
+        when(eventRepository.findByOrganiserAndDateTimeBeforeOrderByDateTimeAsc(eq(organiser), any(LocalDateTime.class)))
+                .thenReturn(List.of(past, nowEdge));
+
+        List<Event> pastEvents = eventService.getPastEventsForOrganiser(organiser);
+
+        assertThat(pastEvents).contains(past);
+    }
+
+    @Test
+    @DisplayName("getUpcomingEventsForOrganiser(): returns only upcoming events (boundary: now)")
+    void beforeBoundaryNow() {
+        User organiser = new User();
+        organiser.setUserId(42L);
+
+        Event past = new Event();
+        past.setDateTime(LocalDateTime.now().minusMinutes(1));
+        Event nowEdge = new Event();
+        nowEdge.setDateTime(LocalDateTime.now());
+        Event future = new Event();
+        future.setDateTime(LocalDateTime.now().plusMinutes(1));
+
+        when(eventRepository.findByOrganiserAndDateTimeAfterOrderByDateTimeAsc(eq(organiser), any(LocalDateTime.class)))
+                .thenReturn(List.of(nowEdge, future));
+        List<Event> upcoming = eventService.getUpcomingEventsForOrganiser(organiser);
+        assertThat(upcoming).contains(future);
+    }
+
+    @Test
+    @DisplayName("get all upcoming events")
+    void getAllUpcomingEvents() {
+        Event futureEvent = new Event();
+        futureEvent.setDateTime(LocalDateTime.now().plusDays(1));
+        when(eventRepository.findByDateTimeAfterOrderByDateTimeAsc(any(LocalDateTime.class)))
+                .thenReturn(List.of(futureEvent));
+
+        List<Event> upcomingEvents = eventService.getAllUpcomingEvents();
+
+        assertThat(upcomingEvents).contains(futureEvent);
+    }
+
+    @Test
+    @DisplayName("getAllEvents(): returns all events from repository")
+    void getAllEventsReturnsAllEvents() {
+        Event event1 = new Event();
+        Event event2 = new Event();
+        when(eventRepository.findAll()).thenReturn(List.of(event1, event2));
+
+        List<Event> events = eventService.getAllEvents();
+
+        assertThat(events).containsExactly(event1, event2);
+        verify(eventRepository, times(1)).findAll();
+    }
+
 }

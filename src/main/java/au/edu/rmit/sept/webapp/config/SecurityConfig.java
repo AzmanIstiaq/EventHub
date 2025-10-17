@@ -35,7 +35,7 @@ public class SecurityConfig {
                         .requestMatchers("/events/public/**").permitAll()
                         .requestMatchers("/users/profile/**").permitAll()
                         .requestMatchers("/h2-console/**").permitAll()
-                        .requestMatchers("/admin/**").hasAuthority("ROLE_ADMIN")
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers("/events/*/gallery/upload").hasRole("ORGANISER")
                         .requestMatchers("/events/*/gallery/**").permitAll()
                         .requestMatchers("/users/**").hasRole("ADMIN")
@@ -46,13 +46,37 @@ public class SecurityConfig {
                         .loginPage("/login")
                         .successHandler((request, response, authentication) -> {
                             var auth = authentication.getAuthorities().iterator().next().getAuthority();
-                            if (auth.equals("ROLE_ADMIN") ||  auth.equals("ROLE_ORGANISER") || auth.equals("ROLE_STUDENT")) {
+                            if (auth.equals("ROLE_ORGANISER") || auth.equals("ROLE_STUDENT")) {
                                 response.sendRedirect("/events");
+                            }
+                            else if (auth.equals("ROLE_ADMIN")) {
+                                response.sendRedirect("/admin/dashboard");
                             } else {
                                 response.sendRedirect("/");
                             }
                         })
-                        .failureUrl("/login?error=true")
+                        .failureHandler((request, response, authentication) -> {
+                            String redirectUrl = "/login?error=true";
+
+                            // Check if the exception is due to a locked account
+                            if (authentication.getClass().getSimpleName().equals("LockedException")) {
+                                // If so, find out what type of ban it is (permanent or temporary)
+                                var userDetails = userDetailsService.loadUserByUsername(request.getParameter("username"));
+                                if (userDetails != null) {
+                                    var customDetails = (au.edu.rmit.sept.webapp.security.CustomUserDetails) userDetails;
+                                    var ban = customDetails.getUser().getBan();
+                                    if (ban != null && ban.getBanType() != null) {
+                                        if (ban.getBanType() == au.edu.rmit.sept.webapp.model.BanType.PERMANENT) {
+                                            redirectUrl = "/login?error=permanent_ban";
+                                        } else if (ban.getBanType() == au.edu.rmit.sept.webapp.model.BanType.TEMPORARY) {
+                                            redirectUrl = "/login?error=temporary_ban";
+                                        }
+                                    }
+                                }
+                            }
+
+                            response.sendRedirect(redirectUrl);
+                        })
                         .permitAll()
                 )
                 .exceptionHandling(exception -> exception
@@ -60,13 +84,13 @@ public class SecurityConfig {
                                 response.sendRedirect("/error/403")
                         )
                 )
+                .securityContext(context -> context.requireExplicitSave(false))
                 .logout(logout -> logout.permitAll())
-                .headers(headers -> headers.frameOptions().sameOrigin());  // <- Allow H2 console frames
-
+                // updated to the non-deprecated API
+                .headers(headers -> headers.frameOptions(frameOptions -> frameOptions.sameOrigin()));
 
         return http.build();
     }
-
 
     @Bean
     public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {

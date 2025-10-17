@@ -1,6 +1,5 @@
 package au.edu.rmit.sept.webapp;
 
-import au.edu.rmit.sept.webapp.model.Category;
 import au.edu.rmit.sept.webapp.model.Event;
 import au.edu.rmit.sept.webapp.model.User;
 import au.edu.rmit.sept.webapp.model.UserType;
@@ -42,7 +41,7 @@ class AcceptanceScenariosTest {
         userRepository.save(organiser);
 
         Event e = new Event("Welcome week", "desc.", LocalDateTime.now().plusDays(3),
-                "Main Hall", organiser, null);
+                "Main Hall", organiser, null, -37, 144);
         eventRepository.save(e);
 
         registrationService.registerUserForEvent(u, e);

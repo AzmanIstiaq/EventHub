@@ -5,7 +5,6 @@ import au.edu.rmit.sept.webapp.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class OrganiserService {

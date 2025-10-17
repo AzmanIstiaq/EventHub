@@ -22,7 +22,8 @@ class CustomUserDetailsServiceTest {
     @DisplayName("CustomUserDetailsService: loadUserByUsername returns CustomUserDetails")
     void loadsUser() {
         UserRepository repo = mock(UserRepository.class);
-        CustomUserDetailsService svc = new CustomUserDetailsService(repo);
+        BanService banService = mock(BanService.class);
+        CustomUserDetailsService svc = new CustomUserDetailsService(repo, banService);
 
         User u = new User();
         u.setUserId(5L);
@@ -40,7 +41,8 @@ class CustomUserDetailsServiceTest {
     @DisplayName("CustomUserDetailsService: throws UsernameNotFound when missing")
     void throwsWhenMissing() {
         UserRepository repo = mock(UserRepository.class);
-        CustomUserDetailsService svc = new CustomUserDetailsService(repo);
+        BanService banService = mock(BanService.class);
+        CustomUserDetailsService svc = new CustomUserDetailsService(repo, banService);
         when(repo.findByEmail("missing@ex.com")).thenReturn(Optional.empty());
 
         assertThrows(UsernameNotFoundException.class, () -> svc.loadUserByUsername("missing@ex.com"));

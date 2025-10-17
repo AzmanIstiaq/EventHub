@@ -33,19 +33,22 @@ public class EventController {
     private final CategoryService categoryService;
     private final KeywordService keywordService;
     private final EventGalleryService eventGalleryService;
+    private final FeedbackService feedbackService;
 
     public EventController(EventService eventService,
                            RegistrationService registrationService,
                            UserService userService,
                            CategoryService categoryService,
                            KeywordService keywordService,
-                           EventGalleryService eventGalleryService) {
+                           EventGalleryService eventGalleryService,
+                           FeedbackService feedbackService) {
         this.eventService = eventService;
         this.registrationService = registrationService;
         this.userService = userService;
         this.categoryService = categoryService;
         this.keywordService = keywordService;
         this.eventGalleryService = eventGalleryService;
+        this.feedbackService = feedbackService;
     }
 
     @GetMapping
@@ -120,6 +123,7 @@ public class EventController {
                                 Model model) {
         User user = userService.findById(currentUser.getUser().getUserId())
                     .orElseThrow(() -> new IllegalArgumentException("Invalid user ID"));
+
                                     
         return searchEventsGlobal(user, query, startDate, endDate, categoryId, model);
     }
@@ -271,7 +275,7 @@ public class EventController {
     // Delete inappropriate events
     @PostMapping("/{eventId}/delete")
     public String deleteEvent(@AuthenticationPrincipal CustomUserDetails currentUser,
-                                   @PathVariable int eventId,
+                                   @PathVariable Long eventId,
                               RedirectAttributes redirectAttributes) {
         String role = currentUser.getAuthorities()
                 .iterator()
@@ -290,7 +294,7 @@ public class EventController {
                 }
 
                 String eventTitle = event.getTitle();
-                eventService.delete(eventId);
+                eventService.deleteById(eventId);
 
                 redirectAttributes.addFlashAttribute("successMessage",
                         "Event '" + eventTitle + "' has been deleted successfully.");
@@ -320,6 +324,7 @@ public class EventController {
     private String listStudentEvents(User user,
                                      Model model) {
         List<Event> events = eventService.getEventsUserRegisteredTo(user.getUserId());
+        List<Event> suggestedEvents = eventService.getSuggestedEventsForUser(user.getUserId());
 
         LocalDateTime now = LocalDateTime.now();
         List<Event> pastEvents = events.stream()
@@ -328,9 +333,17 @@ public class EventController {
         List<Event> futureEvents = events.stream()
                 .filter(e -> e.getDateTime().isAfter(now))
                 .toList();
-
+        List<Feedback> feedback = feedbackService.getFeedbackForUser(user);
+        List<Event> eventsWithFeedback = new ArrayList<Event>();
+        for (Feedback f : feedback) {
+            if (pastEvents.contains(f.getEvent())) {
+                eventsWithFeedback.add(f.getEvent());
+            }
+        }
+        model.addAttribute("eventsWithFeedback", eventsWithFeedback);
         model.addAttribute("pastEvents", pastEvents);
         model.addAttribute("futureEvents", futureEvents);
+        model.addAttribute("suggestedEvents", suggestedEvents);
         model.addAttribute("events", eventService.getAllUpcomingEvents());
         model.addAttribute("currentUser", user);
         model.addAttribute("activeTab", "upcoming");
@@ -390,6 +403,7 @@ public class EventController {
         model.addAttribute("registrations", registrations);
         model.addAttribute("registrationCount", registrations.size());
         model.addAttribute("photos", photos);
+        model.addAttribute("isPublicView", false);
 
         return "admin-event-detail";
     }
@@ -404,12 +418,52 @@ public class EventController {
         if (user != null && event.getOrganiser() != null) {
             isOrganiser = event.getOrganiser().getUserId().equals(user.getUserId());
         }
+        if (user == null) {
+            model.addAttribute("registered", false);
+        }
+        else if (user.getRegistrations() == null) {
+            model.addAttribute("registered", false);
+        }
+        else if (user.getRegistrations().isEmpty()) {
+            model.addAttribute("registered", false);
+        }
+        else {
+            model.addAttribute("registered", event.checkUserRegistered(user.getRegistrations()));
+        }
 
-        model.addAttribute("registered", event.checkUserRegistered(user.getRegistrations()));
         model.addAttribute("event", event);
         model.addAttribute("currentUser", user);
         model.addAttribute("photos", photos);
         model.addAttribute("isOrganiser", isOrganiser);
+        model.addAttribute("isPublicView", false);
+
+        if (event.getDateTime() != null) {
+            java.time.LocalDate eventDate = event.getDateTime().toLocalDate();
+            java.time.YearMonth month = java.time.YearMonth.from(eventDate);
+
+            java.time.LocalDate firstDayOfMonth = month.atDay(1);
+            java.time.LocalDate lastDayOfMonth = month.atEndOfMonth();
+
+            // include extra days from previous/next month to fill the grid
+            java.time.LocalDate start = firstDayOfMonth.with(java.time.DayOfWeek.SUNDAY);
+            java.time.LocalDate end = lastDayOfMonth.with(java.time.DayOfWeek.SATURDAY);
+
+            java.util.List<java.util.List<java.time.LocalDate>> weeks = new java.util.ArrayList<>();
+            java.util.List<java.time.LocalDate> week = new java.util.ArrayList<>();
+
+            for (java.time.LocalDate date = start; !date.isAfter(end); date = date.plusDays(1)) {
+                week.add(date);
+                if (date.getDayOfWeek() == java.time.DayOfWeek.SATURDAY) {
+                    weeks.add(week);
+                    week = new java.util.ArrayList<>();
+                }
+            }
+
+            model.addAttribute("calendarWeeks", weeks);
+            model.addAttribute("eventDate", eventDate);
+            model.addAttribute("month", month);
+            model.addAttribute("today", java.time.LocalDate.now());
+        }
 
         return "event-detail";
     }
@@ -426,11 +480,42 @@ public class EventController {
         if (user != null && event.getOrganiser() != null) {
             isOrganiser = event.getOrganiser().getUserId().equals(user.getUserId());
         }
-        
+
+        // Even if user is logged, "public" view does not show registration status
+        model.addAttribute("registered", false);
         model.addAttribute("event", event);
         model.addAttribute("currentUser", user);
         model.addAttribute("photos", photos);
         model.addAttribute("isOrganiser", isOrganiser);
+        model.addAttribute("isPublicView", true);
+
+        if (event.getDateTime() != null) {
+            java.time.LocalDate eventDate = event.getDateTime().toLocalDate();
+            java.time.YearMonth month = java.time.YearMonth.from(eventDate);
+
+            java.time.LocalDate firstDayOfMonth = month.atDay(1);
+            java.time.LocalDate lastDayOfMonth = month.atEndOfMonth();
+
+            // include extra days from previous/next month to fill the grid
+            java.time.LocalDate start = firstDayOfMonth.with(java.time.DayOfWeek.SUNDAY);
+            java.time.LocalDate end = lastDayOfMonth.with(java.time.DayOfWeek.SATURDAY);
+
+            java.util.List<java.util.List<java.time.LocalDate>> weeks = new java.util.ArrayList<>();
+            java.util.List<java.time.LocalDate> week = new java.util.ArrayList<>();
+
+            for (java.time.LocalDate date = start; !date.isAfter(end); date = date.plusDays(1)) {
+                week.add(date);
+                if (date.getDayOfWeek() == java.time.DayOfWeek.SATURDAY) {
+                    weeks.add(week);
+                    week = new java.util.ArrayList<>();
+                }
+            }
+
+            model.addAttribute("calendarWeeks", weeks);
+            model.addAttribute("eventDate", eventDate);
+            model.addAttribute("month", month);
+            model.addAttribute("today", java.time.LocalDate.now());
+        }
 
         return "event-detail";
     }
@@ -444,9 +529,11 @@ public class EventController {
         Model model) {
             List<Event> futureEvents = new ArrayList<>();
             List<Event> pastEvents = new ArrayList<>();
+            List<Event> suggestedEvents = new ArrayList<>();
 
             if (user != null) {
                 List<Event> events = eventService.getEventsUserRegisteredTo(user.getUserId());
+                suggestedEvents = eventService.getSuggestedEventsForUser(user.getUserId());
 
                 LocalDateTime now = LocalDateTime.now();
                 pastEvents = events.stream()
@@ -456,10 +543,18 @@ public class EventController {
                         .filter(e -> e.getDateTime().isAfter(now))
                         .toList();
             }
+
+            if (suggestedEvents.isEmpty()) {
+                Event testEvent = new Event();
+                testEvent.setTitle("No Suggested Events Found");
+                testEvent.setDescription("You are not registered to any events yet, so we cannot suggest any events. Please register to some events to get suggestions.");
+                suggestedEvents = List.of(testEvent);
+            }
             
 
             model.addAttribute("pastEvents", pastEvents);
             model.addAttribute("futureEvents", futureEvents);
+            model.addAttribute("suggestedEvents", suggestedEvents);
             model.addAttribute("events", eventService.getAllUpcomingEvents());
             model.addAttribute("currentUser", user);
             model.addAttribute("activeTab", "upcoming");

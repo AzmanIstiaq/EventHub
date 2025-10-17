@@ -47,4 +47,32 @@ public interface EventRepository extends JpaRepository<Event, Long> {
     // Fetch all events a user is registered for
     @Query("SELECT r.event FROM Registration r WHERE r.user.userId = :userId")
     List<Event> findEventsByUserId(@Param("userId") Long userId);
+
+
+    // Find the top 2 most popular upcoming events that the user is not registered for
+    @Query("SELECT e FROM Event e " +
+            "LEFT JOIN e.registrations r " +
+            "WHERE e.dateTime > :dateTime " +
+            "AND e.eventId NOT IN :excludedEventIds " +
+            "AND (:excludeEmpty = false OR SIZE(e.registrations) > 0) " +
+            "GROUP BY e " +
+            "ORDER BY COUNT(r) DESC")
+    List<Event> findTop2MostPopular(@Param("dateTime") LocalDateTime dateTime,
+                                    @Param("excludedEventIds") List<Long> excludedEventIds,
+                                    @Param("excludeEmpty") boolean excludeEmpty);
+
+
+    // Find the top 2 most popular upcoming events in the given categories that the user is not registered for
+    @Query("SELECT e FROM Event e " +
+            "LEFT JOIN e.registrations r " +
+            "WHERE e.dateTime > :dateTime " +
+            "AND e.eventId NOT IN :excludedEventIds " +
+            "AND e.category.id = :categoryId " +
+            "AND (:excludeEmpty = false OR SIZE(e.registrations) > 0) " +
+            "GROUP BY e " +
+            "ORDER BY COUNT(r) DESC")
+    List<Event> findTop2MostPopularEventsByCategory(@Param("dateTime") LocalDateTime dateTime,
+                                                            @Param("excludedEventIds") List<Long> excludedEventIds,
+                                                            @Param("categoryId") Long categoryId,
+                                                            @Param("excludeEmpty") boolean excludeEmpty);
 }

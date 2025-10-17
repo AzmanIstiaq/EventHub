@@ -3,6 +3,8 @@
 <head>
     <link rel="stylesheet" th:href="@{/css/style.css}">
     <title th:text="${event.title}">Event Details</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
     <style>
         body {
             margin: 0;
@@ -49,6 +51,34 @@
         .btn-back { background: #6c757d; }
         .btn-register { background: #28a745; }
         .btn-cancel { background: #dc3545; }
+
+        thead th {
+            background-color:#007bff;
+            color:white;
+        }
+
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+        td {
+            padding: 10px;
+            height: 60px;
+            width: 14.2%;
+            vertical-align: middle;
+        }
+        .event-day {
+            background-color: #6F42C1FF;
+            color: white;
+            font-weight: bold;
+        }
+        .today {
+            background-color: #70abff;
+            color: white;
+            font-weight: bold;
+        }
+        .other-month {
+            color: #aaa;
+        }
     </style>
 </head>
 <body>
@@ -78,9 +108,43 @@
     </div>
 
     <p th:text="${event.description}"></p>
+    <section style="margin-top: 2rem;">
+        <h3>📅 Event Calendar</h3>
+        <h3 th:text="${#strings.capitalize(month.month.name().toLowerCase()) + ' ' + month.year}"></h3>
 
-    <!-- Actions shown only if user is logged in -->
-    <div th:if="${currentUser != null && currentUser.getRole().name() == 'STUDENT'}">
+        <table style="width: 100%; border-collapse: collapse; text-align: center;">
+            <thead>
+            <tr>
+                <th>Sun</th>
+                <th>Mon</th>
+                <th>Tue</th>
+                <th>Wed</th>
+                <th>Thu</th>
+                <th>Fri</th>
+                <th>Sat</th>
+            </tr>
+            <tbody>
+            <tr th:each="week : ${calendarWeeks}">
+                <td th:each="day : ${week}"
+                    th:classappend="${
+                    (day.equals(eventDate) ? 'event-day ' : '') +
+                    (day.equals(today) ? 'today ' : '') +
+                    ((month != null and day.monthValue != month.monthValue) ? 'other-month' : '')}">
+                    <div th:text="${day.dayOfMonth}"></div>
+                    <div th:if="${day.equals(eventDate)}"
+                         th:text="${event.title}"
+                         style="font-size: 0.75em; margin-top: 4px; color: white; font-weight: bold;">
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+
+        </table>
+    </section>
+
+
+    <!-- Actions shown only if user is logged in and in a non-public view-->
+    <div th:if="${currentUser != null && currentUser.getRole().name() == 'STUDENT' && !isPublicView}">
         <!-- Cancel if registered -->
         <form th:if="${registered && !event.isInPast()}"
               style="display:inline;" th:action="@{/events/deleteRegistration}" method="post">
@@ -139,12 +203,33 @@
             No photos have been uploaded yet for this event.
         </p>
     </section>
-
+    <div id="map" style="height: 500px;"></div>
 
     <!-- If no logged-in user, show a different back button -->
     <div th:unless="${currentUser != null && currentUser.getRole().name() == 'STUDENT'}">
         <a href="/events/public" class="btn btn-back">← Back to Events</a>
     </div>
+
 </div>
 </body>
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    const eventLat = [[${event.latitude}]];
+    const eventLng = [[${event.longitude}]];
+    const eventLoc = [[${event.location}]];
+
+    document.addEventListener("DOMContentLoaded", function() {
+        const map = L.map('map').setView([eventLat, eventLng], 13);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+
+        L.marker([eventLat, eventLng]).addTo(map)
+            .bindPopup(eventLoc)
+            .openPopup();
+    });
+    /*]]>*/
+</script>
+
 </html>

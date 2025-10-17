@@ -7,7 +7,6 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -32,6 +31,15 @@ public class Event {
     @Column(nullable = false)
     @NotBlank(message = "Location is required")
     private String location;
+
+    @Column(nullable = false)
+    private double latitude;
+
+    @Column(nullable = false)
+    private double longitude;
+
+    @Column(nullable = false)
+    private boolean hidden = false;
 
     @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     @JsonManagedReference
@@ -64,13 +72,15 @@ public class Event {
     public Event() {}
 
     public Event(String title, String description, LocalDateTime dateTime,
-                 String location, User organiser, Category category) {
+                 String location, User organiser, Category category, double latitude, double longitude) {
         this.title = title;
         this.description = description;
         this.dateTime = dateTime;
         this.location = location;
         this.organiser = organiser;
         this.category = category;
+        this.latitude = latitude;
+        this.longitude = longitude;
     }
 
     // --- Getters and setters ---
@@ -87,11 +97,17 @@ public class Event {
     public void setDateTime(LocalDateTime dateTime) { this.dateTime = dateTime; }
 
     public boolean isInPast() {
-        return this.dateTime.isBefore(LocalDateTime.now());
+        return dateTime != null && dateTime.isBefore(LocalDateTime.now());
     }
 
     public String getLocation() { return location; }
     public void setLocation(String location) { this.location = location; }
+
+    public double getLatitude() { return latitude; }
+    public void setLatitude(double latitude) { this.latitude = latitude; }
+
+    public double getLongitude() { return longitude; }
+    public void setLongitude(double longitude) { this.longitude = longitude; }
 
     public Set<Registration> getRegistrations() { return registrations; }
     public void setRegistrations(Set<Registration> registrations) { this.registrations = registrations; }
@@ -162,4 +178,8 @@ public class Event {
                 ", category=" + (category != null ? category.getCategory() : null) +
                 '}';
     }
+
+    public boolean isHidden() { return hidden; }
+    public void setHidden(boolean hidden) { this.hidden = hidden; }
+
 }

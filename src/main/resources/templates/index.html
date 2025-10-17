@@ -16,20 +16,28 @@
 
     <section class="event-section">
         <h2>Upcoming Events</h2>
-        <div class="event-grid">
+
+        <!-- Show events if not empty -->
+        <div class="event-grid" th:if="${events != null and !#lists.isEmpty(events)}">
             <a class="event-card-link"
                th:each="event : ${events}"
                th:href="@{'/events/public/detail/' + ${event.eventId}}">
                 <div class="event-card">
-                    <h3 th:text="${event.title}"></h3>
+                    <h3 th:text="${event.title}">Event Title</h3>
                     <p class="event-date">
-                        <span th:text="${#temporals.format(event.dateTime, 'yyyy-MM-dd HH:mm')}"></span> @
-                        <span th:text="${event.location}"></span>
+                        <span th:text="${#temporals.format(event.dateTime, 'yyyy-MM-dd HH:mm')}"></span>
+                        @ <span th:text="${event.location}"></span>
                     </p>
                     <p th:text="${event.description}"></p>
                 </div>
             </a>
         </div>
+
+        <!-- Fallback message if no events -->
+        <p th:unless="${events != null and !#lists.isEmpty(events)}"
+           style="font-style: italic; color: #777;">
+            No upcoming events at the moment. Check back soon!
+        </p>
     </section>
 
 </body>
